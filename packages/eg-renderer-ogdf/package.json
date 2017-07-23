@@ -1,0 +1,36 @@
+{
+  "name": "eg-renderer-ogdf",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "webpack-dev-server",
+    "build": "NODE_ENV=production webpack",
+    "deploy": "npm run build && gh-pages -d public",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/likr/eg-renderer-ogdf.git"
+  },
+  "keywords": [],
+  "author": "Yosuke Onoue <onoue@likr-lab.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/likr/eg-renderer-ogdf/issues"
+  },
+  "homepage": "https://github.com/likr/eg-renderer-ogdf#readme",
+  "peerDependencies": {
+    "d3": "^4.10.0"
+  },
+  "devDependencies": {
+    "eg-renderer": "file:../eg-renderer-canvas",
+    "gh-pages": "^1.0.0",
+    "loglevel": "^1.4.1",
+    "webpack": "^2.7.0",
+    "webpack-dev-server": "^2.6.0"
+  },
+  "dependencies": {
+    "emogdf": "0.0.0"
+  }
+}
