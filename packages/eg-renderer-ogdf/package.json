@@ -24,7 +24,10 @@
     "d3": "^4.10.0"
   },
   "devDependencies": {
-    "eg-renderer": "file:../eg-renderer-canvas",
+    "babel-core": "^6.25.0",
+    "babel-loader": "^7.1.1",
+    "babel-preset-env": "^1.6.0",
+    "eg-renderer": "git+https://github.com/likr/eg-renderer-canvas.git",
     "gh-pages": "^1.0.0",
     "loglevel": "^1.4.1",
     "webpack": "^2.7.0",

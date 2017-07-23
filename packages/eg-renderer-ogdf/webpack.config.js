@@ -4,6 +4,21 @@ const webpack = require('webpack')
 const options = {
   module: {
     rules: [
+      {
+        test: /\.js$/,
+        include: [
+          path.resolve(__dirname, 'src'),
+          path.resolve(__dirname, 'node_modules/eg-renderer')
+        ],
+        use: [
+          {
+            loader: 'babel-loader',
+            options: {
+              presets: ['env']
+            }
+          }
+        ]
+      }
     ]
   },
   entry: {
