@@ -52,7 +52,7 @@ fetch('miserables.json')
   .then((data) => {
     const color = d3.scaleOrdinal(d3.schemeCategory20);
     data.nodes.forEach((node) => {
-      node.fill = color(node.group)
+      node.fillColor = color(node.group)
     })
     data.links.forEach((link) => {
       link.strokeWidth = Math.sqrt(link.value)
