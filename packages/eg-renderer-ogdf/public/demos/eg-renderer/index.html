@@ -62,6 +62,7 @@ body {
     <option value="fastMultipoleEmbedder">fastMultipoleEmbedder</option>
     <option value="fmmm" selected>fmmm</option>
     <option value="planarization">planarization</option>
+    <option value="sugiyama">sugiyama</option>
     <option value="tree">tree</option>
     <option value="tutte">tutte</option>
   </select>
@@ -87,7 +88,7 @@ document.getElementById('center').addEventListener('click', (event) => {
   egRenderer.center()
 })
 
-document.getElementById('layout').addEventListener('input', (event) => {
+document.getElementById('layout').addEventListener('change', (event) => {
   egRenderer.layoutMethod = event.target.value
 })
 

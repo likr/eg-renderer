@@ -8,6 +8,7 @@ import {
   FastMultipoleEmbedder,
   FMMMLayout,
   PlanarizationLayout,
+  SugiyamaLayout,
   TreeLayout,
   TutteLayout
 } from 'emogdf'
@@ -19,6 +20,7 @@ const layoutMethods = {
   fastMultipoleEmbedder: FastMultipoleEmbedder,
   fmmm: FMMMLayout,
   planarization: PlanarizationLayout,
+  sugiyama: SugiyamaLayout,
   tree: TreeLayout,
   tutte: TutteLayout
 }
