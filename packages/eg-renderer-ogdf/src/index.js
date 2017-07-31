@@ -16,9 +16,7 @@ window.customElements.whenDefined(egRendererTagName).then(() => {
     attributeChangedCallback (attr, oldValue, newValue) {
       switch (attr) {
         case 'layout-method':
-          if (this.autoUpdate) {
-            this.layout()
-          }
+          this.invalidate()
           break
         default:
           super.attributeChangedCallback(attr, oldValue, newValue)

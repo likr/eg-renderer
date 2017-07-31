@@ -27,12 +27,14 @@ const layoutMethods = {
 
 export const layout = (graphData, mode) => {
   const indexToNode = new Map()
+  const indexToEdge = new Map()
   const graph = new Graph()
-  for (const {u} of graphData.vertices) {
+  for (const u of graphData.vertexIds) {
     indexToNode.set(u, graph.newNode())
+    indexToEdge.set(u, new Map())
   }
-  for (const {u, v} of graphData.edges) {
-    graph.newEdge(indexToNode.get(u), indexToNode.get(v))
+  for (const [u, v] of graphData.edgeIds) {
+    indexToEdge.get(u).set(v, graph.newEdge(indexToNode.get(u), indexToNode.get(v)))
   }
 
   const {
@@ -44,7 +46,8 @@ export const layout = (graphData, mode) => {
   const attributes = new GraphAttributes(graph, nodeGraphics | edgeGraphics | nodeStyle | edgeStyle)
   const nodes = new NodeList()
   graph.allNodes(nodes)
-  for (const {u, width, height} of graphData.vertices) {
+  for (const u of graphData.vertexIds) {
+    const {width, height} = graphData.vertices.get(u)
     const node = indexToNode.get(u)
     attributes.setWidth(node, width)
     attributes.setHeight(node, height)
@@ -53,19 +56,23 @@ export const layout = (graphData, mode) => {
   const layout = new layoutMethods[mode]()
   layout.call(attributes)
 
-  for (const vertex of graphData.vertices) {
-    const {u} = vertex
+  for (const u of graphData.vertexIds) {
+    const vertex = graphData.vertices.get(u)
     const node = indexToNode.get(u)
     vertex.x = attributes.x(node)
     vertex.y = attributes.y(node)
   }
-  for (const edge of graphData.edges) {
-    const {u, v} = edge
+  for (const [u, v] of graphData.edgeIds) {
+    const edge = graphData.edges.get(u).get(v)
     const unode = indexToNode.get(u)
     const vnode = indexToNode.get(v)
-    edge.points = [
-      [attributes.x(unode), attributes.y(unode)],
-      [attributes.x(vnode), attributes.y(vnode)]
-    ]
+    const e = indexToEdge.get(u).get(v)
+    const bends = attributes.bends(e)
+    edge.points = [[attributes.x(unode), attributes.y(unode)]]
+    for (let i = 0; i < bends.size(); ++i) {
+      const point = bends.get(i)
+      edge.points.push([point.x, point.y])
+    }
+    edge.points.push([attributes.x(vnode), attributes.y(vnode)])
   }
 }
