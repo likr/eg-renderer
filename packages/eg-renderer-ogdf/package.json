@@ -1,7 +1,7 @@
 {
   "name": "eg-renderer-ogdf",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.0.0",
+  "description": "OGDF Graph Layout for EgRenderer",
   "main": "src/index.js",
   "scripts": {
     "start": "webpack-dev-server",
@@ -27,7 +27,7 @@
     "babel-core": "^6.25.0",
     "babel-loader": "^7.1.1",
     "babel-preset-env": "^1.6.0",
-    "eg-renderer": "git+https://github.com/likr/eg-renderer-canvas.git",
+    "eg-renderer": "^1.0.0-beta.2",
     "gh-pages": "^1.0.0",
     "loglevel": "^1.4.1",
     "webpack": "^2.7.0",

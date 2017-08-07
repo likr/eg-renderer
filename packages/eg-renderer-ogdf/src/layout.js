@@ -25,7 +25,7 @@ const layoutMethods = {
   tutte: TutteLayout
 }
 
-export const layout = (graphData, mode) => {
+export const layout = (element, graphData) => {
   const indexToNode = new Map()
   const indexToEdge = new Map()
   const graph = new Graph()
@@ -53,7 +53,12 @@ export const layout = (graphData, mode) => {
     attributes.setHeight(node, height)
   }
 
-  const layout = new layoutMethods[mode]()
+  const layout = new layoutMethods[element.layoutMethod]()
+  switch (element.layoutMethod) {
+    case 'fmmm':
+      layout.unitEdgeLength(element.fmmmUnitEdgeLength)
+      break
+  }
   layout.call(attributes)
 
   for (const u of graphData.vertexIds) {
