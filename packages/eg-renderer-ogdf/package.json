@@ -34,6 +34,6 @@
     "webpack-dev-server": "^2.6.0"
   },
   "dependencies": {
-    "emogdf": "^0.3.0"
+    "emogdf": "^0.5.0"
   }
 }

@@ -56,7 +56,7 @@ export const layout = (element, graphData) => {
   const layout = new layoutMethods[element.layoutMethod]()
   switch (element.layoutMethod) {
     case 'fmmm':
-      layout.unitEdgeLength(element.fmmmUnitEdgeLength)
+      layout.unitEdgeLength = element.fmmmUnitEdgeLength
       break
   }
   layout.call(attributes)

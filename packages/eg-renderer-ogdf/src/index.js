@@ -41,7 +41,7 @@ window.customElements.whenDefined(egRendererTagName).then(() => {
 
     get fmmmUnitEdgeLength () {
       if (!this.hasAttribute('fmmm-unit-edge-length')) {
-        return 100
+        return 20
       }
       return +this.getAttribute('fmmm-unit-edge-length')
     }
