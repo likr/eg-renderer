@@ -6,11 +6,13 @@
     "src"
   ],
   "description": "Easy Graph Renderer for the Web",
-  "keywords": [],
+  "keywords": [
+    "Network Visualization"
+  ],
   "author": "Yosuke Onoue <onoue@likr-lab.com>",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/likr/eg-renderer-canvas.git"
+    "url": "git+https://github.com/likr/eg-renderer/tree/master/packages/eg-renderer"
   },
   "license": "MIT",
   "dependencies": {
