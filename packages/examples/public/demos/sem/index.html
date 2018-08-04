@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8"/>
-<title>email-Eu-core temporal | EgRenderer Example</title>
+<title>Path Diagram for SEM | EgRenderer Example</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/6.23.0/polyfill.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/2.0.3/fetch.min.js"></script>
 <script>
@@ -26,24 +26,26 @@ eg-renderer-ogdf {
 </head>
 <body>
 <div>
-<a href="https://likr.github.io/eg-renderer-canvas/">back</a>
-<h1>email-Eu-core temporal network</h1>
-<p>Obtained from <a href="https://snap.stanford.edu/data/email-Eu-core-temporal.html">SNAP</a>
+<a href="../../">back</a>
+<h1>Path Diagram for SEM</h1>
 </div>
 <div>
 <h2>Result</h2>
 <eg-renderer-ogdf
   width="960"
   height="600"
-  default-node-type="circle"
-  default-node-width="1"
-  default-node-height="1"
-  default-node-stroke-color="#999"
-  default-node-stroke-width="0.1"
-  default-link-stroke-color="#999"
-  default-link-stroke-width="0.1"
-  default-link-stroke-opacity="0.3"
-  src="email.json">
+  node-id-property="id"
+  node-fill-color-property="color"
+  node-label-stroke-color-property="color"
+  link-stroke-color-property="color"
+  link-label-stroke-color-property="color"
+  link-source-marker-size-property="markerSize"
+  link-target-marker-size-property="markerSize"
+  default-node-stroke-width="0"
+  default-node-label-fill-color="#fff"
+  default-node-label-stroke-width="2"
+  default-link-label-stroke-width="2"
+  src="sem.json">
 </eg-renderer-ogdf>
 </div>
 <h2>Code</h2>
@@ -59,15 +61,16 @@ eg-renderer-ogdf {
 &lt;eg-renderer-ogdf<br/>
 &ensp;&ensp;width="960"<br/>
 &ensp;&ensp;height="600"<br/>
-&ensp;&ensp;default-node-type="circle"<br/>
-&ensp;&ensp;default-node-width="1"<br/>
-&ensp;&ensp;default-node-height="1"<br/>
-&ensp;&ensp;default-node-stroke-color="#999"<br/>
-&ensp;&ensp;default-node-stroke-width="0.1"<br/>
-&ensp;&ensp;default-link-stroke-color="#999"<br/>
-&ensp;&ensp;default-link-stroke-width="0.1"<br/>
-&ensp;&ensp;default-link-stroke-opacity="0.3"<br/>
-&ensp;&ensp;src="email.json"&gt;<br/>
+&ensp;&ensp;node-id-property="id"<br/>
+&ensp;&ensp;node-fill-color-property="color"<br/>
+&ensp;&ensp;node-label-stroke-color-property="color"<br/>
+&ensp;&ensp;link-stroke-color-property="color"<br/>
+&ensp;&ensp;link-label-stroke-color-property="color"<br/>
+&ensp;&ensp;default-node-stroke-width="0"<br/>
+&ensp;&ensp;default-node-label-fill-color="#fff"<br/>
+&ensp;&ensp;default-node-label-stroke-width="2"<br/>
+&ensp;&ensp;default-link-label-stroke-width="2"<br/>
+&ensp;&ensp;src="sem.json"&gt;<br/>
 &lt;/eg-renderer-ogdf&gt;<br/>
 &lt;/body&gt;<br/>
 &lt;/html&gt;<br/>

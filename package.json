@@ -1,15 +1,9 @@
 {
   "name": "eg-renderer",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Yosuke Onoue <onoue@likr-lab.com>",
+  "license": "MIT",
   "devDependencies": {
     "lerna": "^3.0.0-rc.0"
-  }
+  },
+  "private": true
 }
