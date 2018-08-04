@@ -17,5 +17,6 @@
   "license": "MIT",
   "dependencies": {
     "emogdf": "^0.5.0"
-  }
+  },
+  "gitHead": "26cd4a414d99f3b875a23a45c4ea5b6199c28887"
 }
