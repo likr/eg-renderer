@@ -15,10 +15,10 @@ window.customElements.whenDefined(egRendererTagName).then(() => {
     }
 
     attributeChangedCallback (attr, oldValue, newValue) {
-      switch (attr) {
-        default:
-          super.attributeChangedCallback(attr, oldValue, newValue)
+      if (attr === 'layout-method') {
+        this.invalidatePositions()
       }
+      super.attributeChangedCallback(attr, oldValue, newValue)
     }
 
     onLayout (data, preservePos) {

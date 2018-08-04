@@ -158,6 +158,7 @@ class EgRendererElement extends window.HTMLElement {
     super()
     const p = {
       invalidate: false,
+      invalidatePositions: false,
       originalData: null,
       canvas: document.createElement('canvas'),
       data: {
@@ -266,9 +267,10 @@ class EgRendererElement extends window.HTMLElement {
 
     const render = () => {
       if (p.invalidate && p.originalData) {
-        this.update(true)
+        this.update(!p.invalidatePositions)
       }
       p.invalidate = false
+      p.invalidatePositions = false
       const now = new Date()
       const transitionDuration = this.transitionDuration
       const t = now > p.layoutTime ? (now - p.layoutTime) / transitionDuration : 1 / transitionDuration
@@ -411,7 +413,7 @@ class EgRendererElement extends window.HTMLElement {
     return this.update()
   }
 
-  update (preservePos = false) {
+  update (preservePositions = false) {
     const p = privates.get(this)
     p.prevData = p.data
     const data = p.originalData
@@ -429,8 +431,8 @@ class EgRendererElement extends window.HTMLElement {
         const u = (this.nodeIdProperty === '$index' ? i : get(node, this.nodeIdProperty)).toString()
         return {
           u,
-          x: preservePos && p.prevData.vertices.has(u) ? p.prevData.vertices.get(u).x : +get(node, this.nodeXProperty, this.defaultNodeX),
-          y: preservePos && p.prevData.vertices.has(u) ? p.prevData.vertices.get(u).y : +get(node, this.nodeYProperty, this.defaultNodeY),
+          x: preservePositions && p.prevData.vertices.has(u) ? p.prevData.vertices.get(u).x : +get(node, this.nodeXProperty, this.defaultNodeX),
+          y: preservePositions && p.prevData.vertices.has(u) ? p.prevData.vertices.get(u).y : +get(node, this.nodeYProperty, this.defaultNodeY),
           width: +get(node, this.nodeWidthProperty, this.defaultNodeWidth),
           height: +get(node, this.nodeHeightProperty, this.defaultNodeHeight),
           type: get(node, this.nodeTypeProperty, this.defaultNodeType),
@@ -472,7 +474,7 @@ class EgRendererElement extends window.HTMLElement {
           newPoints.push([x, y])
         }
         newPoints.push([dv.x, dv.y])
-        const points = preservePos && p.prevData.edges.has(u) && p.prevData.edges.get(u).has(v)
+        const points = preservePositions && p.prevData.edges.has(u) && p.prevData.edges.get(u).has(v)
           ? p.prevData.edges.get(u).get(v).points
           : newPoints
         const edge = {
@@ -507,7 +509,7 @@ class EgRendererElement extends window.HTMLElement {
     for (const edge of edges) {
       p.data.edges.get(edge.u).set(edge.v, edge)
     }
-    this.onLayout(p.data, preservePos)
+    this.onLayout(p.data, preservePositions)
     for (const [u, v] of p.data.edgeIds) {
       const edge = p.data.edges.get(u).get(v)
       const du = p.data.vertices.get(u)
@@ -520,7 +522,7 @@ class EgRendererElement extends window.HTMLElement {
       this.center()
     }
     this.dispatchEvent(new window.CustomEvent('updateend', {
-      detail: {preservePos}
+      detail: {preservePositions}
     }))
     return this
   }
@@ -529,7 +531,15 @@ class EgRendererElement extends window.HTMLElement {
   }
 
   invalidate () {
-    privates.get(this).invalidate = true
+    if (this.autoUpdate) {
+      privates.get(this).invalidate = true
+    }
+  }
+
+  invalidatePositions () {
+    if (this.autoUpdate) {
+      privates.get(this).invalidatePositions = true
+    }
   }
 
   get autoUpdate () {

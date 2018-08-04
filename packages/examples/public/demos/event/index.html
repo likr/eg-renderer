@@ -103,8 +103,8 @@ customElements.whenDefined('eg-renderer').then(() => {
     })
 
     renderer.addEventListener('updateend', (event) => {
-      const {preservePos} = event.detail
-      if (!preservePos) {
+      const {preservePositions} = event.detail
+      if (!preservePositions) {
         renderer.center()
       }
     })
