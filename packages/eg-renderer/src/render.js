@@ -211,7 +211,7 @@ export const renderEdge = (ctx, args) => {
           const [x, y] = points[0]
           const [x0, y0] = points[1]
           const theta = Math.atan2(y - y0, x - x0)
-          const r = targetMarkerSize * 2 / 3
+          const r = sourceMarkerSize * 2 / 3
           ctx.fillStyle = args.strokeColor.toString()
           ctx.beginPath()
           ctx.moveTo(x + Math.cos(theta) * r, y + Math.sin(theta) * r)
