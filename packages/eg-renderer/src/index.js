@@ -15,11 +15,13 @@ import {
   layoutRect
 } from './centering'
 import {
+  interpolateGroup,
   interpolateVertex,
   interpolateEdge,
   diff
 } from './interpolate'
 import {
+  renderGroup,
   renderEdge,
   renderEdgeLabel,
   renderEdgeRegion,
@@ -76,8 +78,20 @@ class EgRendererElement extends window.HTMLElement {
       'src',
       'width',
       'height',
+      'graph-groups-property',
       'graph-nodes-property',
       'graph-links-property',
+      'group-x-property',
+      'group-y-property',
+      'group-width-property',
+      'group-height-property',
+      'group-type-property',
+      'group-visibility-property',
+      'group-fill-color-property',
+      'group-fill-opacity-property',
+      'group-stroke-color-property',
+      'group-stroke-opacity-property',
+      'group-stroke-width-property',
       'node-id-property',
       'node-x-property',
       'node-y-property',
@@ -116,6 +130,17 @@ class EgRendererElement extends window.HTMLElement {
       'link-label-stroke-width-property',
       'link-label-font-size-property',
       'link-label-font-family-property',
+      'default-group-x',
+      'default-group-y',
+      'default-group-width',
+      'default-group-height',
+      'default-group-type',
+      'default-group-visibility',
+      'default-group-fill-color',
+      'default-group-fill-opacity',
+      'default-group-stroke-color',
+      'default-group-stroke-opacity',
+      'default-group-stroke-width',
       'default-node-x',
       'default-node-y',
       'default-node-width',
@@ -162,6 +187,8 @@ class EgRendererElement extends window.HTMLElement {
       originalData: null,
       canvas: document.createElement('canvas'),
       data: {
+        groupIds: [],
+        groups: new Map(),
         vertexIds: [],
         vertices: new Map(),
         edgeIds: [],
@@ -175,14 +202,17 @@ class EgRendererElement extends window.HTMLElement {
       currentRegion: null,
       layout: {
         update: {
+          groups: [],
           vertices: [],
           edges: []
         },
         enter: {
+          groups: [],
           vertices: [],
           edges: []
         },
         exit: {
+          groups: [],
           vertices: [],
           edges: []
         }
@@ -282,6 +312,26 @@ class EgRendererElement extends window.HTMLElement {
       ctx.translate(p.margin, p.margin)
       ctx.translate(p.transform.x, p.transform.y)
       ctx.scale(p.transform.k, p.transform.k)
+
+      if (r < 1) {
+        ctx.globalAlpha = 1 - r
+        for (const group of p.layout.exit.groups) {
+          renderGroup(ctx, group)
+        }
+      }
+      ctx.globalAlpha = Math.min(1, r)
+      for (const group of p.layout.enter.groups) {
+        renderGroup(ctx, group)
+      }
+      ctx.globalAlpha = 1
+      for (const {current, next} of p.layout.update.groups) {
+        if (r < 1) {
+          renderGroup(ctx, interpolateGroup(current, next, r))
+        } else {
+          renderGroup(ctx, next)
+        }
+      }
+
       if (this.enableLinkEvents) {
         if (r < 1) {
           for (const edge of p.layout.exit.edges) {
@@ -417,6 +467,27 @@ class EgRendererElement extends window.HTMLElement {
     const p = privates.get(this)
     p.prevData = p.data
     const data = p.originalData
+    const groups = get(data, this.graphGroupsProperty, [])
+      .filter((group) => get(group, this.groupVisibilityProperty, this.defaultGroupVisibility))
+      .map((group, i) => {
+        const fillColor = d3Color(get(group, this.groupFillColorProperty, this.defaultGroupFillColor))
+        fillColor.opacity = +get(group, this.groupFillOpacityProperty, this.defaultGroupFillOpacity)
+        const strokeColor = d3Color(get(group, this.groupStrokeColorProperty, this.defaultGroupStrokeColor))
+        strokeColor.opacity = +get(group, this.groupStrokeOpacityProperty, this.defaultGroupStrokeOpacity)
+        const g = i.toString()
+        return {
+          g,
+          x: preservePositions && p.prevData.groups.has(g) ? p.prevData.groups.get(g).x : +get(group, this.groupXProperty, this.defaultGroupX),
+          y: preservePositions && p.prevData.groups.has(g) ? p.prevData.groups.get(g).y : +get(group, this.groupYProperty, this.defaultGroupY),
+          width: +get(group, this.groupWidthProperty, this.defaultGroupWidth),
+          height: +get(group, this.groupHeightProperty, this.defaultGroupHeight),
+          type: get(group, this.groupTypeProperty, this.defaultGroupType),
+          fillColor,
+          strokeColor,
+          strokeWidth: +get(group, this.groupStrokeWidthProperty, this.defaultGroupStrokeWidth),
+          d: group
+        }
+      })
     const vertices = get(data, this.graphNodesProperty)
       .filter((node) => get(node, this.nodeVisibilityProperty, this.defaultNodeVisibility))
       .map((node, i) => {
@@ -501,6 +572,8 @@ class EgRendererElement extends window.HTMLElement {
         return edge
       })
     p.data = {
+      groupIds: groups.map(({g}) => g),
+      groups: new Map(groups.map((group) => [group.g, group])),
       vertexIds: vertices.map(({u}) => u),
       vertices: new Map(vertices.map((vertex) => [vertex.u, vertex])),
       edgeIds: edges.map(({u, v}) => [u, v]),
@@ -634,6 +707,14 @@ class EgRendererElement extends window.HTMLElement {
     this.setAttribute('transition-duration', value)
   }
 
+  get graphGroupsProperty () {
+    return getter(this, 'graph-groups-property', 'groups')
+  }
+
+  set graphGroupsProperty (value) {
+    this.setAttribute('graph-groups-property', value)
+  }
+
   get graphNodesProperty () {
     return getter(this, 'graph-nodes-property', 'nodes')
   }
@@ -648,6 +729,94 @@ class EgRendererElement extends window.HTMLElement {
 
   set graphLinksProperty (value) {
     this.setAttribute('graph-links-property', value)
+  }
+
+  get groupXProperty () {
+    return getter(this, 'group-x-property', 'x')
+  }
+
+  set groupXProperty (value) {
+    this.setAttribute('group-x-property', value)
+  }
+
+  get groupYProperty () {
+    return getter(this, 'group-y-property', 'y')
+  }
+
+  set groupYProperty (value) {
+    this.setAttribute('group-y-property', value)
+  }
+
+  get groupWidthProperty () {
+    return getter(this, 'group-width-property', 'width')
+  }
+
+  set groupWidthProperty (value) {
+    this.setAttribute('group-width-property', value)
+  }
+
+  get groupHeightProperty () {
+    return getter(this, 'group-height-property', 'height')
+  }
+
+  set groupHeightProperty (value) {
+    this.setAttribute('group-height-property', value)
+  }
+
+  get groupFillColorProperty () {
+    return getter(this, 'group-fill-color-property', 'fillColor')
+  }
+
+  set groupFillColorProperty (value) {
+    this.setAttribute('group-fill-color-property', value)
+  }
+
+  get groupFillOpacityProperty () {
+    return getter(this, 'group-fill-opacity-property', 'fillOpacity')
+  }
+
+  set groupFillOpacityProperty (value) {
+    this.setAttribute('group-fill-opacity-property', value)
+  }
+
+  get groupStrokeColorProperty () {
+    return getter(this, 'group-stroke-color-property', 'strokeColor')
+  }
+
+  set groupStrokeColorProperty (value) {
+    this.setAttribute('group-stroke-color-property', value)
+  }
+
+  get groupStrokeOpacityProperty () {
+    return getter(this, 'group-stroke-opacity-property', 'strokeOpacity')
+  }
+
+  set groupStrokeOpacityProperty (value) {
+    this.setAttribute('group-stroke-opacity-property', value)
+  }
+
+  get groupStrokeWidthProperty () {
+    return getter(this, 'group-stroke-width-property', 'strokeWidth')
+  }
+
+  set groupStrokeWidthProperty (value) {
+    this.setAttribute('group-stroke-width-property', value)
+  }
+
+  get groupTypeProperty () {
+    return getter(this, 'group-type-property', 'type')
+  }
+
+  set groupTypeProperty (value) {
+    this.setAttribute('group-type-property', value)
+  }
+
+  get groupVisibilityProperty () {
+    return getter(this, 'group-visibility-property', 'visibility')
+  }
+
+  set groupVisibilityProperty (value) {
+    this.setAttribute('group-visibility-property', value)
   }
 
   get nodeIdProperty () {
@@ -968,6 +1137,94 @@ class EgRendererElement extends window.HTMLElement {
 
   set linkLabelFontFamilyProperty (value) {
     this.setAttribute('link-label-font-family-property', value)
+  }
+
+  get defaultGroupX () {
+    return getter(this, 'default-group-x', 0)
+  }
+
+  set defaultGroupX (value) {
+    this.setAttribute('default-group-x', value)
+  }
+
+  get defaultGroupY () {
+    return getter(this, 'default-group-y', 0)
+  }
+
+  set defaultGroupY (value) {
+    this.setAttribute('default-group-y', value)
+  }
+
+  get defaultGroupWidth () {
+    return getter(this, 'default-group-width', 10)
+  }
+
+  set defaultGroupWidth (value) {
+    this.setAttribute('default-group-width', value)
+  }
+
+  get defaultGroupHeight () {
+    return getter(this, 'default-group-height', 10)
+  }
+
+  set defaultGroupHeight (value) {
+    this.setAttribute('default-group-height', value)
+  }
+
+  get defaultGroupFillColor () {
+    return getter(this, 'default-group-fill-color', '#fff')
+  }
+
+  set defaultGroupFillColor (value) {
+    this.setAttribute('default-group-fill-color', value)
+  }
+
+  get defaultGroupFillOpacity () {
+    return getter(this, 'default-group-fill-opacity', 1)
+  }
+
+  set defaultGroupFillOpacity (value) {
+    this.setAttribute('default-group-fill-opacity', value)
+  }
+
+  get defaultGroupStrokeColor () {
+    return getter(this, 'default-group-stroke-color', '#000')
+  }
+
+  set defaultGroupStrokeColor (value) {
+    this.setAttribute('default-group-stroke-color', value)
+  }
+
+  get defaultGroupStrokeOpacity () {
+    return getter(this, 'default-group-stroke-opacity', 1)
+  }
+
+  set defaultGroupStrokeOpacity (value) {
+    this.setAttribute('default-group-stroke-opacity', value)
+  }
+
+  get defaultGroupStrokeWidth () {
+    return getter(this, 'default-group-stroke-width', 1)
+  }
+
+  set defaultGroupStrokeWidth (value) {
+    this.setAttribute('default-group-stroke-width', value)
+  }
+
+  get defaultGroupType () {
+    return getter(this, 'default-group-type', 'rect')
+  }
+
+  set defaultGroupType (value) {
+    this.setAttribute('default-group-type', value)
+  }
+
+  get defaultGroupVisibility () {
+    return getter(this, 'default-group-visibility', true)
+  }
+
+  set defaultGroupVisibility (value) {
+    this.setAttribute('default-group-visibility', value)
   }
 
   get defaultNodeX () {

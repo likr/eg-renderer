@@ -274,3 +274,39 @@ export const renderEdgeLabel = (ctx, args) => {
     ctx.fillText(label, x, y)
   })
 }
+
+export const renderGroup = (ctx, args) => {
+  const {
+    type
+  } = args
+  withContext(ctx, () => {
+    switch (type) {
+      case 'rect':
+        const {
+          x,
+          y,
+          width,
+          height,
+          strokeWidth
+        } = args
+        withContext(ctx, () => {
+          ctx.translate(x, y)
+          ctx.fillStyle = '#fff'
+          ctx.strokeStyle = '#000'
+          ctx.lineWidth = 1
+          ctx.moveTo(-width / 2, -height / 2)
+          ctx.lineTo(width / 2, -height / 2)
+          ctx.lineTo(width / 2, height / 2)
+          ctx.lineTo(-width / 2, height / 2)
+          ctx.closePath()
+          ctx.fill()
+          if (strokeWidth > 0) {
+            ctx.stroke()
+          }
+        })
+        break
+      default:
+        throw new Error(`Unknown Group type "${type}"`)
+    }
+  })
+}

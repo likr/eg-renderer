@@ -6,6 +6,37 @@ const interpolate = (current, next, r) => {
   return (next - current) * r + current
 }
 
+export const interpolateGroup = (current, next, r) => {
+  const copyProperties = [
+    'g',
+    'type',
+    'd'
+  ]
+  const interpolateProperties = [
+    'x',
+    'y',
+    'width',
+    'height',
+    'strokeWidth',
+    'alpha'
+  ]
+  const colorInterpolateProperties = [
+    'fillColor',
+    'strokeColor'
+  ]
+  const result = {}
+  for (const p of copyProperties) {
+    result[p] = next[p]
+  }
+  for (const p of interpolateProperties) {
+    result[p] = interpolate(current[p], next[p], r)
+  }
+  for (const p of colorInterpolateProperties) {
+    result[p] = d3InterpolateRgb(current[p], next[p])(r)
+  }
+  return result
+}
+
 export const interpolateVertex = (current, next, r) => {
   const copyProperties = [
     'u',
@@ -83,6 +114,14 @@ export const interpolateEdge = (current, next, r) => {
 
 export const diff = (current, next) => {
   const update = {
+    groups: next.groupIds
+      .filter((g) => current.groups.has(g))
+      .map((g) => {
+        return {
+          current: current.groups.get(g),
+          next: next.groups.get(g)
+        }
+      }),
     vertices: next.vertexIds
       .filter((u) => current.vertices.has(u))
       .map((u) => {
@@ -108,6 +147,9 @@ export const diff = (current, next) => {
       })
   }
   const enter = {
+    groups: next.groupIds
+      .filter((g) => !current.groups.has(g))
+      .map((g) => next.groups.get(g)),
     vertices: next.vertexIds
       .filter((u) => !current.vertices.has(u))
       .map((u) => next.vertices.get(u)),
@@ -123,6 +165,9 @@ export const diff = (current, next) => {
       .map(([u, v]) => next.edges.get(u).get(v))
   }
   const exit = {
+    groups: current.groupIds
+      .filter((g) => !next.groups.has(g))
+      .map((g) => current.groups.get(g)),
     vertices: current.vertexIds
       .filter((u) => !next.vertices.has(u))
       .map((u) => current.vertices.get(u)),
