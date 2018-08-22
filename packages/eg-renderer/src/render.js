@@ -73,7 +73,7 @@ export const renderVertex = (ctx, args) => {
           renderRectVertex(ctx, width, height)
           break
         default:
-          return
+          throw new Error(`Unknown Group type "${type}"`)
       }
       ctx.closePath()
       ctx.fill()

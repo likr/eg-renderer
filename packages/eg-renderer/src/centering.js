@@ -1,4 +1,12 @@
 export const layoutRect = ({vertices}) => {
+  if (vertices.size === 0) {
+    return {
+      left: 0,
+      top: 0,
+      layoutWidth: 0,
+      layoutHeight: 0
+    }
+  }
   vertices = Array.from(vertices.values())
   const left = Math.min(...vertices.map(({x, width}) => x - width / 2))
   const right = Math.max(...vertices.map(({x, width}) => x + width / 2))
@@ -13,6 +21,13 @@ export const layoutRect = ({vertices}) => {
 }
 
 export const centerTransform = (lWidth, lHeight, left, top, cWidth, cHeight, margin) => {
+  if (lWidth === 0 || lHeight === 0) {
+    return {
+      x: 0,
+      y: 0,
+      k: 1
+    }
+  }
   const aWidth = cWidth - 2 * margin
   const aHeight = cHeight - 2 * margin
   const hScale = aWidth / lWidth
