@@ -55,6 +55,8 @@ export const renderGroupLabel = (ctx, args) => {
     type,
     x,
     y,
+    width,
+    height,
     label
   } = args
   if (!label) {
@@ -65,13 +67,12 @@ export const renderGroupLabel = (ctx, args) => {
     switch (type) {
       case 'circle':
         ctx.textAlign = 'center'
-        ctx.textBaseline = 'middle'
-        ctx.translate(x, y)
+        ctx.textBaseline = 'top'
+        ctx.translate(x, y - height / 2)
         break
       case 'rect':
         ctx.textAlign = 'left'
         ctx.textBaseline = 'top'
-        const {width, height} = args
         ctx.translate(x - width / 2 + 5, y - height / 2 + 5)
         break
     }
