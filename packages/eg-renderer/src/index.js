@@ -450,7 +450,8 @@ class EgRendererElement extends window.HTMLElement {
 
   center () {
     const {canvas, data, margin, zoom} = privates.get(this)
-    const {layoutWidth, layoutHeight, left, top} = layoutRect(data)
+    const items = [].concat(Array.from(data.vertices.values()), Array.from(data.groups.values()))
+    const {layoutWidth, layoutHeight, left, top} = layoutRect(items)
     const canvasWidth = canvas.width / devicePixelRatio()
     const canvasHeight = canvas.height / devicePixelRatio()
     const {x, y, k} = centerTransform(layoutWidth, layoutHeight, left, top, canvasWidth, canvasHeight, margin)

@@ -1,5 +1,5 @@
-export const layoutRect = ({vertices}) => {
-  if (vertices.size === 0) {
+export const layoutRect = (items) => {
+  if (items.size === 0) {
     return {
       left: 0,
       top: 0,
@@ -7,11 +7,11 @@ export const layoutRect = ({vertices}) => {
       layoutHeight: 0
     }
   }
-  vertices = Array.from(vertices.values())
-  const left = Math.min(...vertices.map(({x, width}) => x - width / 2))
-  const right = Math.max(...vertices.map(({x, width}) => x + width / 2))
-  const top = Math.min(...vertices.map(({y, height}) => y - height / 2))
-  const bottom = Math.max(...vertices.map(({y, height}) => y + height / 2))
+  items = Array.from(items.values())
+  const left = Math.min(...items.map(({x, width}) => x - width / 2))
+  const right = Math.max(...items.map(({x, width}) => x + width / 2))
+  const top = Math.min(...items.map(({y, height}) => y - height / 2))
+  const bottom = Math.max(...items.map(({y, height}) => y + height / 2))
   return {
     left: left,
     top: top,
