@@ -7,34 +7,7 @@ const interpolate = (current, next, r) => {
 }
 
 export const interpolateGroup = (current, next, r) => {
-  const copyProperties = [
-    'g',
-    'type',
-    'd'
-  ]
-  const interpolateProperties = [
-    'x',
-    'y',
-    'width',
-    'height',
-    'strokeWidth',
-    'alpha'
-  ]
-  const colorInterpolateProperties = [
-    'fillColor',
-    'strokeColor'
-  ]
-  const result = {}
-  for (const p of copyProperties) {
-    result[p] = next[p]
-  }
-  for (const p of interpolateProperties) {
-    result[p] = interpolate(current[p], next[p], r)
-  }
-  for (const p of colorInterpolateProperties) {
-    result[p] = d3InterpolateRgb(current[p], next[p])(r)
-  }
-  return result
+  return interpolateVertex(current, next, r)
 }
 
 export const interpolateVertex = (current, next, r) => {

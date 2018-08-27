@@ -22,6 +22,7 @@ import {
 } from './interpolate'
 import {
   renderGroup,
+  renderGroupLabel,
   renderEdge,
   renderEdgeLabel,
   renderEdgeRegion,
@@ -113,6 +114,14 @@ class EgRendererElement extends window.HTMLElement {
       'group-stroke-color-property',
       'group-stroke-opacity-property',
       'group-stroke-width-property',
+      'group-label-property',
+      'group-label-fill-color-property',
+      'group-label-fill-opacity-property',
+      'group-label-stroke-color-property',
+      'group-label-stroke-opacity-property',
+      'group-label-stroke-width-property',
+      'group-label-font-size-property',
+      'group-label-font-family-property',
       'node-id-property',
       'node-x-property',
       'node-y-property',
@@ -162,6 +171,13 @@ class EgRendererElement extends window.HTMLElement {
       'default-group-stroke-color',
       'default-group-stroke-opacity',
       'default-group-stroke-width',
+      'default-group-label-fill-color',
+      'default-group-label-fill-opacity',
+      'default-group-label-stroke-color',
+      'default-group-label-stroke-opacity',
+      'default-group-label-stroke-width',
+      'default-group-label-font-size',
+      'default-group-label-font-family',
       'default-node-x',
       'default-node-y',
       'default-node-width',
@@ -335,8 +351,9 @@ class EgRendererElement extends window.HTMLElement {
       ctx.scale(p.transform.k, p.transform.k)
 
       renderObjects(ctx, r, p.layout.exit.groups, p.layout.enter.groups, p.layout.update.groups, renderGroup, interpolateGroup)
+      renderObjects(ctx, r, p.layout.exit.groups, p.layout.enter.groups, p.layout.update.groups, renderGroupLabel, interpolateGroup)
       if (this.enableLinkEvents) {
-        renderObjects(ctx, r, p.layout.exit.edges, p.layout.enter.edges, p.layout.update.edges, renderEdgeRegion, interpolateEdge, true)
+        renderObjects(ctx, r, p.layout.exit.edges, p.layout.enter.edges, p.layout.update.edges, renderEdgeRegion, interpolateEdge)
       }
       renderObjects(ctx, r, p.layout.exit.edges, p.layout.enter.edges, p.layout.update.edges, renderEdge, interpolateEdge)
       renderObjects(ctx, r, p.layout.exit.edges, p.layout.enter.edges, p.layout.update.edges, renderEdgeLabel, interpolateEdge)
@@ -397,6 +414,10 @@ class EgRendererElement extends window.HTMLElement {
         fillColor.opacity = +get(group, this.groupFillOpacityProperty, this.defaultGroupFillOpacity)
         const strokeColor = d3Color(get(group, this.groupStrokeColorProperty, this.defaultGroupStrokeColor))
         strokeColor.opacity = +get(group, this.groupStrokeOpacityProperty, this.defaultGroupStrokeOpacity)
+        const labelFillColor = d3Color(get(group, this.groupLabelFillColorProperty, this.defaultGroupLabelFillColor))
+        labelFillColor.opacity = +get(group, this.groupLabelFillOpacityProperty, this.defaultGroupLabelFillOpacity)
+        const labelStrokeColor = d3Color(get(group, this.groupLabelStrokeColorProperty, this.defaultGroupLabelStrokeColor))
+        labelStrokeColor.opacity = +get(group, this.groupLabelStrokeOpacityProperty, this.defaultGroupLabelStrokeOpacity)
         const g = i.toString()
         return {
           g,
@@ -408,6 +429,12 @@ class EgRendererElement extends window.HTMLElement {
           fillColor,
           strokeColor,
           strokeWidth: +get(group, this.groupStrokeWidthProperty, this.defaultGroupStrokeWidth),
+          label: get(group, this.groupLabelProperty, this.defaultGroupLabel),
+          labelFillColor,
+          labelStrokeColor,
+          labelStrokeWidth: +get(group, this.groupLabelStrokeWidthProperty, this.defaultGroupLabelStrokeWidth),
+          labelFontSize: +get(group, this.groupLabelFontSizeProperty, this.defaultGroupLabelFontSize),
+          labelFontFamily: get(group, this.groupLabelFontFamilyProperty, this.defaultGroupLabelFontFamily),
           d: group
         }
       })
@@ -740,6 +767,70 @@ class EgRendererElement extends window.HTMLElement {
 
   set groupVisibilityProperty (value) {
     this.setAttribute('group-visibility-property', value)
+  }
+
+  get groupLabelProperty () {
+    return getter(this, 'group-label-property', 'label')
+  }
+
+  set groupLabelProperty (value) {
+    this.setAttribute('group-label-property', value)
+  }
+
+  get groupLabelFillColorProperty () {
+    return getter(this, 'group-label-fill-color-property', 'labelFillColor')
+  }
+
+  set groupLabelFillColorProperty (value) {
+    this.setAttribute('group-label-fill-color-property', value)
+  }
+
+  get groupLabelFillOpacityProperty () {
+    return getter(this, 'group-label-fill-opacity-property', 'labelFillOpacity')
+  }
+
+  set groupLabelFillOpacityProperty (value) {
+    this.setAttribute('group-label-fill-opacity-property', value)
+  }
+
+  get groupLabelStrokeColorProperty () {
+    return getter(this, 'group-label-stroke-color-property', 'labelStrokeColor')
+  }
+
+  set groupLabelStrokeColorProperty (value) {
+    this.setAttribute('group-label-stroke-color-property', value)
+  }
+
+  get groupLabelStrokeOpacityProperty () {
+    return getter(this, 'group-label-stroke-opacity-property', 'labelStrokeOpacity')
+  }
+
+  set groupLabelStrokeOpacityProperty (value) {
+    this.setAttribute('group-label-stroke-opacity-property', value)
+  }
+
+  get groupLabelStrokeWidthProperty () {
+    return getter(this, 'group-label-stroke-width-property', 'labelStrokeWidth')
+  }
+
+  set groupLabelStrokeWidthProperty (value) {
+    this.setAttribute('group-label-stroke-width-property', value)
+  }
+
+  get groupLabelFontSizeProperty () {
+    return getter(this, 'group-label-font-size-property', 'labelFontSize')
+  }
+
+  set groupLabelFontSizeProperty (value) {
+    this.setAttribute('group-label-font-size-property', value)
+  }
+
+  get groupLabelFontFamilyProperty () {
+    return getter(this, 'group-label-font-family-property', 'labelFontFamily')
+  }
+
+  set groupLabelFontFamilyProperty (value) {
+    this.setAttribute('group-label-font-family-property', value)
   }
 
   get nodeIdProperty () {
@@ -1148,6 +1239,70 @@ class EgRendererElement extends window.HTMLElement {
 
   set defaultGroupVisibility (value) {
     this.setAttribute('default-group-visibility', value)
+  }
+
+  get defaultGroupLabel () {
+    return getter(this, 'default-group-label', '')
+  }
+
+  set defaultGroupLabel (value) {
+    this.setAttribute('default-group-label', value)
+  }
+
+  get defaultGroupLabelFillColor () {
+    return getter(this, 'default-group-label-fill-color', '#000')
+  }
+
+  set defaultGroupLabelFillColor (value) {
+    this.setAttribute('default-group-label-fill-color', value)
+  }
+
+  get defaultGroupLabelFillOpacity () {
+    return getter(this, 'default-group-label-fill-opacity', 1)
+  }
+
+  set defaultGroupLabelFillOpacity (value) {
+    this.setAttribute('default-group-label-fill-opacity', value)
+  }
+
+  get defaultGroupLabelStrokeColor () {
+    return getter(this, 'default-group-label-stroke-color', '#fff')
+  }
+
+  set defaultGroupLabelStrokeColor (value) {
+    this.setAttribute('default-group-label-stroke-color', value)
+  }
+
+  get defaultGroupLabelStrokeOpacity () {
+    return getter(this, 'default-group-label-stroke-opacity', 1)
+  }
+
+  set defaultGroupLabelStrokeOpacity (value) {
+    this.setAttribute('default-group-label-stroke-opacity', value)
+  }
+
+  get defaultGroupLabelStrokeWidth () {
+    return getter(this, 'default-group-label-stroke-width', 0)
+  }
+
+  set defaultGroupLabelStrokeWidth (value) {
+    this.setAttribute('default-group-label-stroke-width', value)
+  }
+
+  get defaultGroupLabelFontSize () {
+    return getter(this, 'default-group-label-font-size', 10)
+  }
+
+  set defaultGroupLabelFontSize (value) {
+    this.setAttribute('default-group-label-font-size', value)
+  }
+
+  get defaultGroupLabelFontFamily () {
+    return getter(this, 'default-group-label-font-family', 'serif')
+  }
+
+  set defaultGroupLabelFontFamily (value) {
+    this.setAttribute('default-group-label-font-family', value)
   }
 
   get defaultNodeX () {

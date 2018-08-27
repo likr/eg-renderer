@@ -50,6 +50,38 @@ const renderCircleVertex = (ctx, width, height) => {
   ctx.ellipse(0, 0, width / 2, height / 2, 0, 0, 2 * Math.PI)
 }
 
+export const renderGroupLabel = (ctx, args) => {
+  const {
+    type,
+    x,
+    y,
+    label
+  } = args
+  if (!label) {
+    return
+  }
+  withContext(ctx, () => {
+    setLabelStyles(ctx, args)
+    switch (type) {
+      case 'circle':
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        ctx.translate(x, y)
+        break
+      case 'rect':
+        ctx.textAlign = 'left'
+        ctx.textBaseline = 'top'
+        const {width, height} = args
+        ctx.translate(x - width / 2 + 5, y - height / 2 + 5)
+        break
+    }
+    if (args.labelStrokeWidth > 0) {
+      ctx.strokeText(label, 0, 0)
+    }
+    ctx.fillText(label, 0, 0)
+  })
+}
+
 export const renderVertex = (ctx, args) => {
   const {
     type,
@@ -73,7 +105,7 @@ export const renderVertex = (ctx, args) => {
           renderRectVertex(ctx, width, height)
           break
         default:
-          throw new Error(`Unknown Group type "${type}"`)
+          throw new Error(`Unknown type "${type}"`)
       }
       ctx.closePath()
       ctx.fill()
@@ -190,6 +222,8 @@ export const renderEdge = (ctx, args) => {
         case 'line':
           renderLineEdge(ctx, points)
           break
+        default:
+          throw new Error(`Unknown type "${type}"`)
       }
       ctx.stroke()
     })
@@ -276,37 +310,5 @@ export const renderEdgeLabel = (ctx, args) => {
 }
 
 export const renderGroup = (ctx, args) => {
-  const {
-    type
-  } = args
-  withContext(ctx, () => {
-    switch (type) {
-      case 'rect':
-        const {
-          x,
-          y,
-          width,
-          height,
-          strokeWidth
-        } = args
-        withContext(ctx, () => {
-          ctx.translate(x, y)
-          ctx.fillStyle = '#fff'
-          ctx.strokeStyle = '#000'
-          ctx.lineWidth = 1
-          ctx.moveTo(-width / 2, -height / 2)
-          ctx.lineTo(width / 2, -height / 2)
-          ctx.lineTo(width / 2, height / 2)
-          ctx.lineTo(-width / 2, height / 2)
-          ctx.closePath()
-          ctx.fill()
-          if (strokeWidth > 0) {
-            ctx.stroke()
-          }
-        })
-        break
-      default:
-        throw new Error(`Unknown Group type "${type}"`)
-    }
-  })
+  renderVertex(ctx, args)
 }
