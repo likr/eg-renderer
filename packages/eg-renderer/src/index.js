@@ -72,6 +72,27 @@ const getter = (element, attributeName, defaultValue) => {
   return element.getAttribute(attributeName)
 }
 
+const renderObjects = (ctx, r, exit, enter, update, render, interpolate) => {
+  if (r < 1) {
+    ctx.globalAlpha = 1 - r
+    for (const item of exit) {
+      render(ctx, item)
+    }
+  }
+  ctx.globalAlpha = Math.min(1, r)
+  for (const item of enter) {
+    render(ctx, item)
+  }
+  ctx.globalAlpha = 1
+  for (const {current, next} of update) {
+    if (r < 1) {
+      render(ctx, interpolate(current, next, r))
+    } else {
+      render(ctx, next)
+    }
+  }
+}
+
 class EgRendererElement extends window.HTMLElement {
   static get observedAttributes () {
     return [
@@ -313,114 +334,15 @@ class EgRendererElement extends window.HTMLElement {
       ctx.translate(p.transform.x, p.transform.y)
       ctx.scale(p.transform.k, p.transform.k)
 
-      if (r < 1) {
-        ctx.globalAlpha = 1 - r
-        for (const group of p.layout.exit.groups) {
-          renderGroup(ctx, group)
-        }
-      }
-      ctx.globalAlpha = Math.min(1, r)
-      for (const group of p.layout.enter.groups) {
-        renderGroup(ctx, group)
-      }
-      ctx.globalAlpha = 1
-      for (const {current, next} of p.layout.update.groups) {
-        if (r < 1) {
-          renderGroup(ctx, interpolateGroup(current, next, r))
-        } else {
-          renderGroup(ctx, next)
-        }
-      }
-
+      renderObjects(ctx, r, p.layout.exit.groups, p.layout.enter.groups, p.layout.update.groups, renderGroup, interpolateGroup)
       if (this.enableLinkEvents) {
-        if (r < 1) {
-          for (const edge of p.layout.exit.edges) {
-            renderEdgeRegion(ctx, edge)
-          }
-        }
-        for (const edge of p.layout.enter.edges) {
-          renderEdgeRegion(ctx, edge)
-        }
-        for (const {current, next} of p.layout.update.edges) {
-          if (r < 1) {
-            renderEdgeRegion(ctx, interpolateEdge(current, next, r))
-          } else {
-            renderEdgeRegion(ctx, next)
-          }
-        }
+        renderObjects(ctx, r, p.layout.exit.edges, p.layout.enter.edges, p.layout.update.edges, renderEdgeRegion, interpolateEdge, true)
       }
-      if (r < 1) {
-        ctx.globalAlpha = 1 - r
-        for (const edge of p.layout.exit.edges) {
-          renderEdge(ctx, edge)
-        }
-      }
-      ctx.globalAlpha = Math.min(1, r)
-      for (const edge of p.layout.enter.edges) {
-        renderEdge(ctx, edge)
-      }
-      ctx.globalAlpha = 1
-      for (const {current, next} of p.layout.update.edges) {
-        if (r < 1) {
-          renderEdge(ctx, interpolateEdge(current, next, r))
-        } else {
-          renderEdge(ctx, next)
-        }
-      }
-      if (r < 1) {
-        ctx.globalAlpha = 1 - r
-        for (const edge of p.layout.exit.edges) {
-          renderEdgeLabel(ctx, edge)
-        }
-      }
-      ctx.globalAlpha = Math.min(1, r)
-      for (const edge of p.layout.enter.edges) {
-        renderEdgeLabel(ctx, edge)
-      }
-      ctx.globalAlpha = 1
-      for (const {current, next} of p.layout.update.edges) {
-        if (r < 1) {
-          renderEdgeLabel(ctx, interpolateEdge(current, next, r))
-        } else {
-          renderEdgeLabel(ctx, next)
-        }
-      }
-      if (r < 1) {
-        ctx.globalAlpha = 1 - r
-        for (const vertex of p.layout.exit.vertices) {
-          renderVertex(ctx, vertex)
-        }
-      }
-      ctx.globalAlpha = Math.min(1, r)
-      for (const vertex of p.layout.enter.vertices) {
-        renderVertex(ctx, vertex)
-      }
-      ctx.globalAlpha = 1
-      for (const {current, next} of p.layout.update.vertices) {
-        if (r < 1) {
-          renderVertex(ctx, interpolateVertex(current, next, r))
-        } else {
-          renderVertex(ctx, next)
-        }
-      }
-      if (r < 1) {
-        ctx.globalAlpha = 1 - r
-        for (const vertex of p.layout.exit.vertices) {
-          renderVertexLabel(ctx, vertex)
-        }
-      }
-      ctx.globalAlpha = Math.min(1, r)
-      for (const vertex of p.layout.enter.vertices) {
-        renderVertexLabel(ctx, vertex)
-      }
-      ctx.globalAlpha = 1
-      for (const {current, next} of p.layout.update.vertices) {
-        if (r < 1) {
-          renderVertexLabel(ctx, interpolateVertex(current, next, r))
-        } else {
-          renderVertexLabel(ctx, next)
-        }
-      }
+      renderObjects(ctx, r, p.layout.exit.edges, p.layout.enter.edges, p.layout.update.edges, renderEdge, interpolateEdge)
+      renderObjects(ctx, r, p.layout.exit.edges, p.layout.enter.edges, p.layout.update.edges, renderEdgeLabel, interpolateEdge)
+      renderObjects(ctx, r, p.layout.exit.vertices, p.layout.enter.vertices, p.layout.update.vertices, renderVertex, interpolateVertex)
+      renderObjects(ctx, r, p.layout.exit.vertices, p.layout.enter.vertices, p.layout.update.vertices, renderVertexLabel, interpolateVertex)
+
       ctx.restore()
       window.requestAnimationFrame(render)
     }
