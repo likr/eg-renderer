@@ -103,6 +103,7 @@ class EgRendererElement extends window.HTMLElement {
       'graph-groups-property',
       'graph-nodes-property',
       'graph-links-property',
+      'group-id-property',
       'group-x-property',
       'group-y-property',
       'group-width-property',
@@ -418,7 +419,7 @@ class EgRendererElement extends window.HTMLElement {
         labelFillColor.opacity = +get(group, this.groupLabelFillOpacityProperty, this.defaultGroupLabelFillOpacity)
         const labelStrokeColor = d3Color(get(group, this.groupLabelStrokeColorProperty, this.defaultGroupLabelStrokeColor))
         labelStrokeColor.opacity = +get(group, this.groupLabelStrokeOpacityProperty, this.defaultGroupLabelStrokeOpacity)
-        const g = i.toString()
+        const g = (this.groupIdProperty === '$index' ? i : get(group, this.groupIdProperty)).toString()
         return {
           g,
           x: preservePositions && p.prevData.groups.has(g) ? p.prevData.groups.get(g).x : +get(group, this.groupXProperty, this.defaultGroupX),
@@ -679,6 +680,14 @@ class EgRendererElement extends window.HTMLElement {
 
   set graphLinksProperty (value) {
     this.setAttribute('graph-links-property', value)
+  }
+
+  get groupIdProperty () {
+    return getter(this, 'group-id-property', '$index')
+  }
+
+  set groupIdProperty (value) {
+    this.setAttribute('group-id-property', value)
   }
 
   get groupXProperty () {
