@@ -1,5 +1,5 @@
 export const layoutRect = (items) => {
-  if (items.size === 0) {
+  if (items.length === 0) {
     return {
       left: 0,
       top: 0,
