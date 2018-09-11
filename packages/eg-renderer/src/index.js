@@ -41,7 +41,7 @@ const get = (...args) => {
   const key = args[1]
   const attrs = key.split('.')
   for (const attr of attrs) {
-    if (!d.hasOwnProperty(attr)) {
+    if (!(attr in d)) {
       if (args.length === 2) {
         throw new Error(`Object doesn't have an attribute ${key}`)
       }
