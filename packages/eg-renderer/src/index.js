@@ -419,7 +419,7 @@ class EgRendererElement extends window.HTMLElement {
     const p = privates.get(this)
     p.prevData = p.data
     const data = p.originalData
-    const groups = get(data, this.graphGroupsProperty, [])
+    const groups = Array.from(get(data, this.graphGroupsProperty, []))
       .filter((group) => get(group, this.groupVisibilityProperty, this.defaultGroupVisibility))
       .map((group, i) => {
         const fillColor = d3Color(get(group, this.groupFillColorProperty, this.defaultGroupFillColor))
@@ -450,7 +450,7 @@ class EgRendererElement extends window.HTMLElement {
           d: group
         }
       })
-    const vertices = get(data, this.graphNodesProperty)
+    const vertices = Array.from(get(data, this.graphNodesProperty))
       .filter((node) => get(node, this.nodeVisibilityProperty, this.defaultNodeVisibility))
       .map((node, i) => {
         const fillColor = d3Color(get(node, this.nodeFillColorProperty, this.defaultNodeFillColor))
@@ -484,7 +484,7 @@ class EgRendererElement extends window.HTMLElement {
         }
       })
     const indices = new Map(vertices.map(({u}, i) => [u, i]))
-    const edges = get(data, this.graphLinksProperty)
+    const edges = Array.from(get(data, this.graphLinksProperty))
       .filter((link) => get(link, this.linkVisibilityProperty, this.defaultLinkVisibility))
       .filter((link) => {
         const u = get(link, this.linkSourceProperty).toString()
