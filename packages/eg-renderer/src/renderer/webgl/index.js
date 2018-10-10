@@ -1,6 +1,7 @@
 import {devicePixelRatio} from '../../device-pixel-ratio'
 import {setVertexData} from './vertex'
 import {setEdgeData} from './edge'
+import {setLabelData} from './label'
 import {
   identity,
   translate,
@@ -20,7 +21,8 @@ const init = (gl, canvas) => {
     pMatrix: identity(),
     objects: {
       edges: [],
-      vertices: []
+      vertices: [],
+      labels: []
     }
   }
 }
@@ -32,6 +34,11 @@ const draw = (gl, context, r) => {
   for (const name in context.objects) {
     for (const obj of context.objects[name]) {
       gl.useProgram(obj.program)
+      if (obj.texture) {
+        gl.bindTexture(gl.TEXTURE_2D, obj.texture)
+        const textureLocation = gl.getUniformLocation(obj.program, 'image')
+        gl.uniform1i(textureLocation, 0)
+      }
       const mvLocation = gl.getUniformLocation(obj.program, 'uMVMatrix')
       gl.uniformMatrix4fv(mvLocation, false, mvMatrix)
       const pLocation = gl.getUniformLocation(obj.program, 'uPMatrix')
@@ -59,6 +66,7 @@ export class WebGLRenderer {
   update (layout) {
     this.context.objects.vertices = setVertexData(this.gl, layout)
     this.context.objects.edges = setEdgeData(this.gl, layout)
+    this.context.objects.label = setLabelData(this.gl, layout)
   }
 
   transform (transform) {
