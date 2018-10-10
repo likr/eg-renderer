@@ -11,13 +11,15 @@ import {
   orthogonalMatrix
 } from './matrix'
 
+const margin = 10
+
 const init = (gl, canvas) => {
   gl.clearColor(0.0, 0.0, 0.0, 0.0)
   gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
   gl.enable(gl.BLEND)
   gl.disable(gl.DEPTH_TEST)
   return {
-    mvMatrix: identity(),
+    mvMatrix: translate(margin, margin),
     pMatrix: identity(),
     objects: {
       edges: [],
@@ -71,7 +73,7 @@ export class WebGLRenderer {
 
   transform (transform) {
     const {x, y, k} = transform
-    const mMatrix = matmul(scale(k, k), translate(x, y))
+    const mMatrix = matmul(scale(k, k), matmul(translate(x, y), translate(margin, margin)))
     this.context.mvMatrix = matmul(viewingMatrix([0, 0, 1], [0, 1, 0], [0, 0, 0]), mMatrix)
   }
 

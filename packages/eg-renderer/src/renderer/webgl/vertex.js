@@ -1,3 +1,4 @@
+import {devicePixelRatio} from '../../device-pixel-ratio'
 import {initShader, initProgram} from './program'
 
 const vertexShaderProgram = (gl) => {
@@ -13,7 +14,7 @@ const vertexShaderProgram = (gl) => {
       out vec4 vColor;
       void main() {
         vec4 mvPosition = uMVMatrix * vec4(r * aPosition1 + (1.0 - r) * aPosition0, 1.0);
-        gl_PointSize = 2.0 * aSize * uMVMatrix[0][0];
+        gl_PointSize = aSize * uMVMatrix[0][0];
         gl_Position = uPMatrix * mvPosition;
         vColor = r * aColor1 + (1.0 - r) * aColor0;
       }
@@ -50,7 +51,7 @@ const setData = (data, index, current, next, a0, a1) => {
   data[index * 15 + 11] = next.fillColor.g / 255
   data[index * 15 + 12] = next.fillColor.b / 255
   data[index * 15 + 13] = a1
-  data[index * 15 + 14] = next.width
+  data[index * 15 + 14] = devicePixelRatio() * next.width
 }
 
 export const setVertexData = (gl, layout) => {
