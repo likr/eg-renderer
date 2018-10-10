@@ -134,7 +134,7 @@ export const setEdgeData = (gl, obj, layout) => {
   let elementOffset = 0
   for (let i = 0; i < layout.exit.edges.length; ++i) {
     const item = layout.exit.edges[i]
-    setData(data, elements, dataOffset, elementOffset, item, item, 1, 0)
+    setData(data, elements, dataOffset, elementOffset, item, item, item.strokeColor.opacity, 0)
     dataOffset += 2 * item.points.length
     elementOffset += 2 * (item.points.length - 1)
   }
@@ -146,7 +146,7 @@ export const setEdgeData = (gl, obj, layout) => {
   }
   for (let i = 0; i < layout.enter.edges.length; ++i) {
     const item = layout.enter.edges[i]
-    setData(data, elements, dataOffset, elementOffset, item, item, 0, 1)
+    setData(data, elements, dataOffset, elementOffset, item, item, 0, item.strokeColor.opacity)
     dataOffset += 2 * item.points.length
     elementOffset += 2 * (item.points.length - 1)
   }

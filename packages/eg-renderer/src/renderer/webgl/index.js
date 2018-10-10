@@ -12,7 +12,7 @@ import {
 
 const init = (gl, canvas) => {
   gl.clearColor(0.0, 0.0, 0.0, 0.0)
-  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+  gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
   gl.enable(gl.BLEND)
   gl.disable(gl.DEPTH_TEST)
   return {
@@ -68,11 +68,6 @@ export class WebGLRenderer {
   }
 
   resize (width, height) {
-    // width *= window.devicePixelRatio
-    // height *= window.devicePixelRatio
-    // this.canvas.width = width
-    // this.canvas.height = height
-
     this.gl.viewport(0, 0, width * devicePixelRatio(), height * devicePixelRatio())
     const left = 0
     const right = width - 1
