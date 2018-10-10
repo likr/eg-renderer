@@ -53,7 +53,7 @@ const setData = (data, index, current, next, a0, a1) => {
   data[index * 15 + 14] = next.width
 }
 
-export const setVertexData = (gl, obj, layout) => {
+export const setVertexData = (gl, layout) => {
   const n = layout.enter.vertices.length + layout.update.vertices.length + layout.exit.vertices.length
   const data = new Float32Array(n * 15)
   let offset = 0
@@ -71,6 +71,9 @@ export const setVertexData = (gl, obj, layout) => {
     const item = layout.exit.vertices[i]
     setData(data, offset + i, item, item, 1, 0)
   }
+
+  const obj = vertexObject(gl)
+
   gl.bindBuffer(gl.ARRAY_BUFFER, obj.vertexBuffer.buffer)
   gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW)
   obj.vertexBuffer.data = data
@@ -82,6 +85,8 @@ export const setVertexData = (gl, obj, layout) => {
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, obj.elementBuffer.buffer)
   gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, elements, gl.STATIC_DRAW)
   obj.elementBuffer.data = elements
+
+  return [obj]
 }
 
 export const vertexObject = (gl) => {

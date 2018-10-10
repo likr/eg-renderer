@@ -1,6 +1,6 @@
 import {devicePixelRatio} from '../../device-pixel-ratio'
-import {setVertexData, vertexObject} from './vertex'
-import {setEdgeData, edgeObject} from './edge'
+import {setVertexData} from './vertex'
+import {setEdgeData} from './edge'
 import {
   identity,
   translate,
@@ -19,8 +19,8 @@ const init = (gl, canvas) => {
     mvMatrix: identity(),
     pMatrix: identity(),
     objects: {
-      edges: edgeObject(gl),
-      vertices: vertexObject(gl)
+      edges: [],
+      vertices: []
     }
   }
 }
@@ -30,17 +30,18 @@ const draw = (gl, context, r) => {
   gl.clear(gl.COLOR_BUFFER_BIT)
 
   for (const name in context.objects) {
-    const obj = context.objects[name]
-    gl.useProgram(obj.program)
-    const mvLocation = gl.getUniformLocation(obj.program, 'uMVMatrix')
-    gl.uniformMatrix4fv(mvLocation, false, mvMatrix)
-    const pLocation = gl.getUniformLocation(obj.program, 'uPMatrix')
-    gl.uniformMatrix4fv(pLocation, false, pMatrix)
-    const rLocation = gl.getUniformLocation(obj.program, 'r')
-    gl.uniform1f(rLocation, r)
-    gl.bindVertexArray(obj.geometry)
-    gl.drawElements(obj.mode, obj.elementBuffer.data.length, gl.UNSIGNED_SHORT, 0)
-    gl.bindVertexArray(null)
+    for (const obj of context.objects[name]) {
+      gl.useProgram(obj.program)
+      const mvLocation = gl.getUniformLocation(obj.program, 'uMVMatrix')
+      gl.uniformMatrix4fv(mvLocation, false, mvMatrix)
+      const pLocation = gl.getUniformLocation(obj.program, 'uPMatrix')
+      gl.uniformMatrix4fv(pLocation, false, pMatrix)
+      const rLocation = gl.getUniformLocation(obj.program, 'r')
+      gl.uniform1f(rLocation, r)
+      gl.bindVertexArray(obj.geometry)
+      gl.drawElements(obj.mode, obj.elementBuffer.data.length, gl.UNSIGNED_SHORT, 0)
+      gl.bindVertexArray(null)
+    }
   }
 }
 
@@ -56,12 +57,11 @@ export class WebGLRenderer {
   }
 
   update (layout) {
-    setVertexData(this.gl, this.context.objects.vertices, layout)
-    setEdgeData(this.gl, this.context.objects.edges, layout)
+    this.context.objects.vertices = setVertexData(this.gl, layout)
+    this.context.objects.edges = setEdgeData(this.gl, layout)
   }
 
   transform (transform) {
-    console.log('transform', transform)
     const {x, y, k} = transform
     const mMatrix = matmul(scale(k, k), translate(x, y))
     this.context.mvMatrix = matmul(viewingMatrix([0, 0, 1], [0, 1, 0], [0, 0, 0]), mMatrix)

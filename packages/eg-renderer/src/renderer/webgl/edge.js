@@ -111,53 +111,60 @@ const setData = (data, elements, dataOffset, elementOffset, current, next, a0, a
   }
 }
 
-export const setEdgeData = (gl, obj, layout) => {
-  let vertexCount = 0
-  let elementCount = 0
-  for (const item of layout.enter.edges) {
-    vertexCount += item.points.length * 2
-    elementCount += (item.points.length - 1) * 2
-  }
-  for (const {next} of layout.update.edges) {
-    vertexCount += next.points.length * 2
-    elementCount += (next.points.length - 1) * 2
-  }
-  for (const item of layout.exit.edges) {
-    vertexCount += item.points.length * 2
-    elementCount += (item.points.length - 1) * 2
-  }
+const createEdgeObject = (gl, edges, items, f1, f2) => {
+  const chunk = 65536
+  let offset = 0
+  while (offset < edges.length) {
+    let edgeCount = 0
+    let vertexCount = 0
+    let elementCount = 0
+    for (let i = offset; i < edges.length; ++i) {
+      const numPoints = f1(edges[i])
+      if (vertexCount + numPoints * 2 >= chunk) {
+        break
+      }
+      vertexCount += numPoints * 2
+      elementCount += (numPoints - 1) * 2
+      edgeCount += 1
+    }
 
-  const data = new Float32Array(vertexCount * 14)
-  const elements = new Uint16Array(elementCount * 3)
+    const data = new Float32Array(vertexCount * 14)
+    const elements = new Uint16Array(elementCount * 3)
+    let dataOffset = 0
+    let elementOffset = 0
+    for (let i = 0; i < edgeCount; ++i) {
+      f2(edges[offset + i], data, elements, dataOffset, elementOffset)
+      const numPoints = f1(edges[offset + i])
+      dataOffset += 2 * numPoints
+      elementOffset += 2 * (numPoints - 1)
+    }
 
-  let dataOffset = 0
-  let elementOffset = 0
-  for (let i = 0; i < layout.exit.edges.length; ++i) {
-    const item = layout.exit.edges[i]
+    const obj = edgeObject(gl)
+    gl.bindBuffer(gl.ARRAY_BUFFER, obj.vertexBuffer.buffer)
+    gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW)
+    obj.vertexBuffer.data = data
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, obj.elementBuffer.buffer)
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, elements, gl.STATIC_DRAW)
+    obj.elementBuffer.data = elements
+    items.push(obj)
+
+    offset += edgeCount
+  }
+  return items
+}
+
+export const setEdgeData = (gl, layout) => {
+  const items = []
+  createEdgeObject(gl, layout.exit.edges, items, (item) => item.points.length, (item, data, elements, dataOffset, elementOffset) => {
     setData(data, elements, dataOffset, elementOffset, item, item, item.strokeColor.opacity, 0)
-    dataOffset += 2 * item.points.length
-    elementOffset += 2 * (item.points.length - 1)
-  }
-  for (let i = 0; i < layout.update.edges.length; ++i) {
-    const {current, next} = layout.update.edges[i]
+  })
+  createEdgeObject(gl, layout.update.edges, items, ({next}) => next.points.length, ({current, next}, data, elements, dataOffset, elementOffset) => {
     setData(data, elements, dataOffset, elementOffset, current, next, current.strokeColor.opacity, next.strokeColor.opacity)
-    dataOffset += 2 * next.points.length
-    elementOffset += 2 * (next.points.length - 1)
-  }
-  for (let i = 0; i < layout.enter.edges.length; ++i) {
-    const item = layout.enter.edges[i]
+  })
+  createEdgeObject(gl, layout.enter.edges, items, (item) => item.points.length, (item, data, elements, dataOffset, elementOffset) => {
     setData(data, elements, dataOffset, elementOffset, item, item, 0, item.strokeColor.opacity)
-    dataOffset += 2 * item.points.length
-    elementOffset += 2 * (item.points.length - 1)
-  }
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, obj.vertexBuffer.buffer)
-  gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW)
-  obj.vertexBuffer.data = data
-
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, obj.elementBuffer.buffer)
-  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, elements, gl.STATIC_DRAW)
-  obj.elementBuffer.data = elements
+  })
+  return items
 }
 
 export const edgeObject = (gl) => {
