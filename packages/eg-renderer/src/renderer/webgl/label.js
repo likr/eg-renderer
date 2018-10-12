@@ -60,21 +60,18 @@ const labelObject = (gl) => {
   }
 }
 
-const createTextImage = (text) => {
-  const size = 40
-  const family = 'sans-serif'
+const createTextImage = (text, options, scale) => {
   const canvas = document.createElement('canvas')
+  canvas.width = 64 * scale
+  canvas.height = 16 * scale
   const ctx = canvas.getContext('2d')
-  ctx.font = `${size}pt ${family}`
-  const result = {
-    width: Math.ceil(ctx.measureText(text).width),
-    height: Math.ceil(size * 1.5)
-  }
-  canvas.width = result.width
-  canvas.height = result.height
-  ctx.fillStyle = '#000'
-  ctx.font = `${size}pt ${family}`
-  ctx.fillText(text, 0, size * 1.3)
+  ctx.font = `${options.labelFontSize * scale}px ${options.labelFontFamily}`
+  ctx.fillStyle = options.labelFillColor.toString()
+  ctx.strokeStyle = options.labelStrokeColor.toString()
+  ctx.lineWidth = options.labelStrokeWidth * scale
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  ctx.fillText(text, canvas.width / 2, canvas.height / 2)
   return canvas
 }
 
@@ -87,33 +84,44 @@ const createTexture = (gl, canvas) => {
   return texture
 }
 
+const createLabelObject = (gl, item) => {
+  const scale = 2
+  const canvas = createTextImage(item.label, item, scale)
+  const texture = createTexture(gl, canvas)
+  const obj = labelObject(gl)
+  const {x, y} = item
+  const width = canvas.width / scale
+  const height = canvas.height / scale
+  const data = new Float32Array([
+    x - width / 2, y + height / 2, 0.0, x - width / 2, y + height / 2, 0.0, 0.0, 1.0,
+    x + width / 2, y + height / 2, 0.0, x + width / 2, y + height / 2, 0.0, 1.0, 1.0,
+    x - width / 2, y - height / 2, 0.0, x - width / 2, y - height / 2, 0.0, 0.0, 0.0,
+    x + width / 2, y - height / 2, 0.0, x + width / 2, y - height / 2, 0.0, 1.0, 0.0
+  ])
+  const elements = new Uint16Array([0, 1, 2, 3, 2, 1])
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, obj.vertexBuffer.buffer)
+  gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW)
+  obj.vertexBuffer.data = data
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, obj.elementBuffer.buffer)
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, elements, gl.STATIC_DRAW)
+  obj.elementBuffer.data = elements
+  obj.texture = texture
+
+  return obj
+}
+
 export const setLabelData = (gl, layout) => {
   const items = []
+  for (const {next} of layout.update.vertices) {
+    const item = next
+    if (item.label) {
+      items.push(createLabelObject(gl, item))
+    }
+  }
   for (const item of layout.enter.vertices) {
     if (item.label) {
-      const canvas = createTextImage(item.label)
-      const texture = createTexture(gl, canvas)
-      const obj = labelObject(gl)
-      const {x, y} = item
-      const width = canvas.width
-      const height = canvas.height
-      const data = new Float32Array([
-        x - width / 2, y + height / 2, 0.0, x - width / 2, y + height / 2, 0.0, 0.0, 1.0,
-        x + width / 2, y + height / 2, 0.0, x + width / 2, y + height / 2, 0.0, 1.0, 1.0,
-        x - width / 2, y - height / 2, 0.0, x - width / 2, y - height / 2, 0.0, 0.0, 0.0,
-        x + width / 2, y - height / 2, 0.0, x + width / 2, y - height / 2, 0.0, 1.0, 0.0
-      ])
-      const elements = new Uint16Array([0, 1, 2, 3, 2, 1])
-
-      gl.bindBuffer(gl.ARRAY_BUFFER, obj.vertexBuffer.buffer)
-      gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW)
-      obj.vertexBuffer.data = data
-      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, obj.elementBuffer.buffer)
-      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, elements, gl.STATIC_DRAW)
-      obj.elementBuffer.data = elements
-      obj.texture = texture
-
-      items.push(obj)
+      items.push(createLabelObject(gl, item))
     }
   }
   return items
