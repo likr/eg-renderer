@@ -149,19 +149,15 @@ const renderLineEdge = (ctx, points) => {
 
 const renderQuadraticCurveEdge = (ctx, points) => {
   const n = points.length
-  ctx.moveTo(points[0][0], points[0][1])
-  if (n === 2) {
-    ctx.lineTo(points[1][0], points[1][1])
-    return
+  if (n < 3 || n % 2 === 0) {
+    throw new Error(`The number of edge points should be an odd number greater than 2 for quadratic curve edges: got ${n}`)
   }
-  for (let i = 2; i < n - 1; ++i) {
+  ctx.moveTo(points[0][0], points[0][1])
+  for (let i = 2; i < n; i += 2) {
     const [x1, y1] = points[i - 1]
     const [x2, y2] = points[i]
-    const dx = (x2 - x1) / 2
-    const dy = (y2 - y1) / 2
-    ctx.quadraticCurveTo(x1, y1, x1 + dx, y1 + dy)
+    ctx.quadraticCurveTo(x1, y1, x2, y2)
   }
-  ctx.quadraticCurveTo(points[n - 2][0], points[n - 2][1], points[n - 1][0], points[n - 1][1])
 }
 
 const renderArcEdge = (ctx, points) => {

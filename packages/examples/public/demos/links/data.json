@@ -10,6 +10,6 @@
   "links": [
     {"source": "0", "target": "1", "sourceMarkerShape": "circle", "targetMarkerShape": "triangle", "type": "line", "bends": [[200, 50], [400, 150]]},
     {"source": "2", "target": "3", "sourceMarkerShape": "circle", "targetMarkerShape": "triangle", "type": "arc"},
-    {"source": "4", "target": "5", "sourceMarkerShape": "circle", "targetMarkerShape": "triangle", "type": "quadratic", "bends": [[200, 250], [400, 350]]}
+    {"source": "4", "target": "5", "sourceMarkerShape": "circle", "targetMarkerShape": "triangle", "type": "quadratic", "bends": [[300, 300]]}
   ]
 }
