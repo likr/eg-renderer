@@ -132,11 +132,16 @@ export const renderVertexLabel = (ctx, args) => {
   withContext(ctx, () => {
     setLabelStyles(ctx, args)
     ctx.textAlign = 'center'
-    ctx.textBaseline = 'middle'
-    if (args.labelStrokeWidth > 0) {
-      ctx.strokeText(label, x, y)
+    ctx.textBaseline = 'top'
+    const lines = label.split('¥n')
+    let offset = -lines.length * args.labelFontSize / 2
+    for (const line of lines) {
+      if (args.labelStrokeWidth > 0) {
+        ctx.strokeText(line, x, y + offset)
+      }
+      ctx.fillText(line, x, y + offset)
+      offset += args.labelFontSize
     }
-    ctx.fillText(label, x, y)
   })
 }
 
