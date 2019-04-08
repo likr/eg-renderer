@@ -76,10 +76,15 @@ export const renderGroupLabel = (ctx, args) => {
         ctx.translate(x - width / 2 + 5, y - height / 2 + 5)
         break
     }
-    if (args.labelStrokeWidth > 0) {
-      ctx.strokeText(label, 0, 0)
+    const lines = label.split('\n')
+    let offset = -lines.length * args.labelFontSize / 2
+    for (const line of lines) {
+      if (args.labelStrokeWidth > 0) {
+        ctx.strokeText(line, 0, offset)
+      }
+      ctx.fillText(line, 0, offset)
+      offset += args.labelFontSize
     }
-    ctx.fillText(label, 0, 0)
   })
 }
 
@@ -133,7 +138,7 @@ export const renderVertexLabel = (ctx, args) => {
     setLabelStyles(ctx, args)
     ctx.textAlign = 'center'
     ctx.textBaseline = 'top'
-    const lines = label.split('¥n')
+    const lines = label.split('\n')
     let offset = -lines.length * args.labelFontSize / 2
     for (const line of lines) {
       if (args.labelStrokeWidth > 0) {
