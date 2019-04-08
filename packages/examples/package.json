@@ -1,6 +1,6 @@
 {
   "name": "examples",
-  "version": "1.1.0-5",
+  "version": "1.1.0",
   "description": "EgRenderer Examples",
   "scripts": {
     "start": "webpack-dev-server --mode=development",
@@ -15,8 +15,8 @@
   },
   "license": "MIT",
   "dependencies": {
-    "eg-renderer": "^1.1.0-5",
-    "eg-renderer-ogdf": "^1.0.0"
+    "eg-renderer": "^1.1.0",
+    "eg-renderer-ogdf": "^1.1.0"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
