@@ -21,4 +21,5 @@ features = [
   'WebGlShader',
   'WebGlUniformLocation',
   'WebGlVertexArrayObject',
+  'Window',
 ]
