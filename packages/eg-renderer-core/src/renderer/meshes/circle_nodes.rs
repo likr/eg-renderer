@@ -1,10 +1,10 @@
 use super::program::{init_fragment_shader, init_program, init_vertex_shader};
-use super::Mesh;
+use super::{LayoutData, Mesh, VertexData};
 use web_sys::{WebGl2RenderingContext, WebGlBuffer, WebGlProgram, WebGlVertexArrayObject};
 
-const NODE_ATTRIBUTES: usize = 18;
+const CIRCLE_NODE_ATTRIBUTES: usize = 18;
 
-const NODE_VERTEX_SHADER_SOURCE: &str = r#"#version 300 es
+const CIRCLE_NODE_VERTEX_SHADER_SOURCE: &str = r#"#version 300 es
 layout(location = 0) in vec3 aPosition0;
 layout(location = 1) in vec3 aPosition1;
 layout(location = 2) in vec4 aColor0;
@@ -23,7 +23,7 @@ void main() {
 }
 "#;
 
-const NODE_FRAGMENT_SHADER_SOURCE: &str = r#"#version 300 es
+const CIRCLE_NODE_FRAGMENT_SHADER_SOURCE: &str = r#"#version 300 es
 precision mediump float;
 in vec4 vColor;
 out vec4 oFragColor;
@@ -39,8 +39,8 @@ void main() {
 "#;
 
 fn create_node_shader_program(gl: &WebGl2RenderingContext) -> Result<WebGlProgram, String> {
-    let vertex_shader = init_vertex_shader(gl, NODE_VERTEX_SHADER_SOURCE)?;
-    let fragment_shader = init_fragment_shader(gl, NODE_FRAGMENT_SHADER_SOURCE)?;
+    let vertex_shader = init_vertex_shader(gl, CIRCLE_NODE_VERTEX_SHADER_SOURCE)?;
+    let fragment_shader = init_fragment_shader(gl, CIRCLE_NODE_FRAGMENT_SHADER_SOURCE)?;
     init_program(gl, vertex_shader, fragment_shader)
 }
 
@@ -137,7 +137,7 @@ impl VertexBuffer {
     }
 
     fn resize(&mut self, n: usize) {
-        self.data.resize(NODE_ATTRIBUTES * n, 0.);
+        self.data.resize(CIRCLE_NODE_ATTRIBUTES * n, 0.);
     }
 }
 
@@ -189,105 +189,116 @@ impl CircleNodes {
         self.elements.resize(n);
     }
 
-    // fn set_value(&mut self, index: usize, value: f32, offset: usize) -> Result<(), JsValue> {
-    //     let e = self
-    //         .vertices
-    //         .data
-    //         .get_mut(NODE_ATTRIBUTES * index + offset)
-    //         .ok_or(format!("Index out of bounds: {}", index))?;
-    //     *e = value;
-    //     Ok(())
-    // }
+    fn set_value(&mut self, index: usize, value: f32, offset: usize) -> Result<(), String> {
+        let e = self
+            .vertices
+            .data
+            .get_mut(CIRCLE_NODE_ATTRIBUTES * index + offset)
+            .ok_or(format!("Index out of bounds: {}", index))?;
+        *e = value;
+        Ok(())
+    }
 
-    // #[wasm_bindgen(js_name = setPrevX)]
-    // pub fn set_prev_x(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
-    //     self.set_value(index, value, 0)
-    // }
+    fn set_current_x(&mut self, index: usize, value: f32) -> Result<(), String> {
+        self.set_value(index, value, 0)
+    }
 
-    // #[wasm_bindgen(js_name = setPrevY)]
-    // pub fn set_prev_y(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
-    //     self.set_value(index, value, 1)
-    // }
+    fn set_current_y(&mut self, index: usize, value: f32) -> Result<(), String> {
+        self.set_value(index, value, 1)
+    }
 
-    // #[wasm_bindgen(js_name = setPrevZ)]
-    // pub fn set_prev_z(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
-    //     self.set_value(index, value, 2)
-    // }
+    fn set_current_z(&mut self, index: usize, value: f32) -> Result<(), String> {
+        self.set_value(index, value, 2)
+    }
 
-    // #[wasm_bindgen(js_name = setNextX)]
-    // pub fn set_next_x(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
-    //     self.set_value(index, value, 3)
-    // }
+    fn set_next_x(&mut self, index: usize, value: f32) -> Result<(), String> {
+        self.set_value(index, value, 3)
+    }
 
-    // #[wasm_bindgen(js_name = setNextY)]
-    // pub fn set_next_y(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
-    //     self.set_value(index, value, 4)
-    // }
+    fn set_next_y(&mut self, index: usize, value: f32) -> Result<(), String> {
+        self.set_value(index, value, 4)
+    }
 
-    // #[wasm_bindgen(js_name = setNextZ)]
-    // pub fn set_next_z(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
-    //     self.set_value(index, value, 5)
-    // }
+    fn set_next_z(&mut self, index: usize, value: f32) -> Result<(), String> {
+        self.set_value(index, value, 5)
+    }
 
-    // #[wasm_bindgen(js_name = setPrevR)]
-    // pub fn set_prev_r(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
-    //     self.set_value(index, value, 6)
-    // }
+    fn set_current_r(&mut self, index: usize, value: f32) -> Result<(), String> {
+        self.set_value(index, value, 6)
+    }
 
-    // #[wasm_bindgen(js_name = setPrevG)]
-    // pub fn set_prev_g(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
-    //     self.set_value(index, value, 7)
-    // }
+    fn set_current_g(&mut self, index: usize, value: f32) -> Result<(), String> {
+        self.set_value(index, value, 7)
+    }
 
-    // #[wasm_bindgen(js_name = setPrevB)]
-    // pub fn set_prev_b(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
-    //     self.set_value(index, value, 8)
-    // }
+    fn set_current_b(&mut self, index: usize, value: f32) -> Result<(), String> {
+        self.set_value(index, value, 8)
+    }
 
-    // #[wasm_bindgen(js_name = setPrevAlpha)]
-    // pub fn set_prev_alpha(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
-    //     self.set_value(index, value, 9)
-    // }
+    fn set_current_alpha(&mut self, index: usize, value: f32) -> Result<(), String> {
+        self.set_value(index, value, 9)
+    }
 
-    // #[wasm_bindgen(js_name = setNextR)]
-    // pub fn set_next_r(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
-    //     self.set_value(index, value, 10)
-    // }
+    fn set_next_r(&mut self, index: usize, value: f32) -> Result<(), String> {
+        self.set_value(index, value, 10)
+    }
 
-    // #[wasm_bindgen(js_name = setNextG)]
-    // pub fn set_next_g(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
-    //     self.set_value(index, value, 11)
-    // }
+    fn set_next_g(&mut self, index: usize, value: f32) -> Result<(), String> {
+        self.set_value(index, value, 11)
+    }
 
-    // #[wasm_bindgen(js_name = setNextB)]
-    // pub fn set_next_b(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
-    //     self.set_value(index, value, 12)
-    // }
+    fn set_next_b(&mut self, index: usize, value: f32) -> Result<(), String> {
+        self.set_value(index, value, 12)
+    }
 
-    // #[wasm_bindgen(js_name = setNextAlpha)]
-    // pub fn set_next_alpha(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
-    //     self.set_value(index, value, 13)
-    // }
+    fn set_next_alpha(&mut self, index: usize, value: f32) -> Result<(), String> {
+        self.set_value(index, value, 13)
+    }
 
-    // #[wasm_bindgen(js_name = setPrevWidth)]
-    // pub fn set_prev_width(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
-    //     self.set_value(index, value, 14)
-    // }
+    fn set_current_width(&mut self, index: usize, value: f32) -> Result<(), String> {
+        self.set_value(index, value, 14)
+    }
 
-    // #[wasm_bindgen(js_name = setPrevHeight)]
-    // pub fn set_prev_height(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
-    //     self.set_value(index, value, 15)
-    // }
+    fn set_current_height(&mut self, index: usize, value: f32) -> Result<(), String> {
+        self.set_value(index, value, 15)
+    }
 
-    // #[wasm_bindgen(js_name = setNextWidth)]
-    // pub fn set_next_width(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
-    //     self.set_value(index, value, 16)
-    // }
+    fn set_next_width(&mut self, index: usize, value: f32) -> Result<(), String> {
+        self.set_value(index, value, 16)
+    }
 
-    // #[wasm_bindgen(js_name = setNextHeight)]
-    // pub fn set_next_height(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
-    //     self.set_value(index, value, 17)
-    // }
+    fn set_next_height(&mut self, index: usize, value: f32) -> Result<(), String> {
+        self.set_value(index, value, 17)
+    }
+
+    fn set_item(
+        &mut self,
+        index: usize,
+        current: &VertexData,
+        next: &VertexData,
+        a0: f32,
+        a1: f32,
+    ) -> Result<(), String> {
+        self.set_current_x(index, current.x as f32)?;
+        self.set_current_y(index, current.y as f32)?;
+        self.set_current_z(index, 0.)?;
+        self.set_next_x(index, next.x as f32)?;
+        self.set_next_y(index, next.y as f32)?;
+        self.set_next_z(index, 0.)?;
+        self.set_current_r(index, (current.fillColor.r / 255.) as f32)?;
+        self.set_current_g(index, (current.fillColor.g / 255.) as f32)?;
+        self.set_current_b(index, (current.fillColor.b / 255.) as f32)?;
+        self.set_current_alpha(index, a0)?;
+        self.set_next_r(index, (next.fillColor.r / 255.) as f32)?;
+        self.set_next_g(index, (next.fillColor.g / 255.) as f32)?;
+        self.set_next_b(index, (next.fillColor.b / 255.) as f32)?;
+        self.set_next_alpha(index, a1)?;
+        self.set_current_width(index, current.width as f32)?;
+        self.set_current_height(index, current.height as f32)?;
+        self.set_next_width(index, next.width as f32)?;
+        self.set_next_height(index, next.height as f32)?;
+        Ok(())
+    }
 }
 
 impl Mesh for CircleNodes {
@@ -305,5 +316,33 @@ impl Mesh for CircleNodes {
 
     fn size(&self) -> i32 {
         self.elements.data.len() as i32
+    }
+
+    fn update(&mut self, layout: &LayoutData) -> Result<(), String> {
+        let n =
+            layout.enter.vertices.len() + layout.update.vertices.len() + layout.exit.vertices.len();
+        self.resize(n);
+
+        let mut offset = 0;
+        for node in &layout.enter.vertices {
+            self.set_item(offset, node, node, 0., 1.)?;
+            offset += 1;
+        }
+        for node in &layout.update.vertices {
+            self.set_item(
+                offset,
+                &node.current,
+                &node.next,
+                node.current.fillColor.alpha as f32,
+                node.next.fillColor.alpha as f32,
+            )?;
+            offset += 1
+        }
+        for node in &layout.exit.vertices {
+            self.set_item(offset, node, node, 1., 0.)?;
+            offset += 1;
+        }
+
+        Ok(())
     }
 }

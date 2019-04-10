@@ -3,4 +3,4 @@ mod mesh;
 mod program;
 
 pub use circle_nodes::CircleNodes;
-pub use mesh::Mesh;
+pub use mesh::*;

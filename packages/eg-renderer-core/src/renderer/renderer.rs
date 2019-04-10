@@ -1,5 +1,5 @@
-use super::matrix::{identity, orthogonal_matrix, translate, Matrix44};
-use super::meshes::{CircleNodes, Mesh};
+use super::meshes::{CircleNodes, LayoutData, Mesh};
+use cgmatrix::{identity, orthogonal_matrix, translate, Matrix44};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::{window, HtmlCanvasElement, WebGl2RenderingContext};
@@ -50,11 +50,19 @@ impl Renderer {
         Ok(Renderer { context, gl })
     }
 
+    pub fn update(&mut self, layout: JsValue) -> Result<(), JsValue> {
+        let layout: LayoutData = layout.into_serde().map_err(|e| format!("{}", e))?;
+        for object in self.context.objects.iter_mut() {
+            object.update(&layout)?;
+        }
+        Ok(())
+    }
+
     pub fn render(&self) -> Result<(), JsValue> {
         let gl = &self.gl;
         gl.clear(WebGl2RenderingContext::COLOR_BUFFER_BIT);
-        for obj in &self.context.objects {
-            let program = obj.program();
+        for object in &self.context.objects {
+            let program = object.program();
             gl.use_program(Some(program));
             let mv_location = gl
                 .get_uniform_location(program, "uMV_matrix")
@@ -68,10 +76,10 @@ impl Renderer {
                 .get_uniform_location(program, "r")
                 .ok_or("failed to get uniform location")?;
             gl.uniform1f(Some(&r_location), 1.0);
-            gl.bind_vertex_array(Some(obj.geometry()));
+            gl.bind_vertex_array(Some(object.geometry()));
             gl.draw_elements_with_i32(
-                obj.mode(),
-                obj.size(),
+                object.mode(),
+                object.size(),
                 WebGl2RenderingContext::UNSIGNED_INT,
                 0,
             );
