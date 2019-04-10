@@ -113,7 +113,7 @@ fn init_vertex_array(
         56,
     );
     gl.vertex_attrib_pointer_with_i32(
-        size0_location as u32,
+        size1_location as u32,
         2,
         WebGl2RenderingContext::FLOAT,
         false,

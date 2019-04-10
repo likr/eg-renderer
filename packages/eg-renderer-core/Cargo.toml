@@ -9,7 +9,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 js-sys = "0.3.17"
-cgmatrix = "0.1"
+cgmatrix = "0.2.1"
 serde = "^1.0.59"
 serde_derive = "^1.0.59"
 

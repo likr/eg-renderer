@@ -1,17 +1,8 @@
 use super::meshes::{CircleNodes, LayoutData, Mesh};
-use cgmatrix::{identity, matmul, orthogonal_matrix, translate, viewing_matrix, zeros, Matrix44};
+use cgmatrix::{identity, matmul, orthogonal_matrix, scale, translate, viewing_matrix, Matrix44};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::{window, HtmlCanvasElement, WebGl2RenderingContext};
-
-fn scale(sx: f32, sy: f32, sz: f32) -> Matrix44 {
-    let mut matrix = zeros();
-    matrix[0] = sx;
-    matrix[5] = sy;
-    matrix[10] = sz;
-    matrix[15] = 1.;
-    matrix
-}
 
 #[derive(Serialize, Deserialize)]
 pub struct Transform {
