@@ -10,8 +10,8 @@ import {
 import {
   zoomIdentity as d3ZoomIdentity
 } from 'd3-zoom'
-// import {CanvasRenderer} from './renderer/canvas'
-import {WebGLRenderer as Renderer} from './renderer/webgl'
+import {CanvasRenderer as Renderer} from './renderer/canvas'
+// import {WebGLRenderer} from './renderer/webgl'
 import {
   centerTransform,
   layoutRect
@@ -193,7 +193,6 @@ class EgRendererElement extends window.HTMLElement {
       invalidatePositions: false,
       originalData: null,
       canvas,
-      renderer: new Renderer(canvas),
       data: {
         groupIds: [],
         groups: new Map(),
@@ -229,6 +228,8 @@ class EgRendererElement extends window.HTMLElement {
       layoutTime: 0,
       ease: d3EaseCubic
     }
+
+    p.renderer = new Renderer(canvas, p.layout, p.transform)
     p.zoom = zoom(this, p)
     privates.set(this, p)
 

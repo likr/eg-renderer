@@ -3,7 +3,7 @@ import {
   interpolateVertex,
   interpolateEdge
 } from '../../interpolate'
-import {devicePixelRatio} from '../../device-pixel-ratio'
+import { devicePixelRatio } from '../../device-pixel-ratio'
 import {
   renderGroup,
   renderGroupLabel,
@@ -26,7 +26,7 @@ const renderObjects = (ctx, r, exit, enter, update, render, interpolate) => {
     render(ctx, item)
   }
   ctx.globalAlpha = 1
-  for (const {current, next} of update) {
+  for (const { current, next } of update) {
     if (r < 1) {
       render(ctx, interpolate(current, next, r))
     } else {
@@ -36,7 +36,16 @@ const renderObjects = (ctx, r, exit, enter, update, render, interpolate) => {
 }
 
 export class CanvasRenderer {
-  render (canvas, r, margin, transform, layout) {
+  constructor (canvas, layout, transform) {
+    this.canvas = canvas
+    this.t = transform
+    this.layout = layout
+  }
+
+  render (r) {
+    const margin = 10
+    const { canvas, layout } = this
+    const transform = this.t
     const ctx = canvas.getContext('2d')
     ctx.save()
     ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -56,5 +65,16 @@ export class CanvasRenderer {
     renderObjects(ctx, r, layout.exit.vertices, layout.enter.vertices, layout.update.vertices, renderVertexLabel, interpolateVertex)
 
     ctx.restore()
+  }
+
+  resize () {
+  }
+
+  update (layout) {
+    this.layout = layout
+  }
+
+  transform (transform) {
+    this.t = transform
   }
 }
