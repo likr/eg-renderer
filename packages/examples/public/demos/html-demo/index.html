@@ -12,7 +12,8 @@ if (!window.customElements) {
 window.customElements.forcePolyfill = true
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/custom-elements/1.0.0/custom-elements.min.js"></script>
-<script async src="../../eg-renderer.js"></script>
+<script async src="/eg-renderer.js"></script>
+<base href="/"/>
 </head>
 <body>
 <div>
@@ -21,7 +22,7 @@ window.customElements.forcePolyfill = true
 </div>
 <div>
 <h2>Result</h2>
-<eg-renderer width="600" height="400" src="data.json"></eg-renderer>
+<eg-renderer width="600" height="400" src="/demos/html-demo/data.json"></eg-renderer>
 </div>
 <div>
 <h2>Code</h2>

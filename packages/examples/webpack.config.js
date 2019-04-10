@@ -19,8 +19,8 @@ const options = {
     ]
   },
   entry: {
-    'eg-renderer': 'eg-renderer',
-    'eg-renderer-ogdf': 'eg-renderer-ogdf'
+    'eg-renderer': './src/eg-renderer',
+    'eg-renderer-ogdf': './src/eg-renderer-ogdf'
   },
   output: {
     path: path.resolve(__dirname, 'public'),

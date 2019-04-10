@@ -17,7 +17,8 @@ uniform float r;
 out vec4 vColor;
 void main() {
   vec4 mvPosition = uMVMatrix * vec4(r * aPosition1 + (1.0 - r) * aPosition0, 1.0);
-  gl_PointSize = aSize0.x * uMVMatrix[0][0];
+  vec2 size = r * aSize1 + (1.0 - r) * aSize0;
+  gl_PointSize = size.x * uMVMatrix[0][0];
   gl_Position = uPMatrix * mvPosition;
   vColor = r * aColor1 + (1.0 - r) * aColor0;
 }
@@ -143,7 +144,7 @@ impl VertexBuffer {
 
 struct ElementBuffer {
     buffer: WebGlBuffer,
-    data: Vec<u32>,
+    data: Vec<u16>,
 }
 
 impl ElementBuffer {
@@ -158,7 +159,7 @@ impl ElementBuffer {
     fn resize(&mut self, n: usize) {
         self.data.resize(n, 0);
         for i in 0..n {
-            self.data[i] = i as u32;
+            self.data[i] = i as u16;
         }
     }
 }
@@ -318,7 +319,7 @@ impl Mesh for CircleNodes {
         self.elements.data.len() as i32
     }
 
-    fn update(&mut self, layout: &LayoutData) -> Result<(), String> {
+    fn update(&mut self, gl: &WebGl2RenderingContext, layout: &LayoutData) -> Result<(), String> {
         let n =
             layout.enter.vertices.len() + layout.update.vertices.len() + layout.exit.vertices.len();
         self.resize(n);
@@ -333,8 +334,8 @@ impl Mesh for CircleNodes {
                 offset,
                 &node.current,
                 &node.next,
-                node.current.fillColor.alpha as f32,
-                node.next.fillColor.alpha as f32,
+                node.current.fillColor.opacity as f32,
+                node.next.fillColor.opacity as f32,
             )?;
             offset += 1
         }
@@ -342,6 +343,37 @@ impl Mesh for CircleNodes {
             self.set_item(offset, node, node, 1., 0.)?;
             offset += 1;
         }
+
+        gl.bind_buffer(
+            WebGl2RenderingContext::ARRAY_BUFFER,
+            Some(&self.vertices.buffer),
+        );
+        let bytes = unsafe {
+            std::slice::from_raw_parts(
+                self.vertices.data.as_ptr() as *const u8,
+                self.vertices.data.len() * 4,
+            )
+        };
+        gl.buffer_data_with_u8_array(
+            WebGl2RenderingContext::ARRAY_BUFFER,
+            bytes,
+            WebGl2RenderingContext::STATIC_DRAW,
+        );
+        gl.bind_buffer(
+            WebGl2RenderingContext::ELEMENT_ARRAY_BUFFER,
+            Some(&self.elements.buffer),
+        );
+        let bytes = unsafe {
+            std::slice::from_raw_parts(
+                self.elements.data.as_ptr() as *const u8,
+                self.elements.data.len() * 2,
+            )
+        };
+        gl.buffer_data_with_u8_array(
+            WebGl2RenderingContext::ELEMENT_ARRAY_BUFFER,
+            bytes,
+            WebGl2RenderingContext::STATIC_DRAW,
+        );
 
         Ok(())
     }

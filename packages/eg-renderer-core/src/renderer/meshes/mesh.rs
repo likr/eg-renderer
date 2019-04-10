@@ -1,11 +1,11 @@
-use web_sys::{WebGlProgram, WebGlVertexArrayObject};
+use web_sys::{WebGl2RenderingContext, WebGlProgram, WebGlVertexArrayObject};
 
 #[derive(Serialize, Deserialize)]
 pub struct ColorData {
     pub r: f64,
     pub g: f64,
     pub b: f64,
-    pub alpha: f64,
+    pub opacity: f64,
 }
 
 #[allow(non_snake_case)]
@@ -61,5 +61,5 @@ pub trait Mesh {
     fn program(&self) -> &WebGlProgram;
     fn geometry(&self) -> &WebGlVertexArrayObject;
     fn size(&self) -> i32;
-    fn update(&mut self, graph: &LayoutData) -> Result<(), String>;
+    fn update(&mut self, gl: &WebGl2RenderingContext, graph: &LayoutData) -> Result<(), String>;
 }

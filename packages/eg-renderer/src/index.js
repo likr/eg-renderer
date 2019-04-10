@@ -10,8 +10,9 @@ import {
 import {
   zoomIdentity as d3ZoomIdentity
 } from 'd3-zoom'
-import { CanvasRenderer as Renderer } from './renderer/canvas'
-// import {WebGLRenderer} from './renderer/webgl'
+// import { CanvasRenderer as Renderer } from './renderer/canvas'
+// import { WebGLRenderer as Renderer } from './renderer/webgl'
+import { Renderer } from 'eg-renderer-core'
 import {
   centerTransform,
   layoutRect
