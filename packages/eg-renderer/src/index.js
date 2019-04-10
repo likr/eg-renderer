@@ -10,31 +10,18 @@ import {
 import {
   zoomIdentity as d3ZoomIdentity
 } from 'd3-zoom'
+// import {CanvasRenderer} from './renderer/canvas'
+import {WebGLRenderer as Renderer} from './renderer/webgl'
 import {
   centerTransform,
   layoutRect
 } from './centering'
 import {
-  interpolateGroup,
-  interpolateVertex,
-  interpolateEdge,
   diff
 } from './interpolate'
-import {
-  renderGroup,
-  renderGroupLabel,
-  renderEdge,
-  renderEdgeLabel,
-  renderEdgeRegion,
-  renderVertex,
-  renderVertexLabel
-} from './render'
+import {devicePixelRatio} from './device-pixel-ratio'
 import {zoom} from './zoom'
 import {adjustEdge} from './marker-point'
-
-const devicePixelRatio = () => {
-  return window.devicePixelRatio || 1.0
-}
 
 const get = (...args) => {
   let d = args[0]
@@ -58,12 +45,14 @@ const setWidth = (e, width) => {
   const p = privates.get(e)
   p.canvas.width = width * devicePixelRatio()
   p.canvas.style.width = `${width}px`
+  p.renderer.resize(e.width, e.height)
 }
 
 const setHeight = (e, height) => {
   const p = privates.get(e)
   p.canvas.height = height * devicePixelRatio()
   p.canvas.style.height = `${height}px`
+  p.renderer.resize(e.width, e.height)
 }
 
 const getter = (element, attributeName, defaultValue) => {
@@ -71,27 +60,6 @@ const getter = (element, attributeName, defaultValue) => {
     return defaultValue
   }
   return element.getAttribute(attributeName)
-}
-
-const renderObjects = (ctx, r, exit, enter, update, render, interpolate) => {
-  if (r < 1) {
-    ctx.globalAlpha = 1 - r
-    for (const item of exit) {
-      render(ctx, item)
-    }
-  }
-  ctx.globalAlpha = Math.min(1, r)
-  for (const item of enter) {
-    render(ctx, item)
-  }
-  ctx.globalAlpha = 1
-  for (const {current, next} of update) {
-    if (r < 1) {
-      render(ctx, interpolate(current, next, r))
-    } else {
-      render(ctx, next)
-    }
-  }
 }
 
 class EgRendererElement extends window.HTMLElement {
@@ -219,11 +187,13 @@ class EgRendererElement extends window.HTMLElement {
 
   constructor () {
     super()
+    const canvas = document.createElement('canvas')
     const p = {
       invalidate: false,
       invalidatePositions: false,
       originalData: null,
-      canvas: document.createElement('canvas'),
+      canvas,
+      renderer: new Renderer(canvas),
       data: {
         groupIds: [],
         groups: new Map(),
@@ -341,27 +311,10 @@ class EgRendererElement extends window.HTMLElement {
       p.invalidatePositions = false
       const now = new Date()
       const transitionDuration = this.transitionDuration
-      const t = now > p.layoutTime ? (now - p.layoutTime) / transitionDuration : 1 / transitionDuration
+      const t = Math.min(1, now > p.layoutTime ? (now - p.layoutTime) / transitionDuration : 1 / transitionDuration)
       const r = p.ease(t)
-      const ctx = p.canvas.getContext('2d')
-      ctx.save()
-      ctx.clearRect(0, 0, p.canvas.width, p.canvas.height)
-      ctx.scale(devicePixelRatio(), devicePixelRatio())
-      ctx.translate(p.margin, p.margin)
-      ctx.translate(p.transform.x, p.transform.y)
-      ctx.scale(p.transform.k, p.transform.k)
-
-      renderObjects(ctx, r, p.layout.exit.groups, p.layout.enter.groups, p.layout.update.groups, renderGroup, interpolateGroup)
-      renderObjects(ctx, r, p.layout.exit.groups, p.layout.enter.groups, p.layout.update.groups, renderGroupLabel, interpolateGroup)
-      if (this.enableLinkEvents) {
-        renderObjects(ctx, r, p.layout.exit.edges, p.layout.enter.edges, p.layout.update.edges, renderEdgeRegion, interpolateEdge)
-      }
-      renderObjects(ctx, r, p.layout.exit.edges, p.layout.enter.edges, p.layout.update.edges, renderEdge, interpolateEdge)
-      renderObjects(ctx, r, p.layout.exit.edges, p.layout.enter.edges, p.layout.update.edges, renderEdgeLabel, interpolateEdge)
-      renderObjects(ctx, r, p.layout.exit.vertices, p.layout.enter.vertices, p.layout.update.vertices, renderVertex, interpolateVertex)
-      renderObjects(ctx, r, p.layout.exit.vertices, p.layout.enter.vertices, p.layout.update.vertices, renderVertexLabel, interpolateVertex)
-
-      ctx.restore()
+      p.renderer.enableLinkEvents = this.enableLinkEvents
+      p.renderer.render(r)
       window.requestAnimationFrame(render)
     }
     render()
@@ -552,6 +505,7 @@ class EgRendererElement extends window.HTMLElement {
       adjustEdge(edge, du, dv)
     }
     p.layout = diff(p.prevData, p.data)
+    p.renderer.update(p.layout)
     p.layoutTime = new Date()
     if (this.autoCentering) {
       this.center()

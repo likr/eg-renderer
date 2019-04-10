@@ -89,6 +89,7 @@ export const zoom = (element, attrs) => {
           y,
           k
         })
+        attrs.renderer.transform(attrs.transform)
       }
     })
     .on('end', function () {
