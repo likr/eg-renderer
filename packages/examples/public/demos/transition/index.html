@@ -12,7 +12,8 @@ if (!window.customElements) {
 window.customElements.forcePolyfill = true
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/custom-elements/1.0.0/custom-elements.min.js"></script>
-<script async src="../../eg-renderer.js"></script>
+<script async src="/eg-renderer.js"></script>
+<base href="/" />
 </head>
 <body>
 <div>
@@ -27,7 +28,7 @@ window.customElements.forcePolyfill = true
   transition-duration="1000"
   width="600"
   height="400"
-  src="data.json"
+  src="/demos/transition/data.json"
   node-id-property="id"
   node-visibility-property="visibility1"
   link-type-property="type1"
