@@ -118,7 +118,7 @@ const baseFunction = (markerShape, nodeType, linkType) => {
 }
 
 export const adjustEdge = (edge, source, target) => {
-  const {points, sourceMarkerShape, sourceMarkerSize, targetMarkerShape, targetMarkerSize} = edge
+  const { points, sourceMarkerShape, sourceMarkerSize, targetMarkerShape, targetMarkerSize } = edge
   const n = points.length
   const sourceBaseFunction = baseFunction(sourceMarkerShape, source.type, edge.type)
   const [x0, y0] = sourceBaseFunction(source.x, source.y, points[1][0], points[1][1], source.width, source.height, sourceMarkerSize)

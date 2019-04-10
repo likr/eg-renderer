@@ -1,4 +1,4 @@
-import {initShader, initProgram} from './program'
+import { initShader, initProgram } from './program'
 
 const labelShaderProgram = (gl) => {
   const vertexShader = initShader(gl, gl.VERTEX_SHADER, `#version 300 es
@@ -89,7 +89,7 @@ const createLabelObject = (gl, item) => {
   const canvas = createTextImage(item.label, item, scale)
   const texture = createTexture(gl, canvas)
   const obj = labelObject(gl)
-  const {x, y} = item
+  const { x, y } = item
   const width = canvas.width / scale
   const height = canvas.height / scale
   const data = new Float32Array([
@@ -113,7 +113,7 @@ const createLabelObject = (gl, item) => {
 
 export const setLabelData = (gl, layout) => {
   const items = []
-  for (const {next} of layout.update.vertices) {
+  for (const { next } of layout.update.vertices) {
     const item = next
     if (item.label) {
       items.push(createLabelObject(gl, item))

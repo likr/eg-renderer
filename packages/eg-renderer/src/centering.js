@@ -8,10 +8,10 @@ export const layoutRect = (items) => {
     }
   }
   items = Array.from(items.values())
-  const left = Math.min(...items.map(({x, width}) => x - width / 2))
-  const right = Math.max(...items.map(({x, width}) => x + width / 2))
-  const top = Math.min(...items.map(({y, height}) => y - height / 2))
-  const bottom = Math.max(...items.map(({y, height}) => y + height / 2))
+  const left = Math.min(...items.map(({ x, width }) => x - width / 2))
+  const right = Math.max(...items.map(({ x, width }) => x + width / 2))
+  const top = Math.min(...items.map(({ y, height }) => y - height / 2))
+  const bottom = Math.max(...items.map(({ y, height }) => y + height / 2))
   return {
     left: left,
     top: top,
@@ -35,5 +35,5 @@ export const centerTransform = (lWidth, lHeight, left, top, cWidth, cHeight, mar
   const scale = Math.min(hScale, vScale)
   const x = hScale < vScale ? 0 : (aWidth - lWidth * scale) / 2
   const y = vScale < hScale ? 0 : (aHeight - lHeight * scale) / 2
-  return {x, y, k: scale}
+  return { x, y, k: scale }
 }

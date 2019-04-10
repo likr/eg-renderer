@@ -6,7 +6,7 @@ import {
   zoom as d3Zoom,
   zoomIdentity as d3ZoomIdentity
 } from 'd3-zoom'
-import {adjustEdge} from './marker-point'
+import { adjustEdge } from './marker-point'
 
 const dispatchNodeMoveStartEvent = (element, u) => {
   const event = new window.CustomEvent('nodemovestart', {
@@ -17,7 +17,7 @@ const dispatchNodeMoveStartEvent = (element, u) => {
   element.dispatchEvent(event)
 }
 
-const dispatchNodeMoveEvent = (element, {u, x, y}) => {
+const dispatchNodeMoveEvent = (element, { u, x, y }) => {
   const event = new window.CustomEvent('nodemove', {
     detail: {
       id: u,
@@ -49,7 +49,7 @@ export const zoom = (element, attrs) => {
     .on('start', () => {
       if (!element.canZoom || (element.canDragNode && d3Event.sourceEvent && d3Event.sourceEvent.region)) {
         const u = d3Event.sourceEvent ? JSON.parse(d3Event.sourceEvent.region).id : null
-        const {x, y, k} = d3Event.transform
+        const { x, y, k } = d3Event.transform
         pos.region = u
         pos.x0 = x / k
         pos.y0 = y / k
@@ -59,23 +59,23 @@ export const zoom = (element, attrs) => {
       }
     })
     .on('zoom', () => {
-      const {x, y, k} = d3Event.transform
+      const { x, y, k } = d3Event.transform
       if (element.canDragNode && pos.region) {
         const u = pos.region
         const dx = x / k - pos.x0
         const dy = y / k - pos.y0
-        const {data} = attrs
+        const { data } = attrs
         const vertex = data.vertices.get(u)
         vertex.x += dx
         vertex.y += dy
         for (const edge of vertex.outEdges) {
-          const {points} = edge
+          const { points } = edge
           points[0][0] += dx
           points[0][1] += dy
           adjustEdge(edge, vertex, data.vertices.get(edge.v))
         }
         for (const edge of vertex.inEdges) {
-          const {points} = edge
+          const { points } = edge
           points[points.length - 1][0] += dx
           points[points.length - 1][1] += dy
           adjustEdge(edge, data.vertices.get(edge.u), vertex)

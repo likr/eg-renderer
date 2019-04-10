@@ -1,5 +1,5 @@
-import {devicePixelRatio} from '../../device-pixel-ratio'
-import {initShader, initProgram} from './program'
+import { devicePixelRatio } from '../../device-pixel-ratio'
+import { initShader, initProgram } from './program'
 
 const vertexShaderProgram = (gl) => {
   const vertexShader = initShader(gl, gl.VERTEX_SHADER, `#version 300 es
@@ -64,7 +64,7 @@ export const setVertexData = (gl, layout) => {
   }
   offset += layout.enter.vertices.length
   for (let i = 0; i < layout.update.vertices.length; ++i) {
-    const {current, next} = layout.update.vertices[i]
+    const { current, next } = layout.update.vertices[i]
     setData(data, offset + i, current, next, current.fillColor.opacity, next.fillColor.opacity)
   }
   offset += layout.update.vertices.length

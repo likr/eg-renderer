@@ -120,7 +120,7 @@ export const renderVertex = (ctx, args) => {
       }
     })
     if (ctx.addHitRegion) {
-      ctx.addHitRegion({id: JSON.stringify({id: u})})
+      ctx.addHitRegion({ id: JSON.stringify({ id: u }) })
     }
   })
 }
@@ -201,7 +201,7 @@ export const renderEdgeRegion = (ctx, args) => {
     ctx.closePath()
     ctx.stroke()
     if (ctx.addHitRegion) {
-      ctx.addHitRegion({id: JSON.stringify({source: u, target: v})})
+      ctx.addHitRegion({ id: JSON.stringify({ source: u, target: v }) })
     }
   })
 }

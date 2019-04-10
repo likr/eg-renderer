@@ -1,7 +1,7 @@
-import {devicePixelRatio} from '../../device-pixel-ratio'
-import {setVertexData} from './vertex'
-import {setEdgeData} from './edge'
-import {setLabelData} from './label'
+import { devicePixelRatio } from '../../device-pixel-ratio'
+import { setVertexData } from './vertex'
+import { setEdgeData } from './edge'
+import { setLabelData } from './label'
 import {
   identity,
   translate,
@@ -30,7 +30,7 @@ const init = (gl, canvas) => {
 }
 
 const draw = (gl, context, r) => {
-  const {mvMatrix, pMatrix} = context
+  const { mvMatrix, pMatrix } = context
   gl.clear(gl.COLOR_BUFFER_BIT)
 
   for (const name in context.objects) {
@@ -72,7 +72,7 @@ export class WebGLRenderer {
   }
 
   transform (transform) {
-    const {x, y, k} = transform
+    const { x, y, k } = transform
     const mMatrix = matmul(scale(k, k), matmul(translate(x, y), translate(margin, margin)))
     this.context.mvMatrix = matmul(viewingMatrix([0, 0, 1], [0, 1, 0], [0, 0, 0]), mMatrix)
   }

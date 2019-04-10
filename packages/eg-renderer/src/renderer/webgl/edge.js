@@ -1,4 +1,4 @@
-import {initShader, initProgram} from './program'
+import { initShader, initProgram } from './program'
 
 const edgeShaderProgram = (gl) => {
   const vertexShader = initShader(gl, gl.VERTEX_SHADER, `#version 300 es
@@ -158,7 +158,7 @@ export const setEdgeData = (gl, layout) => {
   createEdgeObject(gl, layout.exit.edges, items, (item) => item.points.length, (item, data, elements, dataOffset, elementOffset) => {
     setData(data, elements, dataOffset, elementOffset, item, item, item.strokeColor.opacity, 0)
   })
-  createEdgeObject(gl, layout.update.edges, items, ({next}) => next.points.length, ({current, next}, data, elements, dataOffset, elementOffset) => {
+  createEdgeObject(gl, layout.update.edges, items, ({ next }) => next.points.length, ({ current, next }, data, elements, dataOffset, elementOffset) => {
     setData(data, elements, dataOffset, elementOffset, current, next, current.strokeColor.opacity, next.strokeColor.opacity)
   })
   createEdgeObject(gl, layout.enter.edges, items, (item) => item.points.length, (item, data, elements, dataOffset, elementOffset) => {

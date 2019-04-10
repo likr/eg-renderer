@@ -10,7 +10,7 @@ import {
 import {
   zoomIdentity as d3ZoomIdentity
 } from 'd3-zoom'
-import {CanvasRenderer as Renderer} from './renderer/canvas'
+import { CanvasRenderer as Renderer } from './renderer/canvas'
 // import {WebGLRenderer} from './renderer/webgl'
 import {
   centerTransform,
@@ -19,9 +19,9 @@ import {
 import {
   diff
 } from './interpolate'
-import {devicePixelRatio} from './device-pixel-ratio'
-import {zoom} from './zoom'
-import {adjustEdge} from './marker-point'
+import { devicePixelRatio } from './device-pixel-ratio'
+import { zoom } from './zoom'
+import { adjustEdge } from './marker-point'
 
 const get = (...args) => {
   let d = args[0]
@@ -241,14 +241,14 @@ class EgRendererElement extends window.HTMLElement {
         const obj = JSON.parse(event.region)
         if (p.currentRegion == null) {
           if (obj.id) {
-            const {id} = obj
+            const { id } = obj
             this.dispatchEvent(new window.CustomEvent('nodemouseenter', {
-              detail: {id}
+              detail: { id }
             }))
           } else if (obj.source && obj.target) {
-            const {source, target} = obj
+            const { source, target } = obj
             this.dispatchEvent(new window.CustomEvent('linkmouseenter', {
-              detail: {source, target}
+              detail: { source, target }
             }))
           }
         }
@@ -257,14 +257,14 @@ class EgRendererElement extends window.HTMLElement {
         if (p.currentRegion) {
           const obj = p.currentRegion
           if (obj.id) {
-            const {id} = obj
+            const { id } = obj
             this.dispatchEvent(new window.CustomEvent('nodemouseleave', {
-              detail: {id}
+              detail: { id }
             }))
           } else if (obj.source && obj.target) {
-            const {source, target} = obj
+            const { source, target } = obj
             this.dispatchEvent(new window.CustomEvent('linkmouseleave', {
-              detail: {source, target}
+              detail: { source, target }
             }))
           }
         }
@@ -286,14 +286,14 @@ class EgRendererElement extends window.HTMLElement {
       if (event.region) {
         const obj = JSON.parse(event.region)
         if (obj.id) {
-          const {id} = obj
+          const { id } = obj
           this.dispatchEvent(new window.CustomEvent('nodeclick', {
-            detail: {id}
+            detail: { id }
           }))
         } else if (obj.source && obj.target) {
-          const {source, target} = obj
+          const { source, target } = obj
           this.dispatchEvent(new window.CustomEvent('linkclick', {
-            detail: {source, target}
+            detail: { source, target }
           }))
         }
       }
@@ -327,7 +327,7 @@ class EgRendererElement extends window.HTMLElement {
         window.fetch(newValue)
           .then((response) => response.json())
           .then((data) => {
-            this.dispatchEvent(new window.CustomEvent('datafetchend', {detail: data}))
+            this.dispatchEvent(new window.CustomEvent('datafetchend', { detail: data }))
             this.load(data)
           })
         break
@@ -343,23 +343,23 @@ class EgRendererElement extends window.HTMLElement {
   }
 
   center () {
-    const {canvas, data, margin, zoom} = privates.get(this)
+    const { canvas, data, margin, zoom } = privates.get(this)
     const items = [].concat(Array.from(data.vertices.values()), Array.from(data.groups.values()))
-    const {layoutWidth, layoutHeight, left, top} = layoutRect(items)
+    const { layoutWidth, layoutHeight, left, top } = layoutRect(items)
     const canvasWidth = canvas.width / devicePixelRatio()
     const canvasHeight = canvas.height / devicePixelRatio()
-    const {x, y, k} = centerTransform(layoutWidth, layoutHeight, left, top, canvasWidth, canvasHeight, margin)
+    const { x, y, k } = centerTransform(layoutWidth, layoutHeight, left, top, canvasWidth, canvasHeight, margin)
     zoom.transform(d3Select(canvas), d3ZoomIdentity.translate(x, y).scale(k).translate(-left, -top))
     return this
   }
 
   focus (x, y) {
-    const {canvas, data, margin, zoom} = privates.get(this)
+    const { canvas, data, margin, zoom } = privates.get(this)
     const items = [].concat(Array.from(data.vertices.values()), Array.from(data.groups.values()))
-    const {layoutWidth, layoutHeight, left, top} = layoutRect(items)
+    const { layoutWidth, layoutHeight, left, top } = layoutRect(items)
     const canvasWidth = canvas.width / devicePixelRatio()
     const canvasHeight = canvas.height / devicePixelRatio()
-    const {k} = centerTransform(layoutWidth, layoutHeight, left, top, canvasWidth, canvasHeight, margin)
+    const { k } = centerTransform(layoutWidth, layoutHeight, left, top, canvasWidth, canvasHeight, margin)
     zoom.transform(d3Select(canvas), d3ZoomIdentity.translate(x, y).scale(k).translate(-left, -top))
     return this
   }
@@ -437,7 +437,7 @@ class EgRendererElement extends window.HTMLElement {
           d: node
         }
       })
-    const indices = new Map(vertices.map(({u}, i) => [u, i]))
+    const indices = new Map(vertices.map(({ u }, i) => [u, i]))
     const edges = Array.from(get(data, this.graphLinksProperty))
       .filter((link) => get(link, this.linkVisibilityProperty, this.defaultLinkVisibility))
       .filter((link) => {
@@ -488,11 +488,11 @@ class EgRendererElement extends window.HTMLElement {
         return edge
       })
     p.data = {
-      groupIds: groups.map(({g}) => g),
+      groupIds: groups.map(({ g }) => g),
       groups: new Map(groups.map((group) => [group.g, group])),
-      vertexIds: vertices.map(({u}) => u),
+      vertexIds: vertices.map(({ u }) => u),
       vertices: new Map(vertices.map((vertex) => [vertex.u, vertex])),
-      edgeIds: edges.map(({u, v}) => [u, v]),
+      edgeIds: edges.map(({ u, v }) => [u, v]),
       edges: new Map(vertices.map((vertex) => [vertex.u, new Map()]))
     }
     for (const edge of edges) {
@@ -512,7 +512,7 @@ class EgRendererElement extends window.HTMLElement {
       this.center()
     }
     this.dispatchEvent(new window.CustomEvent('updateend', {
-      detail: {preservePositions}
+      detail: { preservePositions }
     }))
     return this
   }

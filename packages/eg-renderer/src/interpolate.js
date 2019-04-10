@@ -155,5 +155,5 @@ export const diff = (current, next) => {
       })
       .map(([u, v]) => current.edges.get(u).get(v))
   }
-  return {update, enter, exit}
+  return { update, enter, exit }
 }

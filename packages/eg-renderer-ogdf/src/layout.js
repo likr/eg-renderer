@@ -47,7 +47,7 @@ export const layout = (element, graphData) => {
   const nodes = new NodeList()
   graph.allNodes(nodes)
   for (const u of graphData.vertexIds) {
-    const {width, height} = graphData.vertices.get(u)
+    const { width, height } = graphData.vertices.get(u)
     const node = indexToNode.get(u)
     attributes.setWidth(node, width)
     attributes.setHeight(node, height)
