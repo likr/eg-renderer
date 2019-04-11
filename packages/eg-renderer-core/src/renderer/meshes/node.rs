@@ -2,9 +2,14 @@ use super::program::{init_fragment_shader, init_program, init_vertex_shader};
 use super::{LayoutData, Mesh, VertexData};
 use web_sys::{WebGl2RenderingContext, WebGlBuffer, WebGlProgram, WebGlVertexArrayObject};
 
-const CIRCLE_NODE_ATTRIBUTES: usize = 32;
+pub enum NodeType {
+    Circle,
+    Rectangle,
+}
 
-const CIRCLE_NODE_VERTEX_SHADER_SOURCE: &str = r#"#version 300 es
+const NODE_ATTRIBUTES: usize = 32;
+
+const NODE_VERTEX_SHADER_SOURCE: &str = r#"#version 300 es
 layout(location = 0) in float aAlpha0;
 layout(location = 1) in float aAlpha1;
 layout(location = 2) in vec2 aPosition0;
@@ -30,17 +35,17 @@ out vec4 vStrokeColor;
 out float vStrokeWidth;
 
 void main() {
-  float alpha = r * aAlpha1 + (1.0 - r) * aAlpha0;
-  vPosition = r * aPosition1 + (1.0 - r) * aPosition0;
-  vec4 mvPosition = uMVMatrix * vec4(vPosition, 1.0, 1.0);
-  gl_Position = uPMatrix * mvPosition;
-  vColor = r * aColor1 + (1.0 - r) * aColor0;
-  vColor.a *= alpha;
-  vCenterPosition = r * aCenterPosition1 + (1.0 - r) * aCenterPosition0;
-  vSize = r * aSize1 + (1.0 - r) * aSize0;
-  vStrokeColor = r * aStrokeColor1 + (1.0 - r) * aStrokeColor0;
-  vStrokeColor.a *= alpha;
-  vStrokeWidth = r * aStrokeWidth1 + (1.0 - r) * aStrokeWidth0;
+    float alpha = r * aAlpha1 + (1.0 - r) * aAlpha0;
+    vPosition = r * aPosition1 + (1.0 - r) * aPosition0;
+    vec4 mvPosition = uMVMatrix * vec4(vPosition, 1.0, 1.0);
+    gl_Position = uPMatrix * mvPosition;
+    vColor = r * aColor1 + (1.0 - r) * aColor0;
+    vColor.a *= alpha;
+    vCenterPosition = r * aCenterPosition1 + (1.0 - r) * aCenterPosition0;
+    vSize = r * aSize1 + (1.0 - r) * aSize0;
+    vStrokeColor = r * aStrokeColor1 + (1.0 - r) * aStrokeColor0;
+    vStrokeColor.a *= alpha;
+    vStrokeWidth = r * aStrokeWidth1 + (1.0 - r) * aStrokeWidth0;
 }
 "#;
 
@@ -54,22 +59,49 @@ in vec4 vStrokeColor;
 in float vStrokeWidth;
 out vec4 oFragColor;
 void main() {
-  vec2 v1 = 2.0 * (vPosition - vCenterPosition) / (vSize + vStrokeWidth);
-  if (dot(v1, v1) > 1.0) {
-    discard;
-  }
-  vec2 v2 = 2.0 * (vPosition - vCenterPosition) / (vSize - vStrokeWidth);
-  if (dot(v2, v2) > 1.0) {
-    oFragColor = vStrokeColor;
-  } else {
-    oFragColor = vColor;
-  }
+    vec2 v1 = 2.0 * (vPosition - vCenterPosition) / (vSize + vStrokeWidth);
+    if (dot(v1, v1) > 1.0) {
+        discard;
+    }
+    vec2 v2 = 2.0 * (vPosition - vCenterPosition) / (vSize - vStrokeWidth);
+    if (dot(v2, v2) > 1.0) {
+        oFragColor = vStrokeColor;
+    } else {
+        oFragColor = vColor;
+    }
 }
 "#;
 
-fn create_node_shader_program(gl: &WebGl2RenderingContext) -> Result<WebGlProgram, String> {
-    let vertex_shader = init_vertex_shader(gl, CIRCLE_NODE_VERTEX_SHADER_SOURCE)?;
-    let fragment_shader = init_fragment_shader(gl, CIRCLE_NODE_FRAGMENT_SHADER_SOURCE)?;
+const RECTANGLE_NODE_FRAGMENT_SHADER_SOURCE: &str = r#"#version 300 es
+precision mediump float;
+in vec2 vPosition;
+in vec4 vColor;
+in vec2 vCenterPosition;
+in vec2 vSize;
+in vec4 vStrokeColor;
+in float vStrokeWidth;
+out vec4 oFragColor;
+void main() {
+    vec2 v = abs(vPosition - vCenterPosition) - (vSize - vStrokeWidth) / 2.0;
+    if (v.x > 0.0 || v.y > 0.0) {
+        oFragColor = vStrokeColor;
+    } else {
+        oFragColor = vColor;
+    }
+}
+"#;
+
+fn create_node_shader_program(
+    gl: &WebGl2RenderingContext,
+    node_type: &NodeType,
+) -> Result<WebGlProgram, String> {
+    let vertex_shader = init_vertex_shader(gl, NODE_VERTEX_SHADER_SOURCE)?;
+    let fragment_shader_source = if let NodeType::Circle = node_type {
+        CIRCLE_NODE_FRAGMENT_SHADER_SOURCE
+    } else {
+        RECTANGLE_NODE_FRAGMENT_SHADER_SOURCE
+    };
+    let fragment_shader = init_fragment_shader(gl, fragment_shader_source)?;
     init_program(gl, vertex_shader, fragment_shader)
 }
 
@@ -246,7 +278,7 @@ impl VertexBuffer {
     }
 
     fn resize(&mut self, n: usize) {
-        self.data.resize(4 * CIRCLE_NODE_ATTRIBUTES * n, 0.);
+        self.data.resize(4 * NODE_ATTRIBUTES * n, 0.);
     }
 }
 
@@ -277,24 +309,30 @@ impl ElementBuffer {
     }
 }
 
-pub struct CircleNodes {
+pub struct NodeMesh {
     program: WebGlProgram,
     vertices: VertexBuffer,
     elements: ElementBuffer,
     geometry: WebGlVertexArrayObject,
+    node_type: NodeType,
 }
 
-impl CircleNodes {
-    pub fn new(gl: &WebGl2RenderingContext, n: usize) -> Result<CircleNodes, String> {
+impl NodeMesh {
+    pub fn new(
+        gl: &WebGl2RenderingContext,
+        n: usize,
+        node_type: NodeType,
+    ) -> Result<NodeMesh, String> {
         let vertices = VertexBuffer::new(gl, n)?;
         let elements = ElementBuffer::new(gl, n)?;
-        let program = create_node_shader_program(gl)?;
+        let program = create_node_shader_program(gl, &node_type)?;
         let geometry = init_vertex_array(gl, &program, &vertices.buffer, &elements.buffer)?;
-        Ok(CircleNodes {
+        Ok(NodeMesh {
             vertices,
             elements,
             program,
             geometry,
+            node_type,
         })
     }
 
@@ -307,7 +345,7 @@ impl CircleNodes {
         let e = self
             .vertices
             .data
-            .get_mut(CIRCLE_NODE_ATTRIBUTES * index + offset)
+            .get_mut(NODE_ATTRIBUTES * index + offset)
             .ok_or(format!("Index out of bounds: {}", index))?;
         *e = value;
         Ok(())
@@ -450,28 +488,28 @@ impl CircleNodes {
         a1: f32,
     ) -> Result<(), String> {
         let current_x = [
-            current.x - (current.width + current.strokeWidth) / 2.,
-            current.x + (current.width + current.strokeWidth) / 2.,
-            current.x - (current.width + current.strokeWidth) / 2.,
-            current.x + (current.width + current.strokeWidth) / 2.,
+            current.x - (current.width + current.stroke_width) / 2.,
+            current.x + (current.width + current.stroke_width) / 2.,
+            current.x - (current.width + current.stroke_width) / 2.,
+            current.x + (current.width + current.stroke_width) / 2.,
         ];
         let current_y = [
-            current.y - (current.height + current.strokeWidth) / 2.,
-            current.y - (current.height + current.strokeWidth) / 2.,
-            current.y + (current.height + current.strokeWidth) / 2.,
-            current.y + (current.height + current.strokeWidth) / 2.,
+            current.y - (current.height + current.stroke_width) / 2.,
+            current.y - (current.height + current.stroke_width) / 2.,
+            current.y + (current.height + current.stroke_width) / 2.,
+            current.y + (current.height + current.stroke_width) / 2.,
         ];
         let next_x = [
-            next.x - (next.width + next.strokeWidth) / 2.,
-            next.x + (next.width + next.strokeWidth) / 2.,
-            next.x - (next.width + next.strokeWidth) / 2.,
-            next.x + (next.width + next.strokeWidth) / 2.,
+            next.x - (next.width + next.stroke_width) / 2.,
+            next.x + (next.width + next.stroke_width) / 2.,
+            next.x - (next.width + next.stroke_width) / 2.,
+            next.x + (next.width + next.stroke_width) / 2.,
         ];
         let next_y = [
-            next.y - (next.height + next.strokeWidth) / 2.,
-            next.y - (next.height + next.strokeWidth) / 2.,
-            next.y + (next.height + next.strokeWidth) / 2.,
-            next.y + (next.height + next.strokeWidth) / 2.,
+            next.y - (next.height + next.stroke_width) / 2.,
+            next.y - (next.height + next.stroke_width) / 2.,
+            next.y + (next.height + next.stroke_width) / 2.,
+            next.y + (next.height + next.stroke_width) / 2.,
         ];
         for i in 0..4 {
             self.set_current_alpha(index * 4 + i, a0)?;
@@ -480,14 +518,14 @@ impl CircleNodes {
             self.set_current_y(index * 4 + i, current_y[i] as f32)?;
             self.set_next_x(index * 4 + i, next_x[i] as f32)?;
             self.set_next_y(index * 4 + i, next_y[i] as f32)?;
-            self.set_current_fill_r(index * 4 + i, (current.fillColor.r / 255.) as f32)?;
-            self.set_current_fill_g(index * 4 + i, (current.fillColor.g / 255.) as f32)?;
-            self.set_current_fill_b(index * 4 + i, (current.fillColor.b / 255.) as f32)?;
-            self.set_current_fill_alpha(index * 4 + i, current.fillColor.opacity as f32)?;
-            self.set_next_fill_r(index * 4 + i, (next.fillColor.r / 255.) as f32)?;
-            self.set_next_fill_g(index * 4 + i, (next.fillColor.g / 255.) as f32)?;
-            self.set_next_fill_b(index * 4 + i, (next.fillColor.b / 255.) as f32)?;
-            self.set_next_fill_alpha(index * 4 + i, next.fillColor.opacity as f32)?;
+            self.set_current_fill_r(index * 4 + i, (current.fill_color.r / 255.) as f32)?;
+            self.set_current_fill_g(index * 4 + i, (current.fill_color.g / 255.) as f32)?;
+            self.set_current_fill_b(index * 4 + i, (current.fill_color.b / 255.) as f32)?;
+            self.set_current_fill_alpha(index * 4 + i, current.fill_color.opacity as f32)?;
+            self.set_next_fill_r(index * 4 + i, (next.fill_color.r / 255.) as f32)?;
+            self.set_next_fill_g(index * 4 + i, (next.fill_color.g / 255.) as f32)?;
+            self.set_next_fill_b(index * 4 + i, (next.fill_color.b / 255.) as f32)?;
+            self.set_next_fill_alpha(index * 4 + i, next.fill_color.opacity as f32)?;
             self.set_current_center_x(index * 4 + i, current.x as f32)?;
             self.set_current_center_y(index * 4 + i, current.y as f32)?;
             self.set_next_center_x(index * 4 + i, next.x as f32)?;
@@ -496,22 +534,29 @@ impl CircleNodes {
             self.set_current_height(index * 4 + i, current.height as f32)?;
             self.set_next_width(index * 4 + i, next.width as f32)?;
             self.set_next_height(index * 4 + i, next.height as f32)?;
-            self.set_current_stroke_r(index * 4 + i, (current.strokeColor.r / 255.) as f32)?;
-            self.set_current_stroke_g(index * 4 + i, (current.strokeColor.g / 255.) as f32)?;
-            self.set_current_stroke_b(index * 4 + i, (current.strokeColor.b / 255.) as f32)?;
-            self.set_current_stroke_alpha(index * 4 + i, current.strokeColor.opacity as f32)?;
-            self.set_next_stroke_r(index * 4 + i, (next.strokeColor.r / 255.) as f32)?;
-            self.set_next_stroke_g(index * 4 + i, (next.strokeColor.g / 255.) as f32)?;
-            self.set_next_stroke_b(index * 4 + i, (next.strokeColor.b / 255.) as f32)?;
-            self.set_next_stroke_alpha(index * 4 + i, next.strokeColor.opacity as f32)?;
-            self.set_current_stroke_width(index * 4 + i, current.strokeWidth as f32)?;
-            self.set_next_stroke_width(index * 4 + i, next.strokeWidth as f32)?;
+            self.set_current_stroke_r(index * 4 + i, (current.stroke_color.r / 255.) as f32)?;
+            self.set_current_stroke_g(index * 4 + i, (current.stroke_color.g / 255.) as f32)?;
+            self.set_current_stroke_b(index * 4 + i, (current.stroke_color.b / 255.) as f32)?;
+            self.set_current_stroke_alpha(index * 4 + i, current.stroke_color.opacity as f32)?;
+            self.set_next_stroke_r(index * 4 + i, (next.stroke_color.r / 255.) as f32)?;
+            self.set_next_stroke_g(index * 4 + i, (next.stroke_color.g / 255.) as f32)?;
+            self.set_next_stroke_b(index * 4 + i, (next.stroke_color.b / 255.) as f32)?;
+            self.set_next_stroke_alpha(index * 4 + i, next.stroke_color.opacity as f32)?;
+            self.set_current_stroke_width(index * 4 + i, current.stroke_width as f32)?;
+            self.set_next_stroke_width(index * 4 + i, next.stroke_width as f32)?;
         }
         Ok(())
     }
+
+    fn is_same_node_type(&self, s: &String) -> bool {
+        match self.node_type {
+            NodeType::Circle => s == "circle",
+            NodeType::Rectangle => s == "rect",
+        }
+    }
 }
 
-impl Mesh for CircleNodes {
+impl Mesh for NodeMesh {
     fn mode(&self) -> u32 {
         WebGl2RenderingContext::TRIANGLES
     }
@@ -529,22 +574,42 @@ impl Mesh for CircleNodes {
     }
 
     fn update(&mut self, gl: &WebGl2RenderingContext, layout: &LayoutData) -> Result<(), String> {
-        let n =
-            layout.enter.vertices.len() + layout.update.vertices.len() + layout.exit.vertices.len();
+        let mut n = 0;
+        for node in &layout.enter.vertices {
+            if self.is_same_node_type(&node.shape) {
+                n += 1;
+            }
+        }
+        for node in &layout.update.vertices {
+            if self.is_same_node_type(&node.next.shape) {
+                n += 1;
+            }
+        }
+        for node in &layout.exit.vertices {
+            if self.is_same_node_type(&node.shape) {
+                n += 1;
+            }
+        }
         self.resize(n);
 
         let mut offset = 0;
         for node in &layout.enter.vertices {
-            self.set_item(offset, node, node, 0., 1.)?;
-            offset += 1;
+            if self.is_same_node_type(&node.shape) {
+                self.set_item(offset, node, node, 0., 1.)?;
+                offset += 1;
+            }
         }
         for node in &layout.update.vertices {
-            self.set_item(offset, &node.current, &node.next, 1., 1.)?;
-            offset += 1
+            if self.is_same_node_type(&node.next.shape) {
+                self.set_item(offset, &node.current, &node.next, 1., 1.)?;
+                offset += 1
+            }
         }
         for node in &layout.exit.vertices {
-            self.set_item(offset, node, node, 1., 0.)?;
-            offset += 1;
+            if self.is_same_node_type(&node.shape) {
+                self.set_item(offset, node, node, 1., 0.)?;
+                offset += 1;
+            }
         }
 
         gl.bind_buffer(

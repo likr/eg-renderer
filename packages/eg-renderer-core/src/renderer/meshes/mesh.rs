@@ -10,22 +10,24 @@ pub struct ColorData {
 
 #[allow(non_snake_case)]
 #[derive(Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct VertexData {
     pub u: String,
     pub x: f64,
     pub y: f64,
     pub width: f64,
     pub height: f64,
-    // pub type: String,
-    pub fillColor: ColorData,
-    pub strokeColor: ColorData,
-    pub strokeWidth: f64,
+    #[serde(rename = "type")]
+    pub shape: String,
+    pub fill_color: ColorData,
+    pub stroke_color: ColorData,
+    pub stroke_width: f64,
     pub label: String,
-    pub labelFillColor: ColorData,
-    pub labelStrokeColor: ColorData,
-    pub labelStrokeWidth: f64,
-    pub labelFontSize: f64,
-    pub labelFontFamily: String,
+    pub label_fill_color: ColorData,
+    pub label_stroke_color: ColorData,
+    pub label_stroke_width: f64,
+    pub label_font_size: f64,
+    pub label_font_family: String,
 }
 
 #[derive(Serialize, Deserialize)]
