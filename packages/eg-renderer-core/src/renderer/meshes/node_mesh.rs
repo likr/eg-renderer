@@ -284,7 +284,7 @@ impl VertexBuffer {
 
 struct ElementBuffer {
     buffer: WebGlBuffer,
-    data: Vec<u16>,
+    data: Vec<u32>,
 }
 
 impl ElementBuffer {
@@ -299,12 +299,12 @@ impl ElementBuffer {
     fn resize(&mut self, n: usize) {
         self.data.resize(6 * n, 0);
         for i in 0..n {
-            self.data[6 * i] = (4 * i) as u16;
-            self.data[6 * i + 1] = (4 * i + 1) as u16;
-            self.data[6 * i + 2] = (4 * i + 2) as u16;
-            self.data[6 * i + 3] = (4 * i + 1) as u16;
-            self.data[6 * i + 4] = (4 * i + 2) as u16;
-            self.data[6 * i + 5] = (4 * i + 3) as u16;
+            self.data[6 * i] = (4 * i) as u32;
+            self.data[6 * i + 1] = (4 * i + 1) as u32;
+            self.data[6 * i + 2] = (4 * i + 2) as u32;
+            self.data[6 * i + 3] = (4 * i + 1) as u32;
+            self.data[6 * i + 4] = (4 * i + 2) as u32;
+            self.data[6 * i + 5] = (4 * i + 3) as u32;
         }
     }
 }
@@ -619,7 +619,7 @@ impl Mesh for NodeMesh {
         let bytes = unsafe {
             std::slice::from_raw_parts(
                 self.vertices.data.as_ptr() as *const u8,
-                self.vertices.data.len() * 4,
+                self.vertices.data.len() * std::mem::size_of::<f32>(),
             )
         };
         gl.buffer_data_with_u8_array(
@@ -634,7 +634,7 @@ impl Mesh for NodeMesh {
         let bytes = unsafe {
             std::slice::from_raw_parts(
                 self.elements.data.as_ptr() as *const u8,
-                self.elements.data.len() * 2,
+                self.elements.data.len() * std::mem::size_of::<u32>(),
             )
         };
         gl.buffer_data_with_u8_array(

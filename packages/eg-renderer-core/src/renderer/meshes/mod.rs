@@ -1,6 +1,8 @@
+mod link_mesh;
 mod mesh;
-mod node;
+mod node_mesh;
 mod program;
 
+pub use link_mesh::*;
 pub use mesh::*;
-pub use node::{NodeMesh, NodeType};
+pub use node_mesh::*;

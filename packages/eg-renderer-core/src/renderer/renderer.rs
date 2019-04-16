@@ -1,4 +1,4 @@
-use super::meshes::{LayoutData, Mesh, NodeMesh, NodeType};
+use super::meshes::{LayoutData, LinkMesh, LinkType, Mesh, NodeMesh, NodeType};
 use cgmatrix::{identity, matmul, orthogonal_matrix, scale, translate, viewing_matrix, Matrix44};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
@@ -19,12 +19,17 @@ struct Context {
 
 impl Context {
     fn new(gl: &WebGl2RenderingContext) -> Result<Context, String> {
+        let line_links = LinkMesh::new(gl, LinkType::Line)?;
         let circle_nodes = NodeMesh::new(gl, 0, NodeType::Circle)?;
         let rectangle_nodes = NodeMesh::new(gl, 0, NodeType::Rectangle)?;
         Ok(Context {
             mv_matrix: translate(0., 0., 0.),
             p_matrix: identity(),
-            objects: vec![Box::new(circle_nodes), Box::new(rectangle_nodes)],
+            objects: vec![
+                Box::new(line_links),
+                Box::new(circle_nodes),
+                Box::new(rectangle_nodes),
+            ],
         })
     }
 }
@@ -80,7 +85,7 @@ impl Renderer {
             gl.draw_elements_with_i32(
                 object.mode(),
                 object.size(),
-                WebGl2RenderingContext::UNSIGNED_SHORT,
+                WebGl2RenderingContext::UNSIGNED_INT,
                 0,
             );
             gl.bind_vertex_array(None);

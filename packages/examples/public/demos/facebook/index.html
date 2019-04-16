@@ -12,8 +12,8 @@ if (!window.customElements) {
 window.customElements.forcePolyfill = true
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/custom-elements/1.0.0/custom-elements.min.js"></script>
-<script src="../../eg-renderer.js"></script>
-<script src="../../eg-renderer-ogdf.js"></script>
+<script async src="/eg-renderer.js"></script>
+<script async src="/eg-renderer-ogdf.js"></script>
 <style>
 eg-renderer-ogdf {
   display: block;
@@ -22,6 +22,7 @@ eg-renderer-ogdf {
   height: 600px;
 }
 </style>
+<base href="/" />
 </head>
 <body>
 <div>
@@ -42,7 +43,7 @@ eg-renderer-ogdf {
   default-link-stroke-color="#999"
   default-link-stroke-width="0.1"
   default-link-stroke-opacity="0.3"
-  src="facebook.json">
+  src="/demos/facebook/facebook.json">
 </eg-renderer-ogdf>
 </div>
 <h2>Code</h2>
