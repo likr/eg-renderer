@@ -1,5 +1,6 @@
 use super::meshes::{LayoutData, LinkMesh, LinkType, Mesh, NodeMesh, NodeType};
 use cgmatrix::{identity, matmul, orthogonal_matrix, scale, translate, viewing_matrix, Matrix44};
+use std::collections::HashMap;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::{window, HtmlCanvasElement, WebGl2RenderingContext};
@@ -12,6 +13,8 @@ pub struct Transform {
 }
 
 struct Context {
+    width: i32,
+    height: i32,
     mv_matrix: Matrix44,
     p_matrix: Matrix44,
     objects: Vec<Box<Mesh>>,
@@ -23,6 +26,8 @@ impl Context {
         let circle_nodes = NodeMesh::new(gl, 0, NodeType::Circle)?;
         let rectangle_nodes = NodeMesh::new(gl, 0, NodeType::Rectangle)?;
         Ok(Context {
+            width: 0,
+            height: 0,
             mv_matrix: translate(0., 0., 0.),
             p_matrix: identity(),
             objects: vec![
@@ -44,8 +49,11 @@ pub struct Renderer {
 impl Renderer {
     #[wasm_bindgen(constructor)]
     pub fn new(canvas: HtmlCanvasElement) -> Result<Renderer, JsValue> {
+        let mut options = HashMap::new();
+        options.insert("antialias", false);
+        let options = JsValue::from_serde(&options).unwrap();
         let gl = canvas
-            .get_context("webgl2")?
+            .get_context_with_context_options("webgl2", &options)?
             .unwrap()
             .dyn_into::<WebGl2RenderingContext>()?;
 
@@ -81,6 +89,13 @@ impl Renderer {
                 .get_uniform_location(program, "r")
                 .ok_or("failed to get uniform location of r")?;
             gl.uniform1f(Some(&r_location), r);
+            if let Some(resolution_location) = gl.get_uniform_location(program, "uResolution") {
+                gl.uniform2f(
+                    Some(&resolution_location),
+                    self.context.width as f32,
+                    self.context.height as f32,
+                );
+            }
             gl.bind_vertex_array(Some(object.geometry()));
             gl.draw_elements_with_i32(
                 object.mode(),
@@ -116,12 +131,10 @@ impl Renderer {
 
     pub fn resize(&mut self, width: f32, height: f32) -> Result<(), JsValue> {
         let device_pixel_ratio = window().ok_or("failed to get window")?.device_pixel_ratio();
-        self.gl.viewport(
-            0,
-            0,
-            (width * device_pixel_ratio as f32) as i32,
-            (height * device_pixel_ratio as f32) as i32,
-        );
+        self.context.width = (width * device_pixel_ratio as f32) as i32;
+        self.context.height = (height * device_pixel_ratio as f32) as i32;
+        self.gl
+            .viewport(0, 0, self.context.width, self.context.height);
         let left = 0.;
         let right = width - 1.;
         let top = 0.;

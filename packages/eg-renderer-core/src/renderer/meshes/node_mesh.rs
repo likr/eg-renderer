@@ -27,48 +27,72 @@ layout(location = 13) in float aStrokeWidth1;
 uniform mat4 uMVMatrix;
 uniform mat4 uPMatrix;
 uniform float r;
+uniform vec2 uResolution;
 out vec2 vPosition;
 out vec4 vColor;
 out vec2 vCenterPosition;
 out vec2 vSize;
 out vec4 vStrokeColor;
 out float vStrokeWidth;
+out float vPixelWidth;
 
 void main() {
-    float alpha = r * aAlpha1 + (1.0 - r) * aAlpha0;
-    vPosition = r * aPosition1 + (1.0 - r) * aPosition0;
-    vec4 mvPosition = uMVMatrix * vec4(vPosition, 1.0, 1.0);
-    gl_Position = uPMatrix * mvPosition;
-    vColor = r * aColor1 + (1.0 - r) * aColor0;
+    float alpha = mix(aAlpha0, aAlpha1, r);
+    vPosition = mix(aPosition0, aPosition1, r);
+    gl_Position = uPMatrix * uMVMatrix * vec4(vPosition, 0.0, 1.0);
+    vColor = mix(aColor0, aColor1, r);
     vColor.a *= alpha;
-    vCenterPosition = r * aCenterPosition1 + (1.0 - r) * aCenterPosition0;
-    vSize = r * aSize1 + (1.0 - r) * aSize0;
-    vStrokeColor = r * aStrokeColor1 + (1.0 - r) * aStrokeColor0;
+    vCenterPosition = mix(aCenterPosition0, aCenterPosition1, r);
+    vSize = mix(aSize0, aSize1, r);
+    vStrokeColor = mix(aStrokeColor0, aStrokeColor1, r);
     vStrokeColor.a *= alpha;
-    vStrokeWidth = r * aStrokeWidth1 + (1.0 - r) * aStrokeWidth0;
+    vStrokeWidth = mix(aStrokeWidth0, aStrokeWidth1, r);
+    vec4 tmp = inverse(uPMatrix * uMVMatrix) * (2.0 / uResolution.x * vec4(1.0, 0.0, 0.0, 1.0));
+    vPixelWidth = (tmp.x - tmp.y) * 1.0;
 }
 "#;
 
 const CIRCLE_NODE_FRAGMENT_SHADER_SOURCE: &str = r#"#version 300 es
-precision mediump float;
+precision highp float;
 in vec2 vPosition;
 in vec4 vColor;
 in vec2 vCenterPosition;
 in vec2 vSize;
 in vec4 vStrokeColor;
 in float vStrokeWidth;
+in float vPixelWidth;
 out vec4 oFragColor;
+
+float calcR(vec2 size, float theta) {
+    vec2 tmp = vec2(1.0 / size.x, tan(theta) / size.y);
+    float x = sqrt(1.0 / dot(tmp, tmp));
+    float y = x * tan(theta);
+    vec2 v = vec2(x, y);
+    return sqrt(dot(v, v));
+}
+
 void main() {
-    vec2 v1 = 2.0 * (vPosition - vCenterPosition) / (vSize + vStrokeWidth);
-    if (dot(v1, v1) > 1.0) {
+    vec2 pos = vPosition - vCenterPosition;
+    float theta = atan(pos.y, pos.x);
+    float outerR = calcR((vSize + vStrokeWidth) / 2.0, theta);
+    float innerR = calcR((vSize - vStrokeWidth) / 2.0, theta);
+    float d = sqrt(dot(pos, pos));
+
+    if (d > outerR) {
         discard;
-    }
-    vec2 v2 = 2.0 * (vPosition - vCenterPosition) / (vSize - vStrokeWidth);
-    if (dot(v2, v2) > 1.0) {
+    } else if (d > innerR) {
         oFragColor = vStrokeColor;
     } else {
         oFragColor = vColor;
     }
+
+    // if (d > (outerR + innerR) / 2.0) {
+    //     vec4 c = vStrokeColor;
+    //     c.a = 0.0;
+    //     oFragColor = mix(vStrokeColor, c, smoothstep(0.0, vPixelWidth, d - outerR));
+    // } else {
+    //     oFragColor = mix(vColor, vStrokeColor, smoothstep(0.0, vPixelWidth, d - innerR));
+    // }
 }
 "#;
 
