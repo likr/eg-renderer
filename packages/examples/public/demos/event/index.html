@@ -3,15 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <title>HTML API Demo | EgRenderer Example</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/6.23.0/polyfill.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/2.0.3/fetch.min.js"></script>
-<script>
-if (!window.customElements) {
-  window.customElements = {}
-}
-window.customElements.forcePolyfill = true
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/custom-elements/1.0.0/custom-elements.min.js"></script>
+<base href="/"/>
 <script src="../../eg-renderer.js"></script>
 </head>
 <body>
@@ -20,7 +12,13 @@ window.customElements.forcePolyfill = true
 <h1>Event</h1>
 </div>
 <div>
-<eg-renderer width="600" height="400" src="data.json" enable-link-events no-auto-centering></eg-renderer>
+<eg-renderer
+  width="600"
+  height="400"
+  src="/demos/event/data.json"
+  enable-link-events
+  no-auto-centering>
+</eg-renderer>
 <p id="status"></p>
 </div>
 <script>

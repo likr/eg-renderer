@@ -3,16 +3,8 @@
 <head>
 <meta charset="utf-8"/>
 <title>Links Demo | EgRenderer Example</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/6.23.0/polyfill.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/2.0.3/fetch.min.js"></script>
-<script>
-if (!window.customElements) {
-  window.customElements = {}
-}
-window.customElements.forcePolyfill = true
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/custom-elements/1.0.0/custom-elements.min.js"></script>
-<script async src="../../eg-renderer.js"></script>
+<base href="/"/>
+<script async src="/eg-renderer.js"></script>
 </head>
 <body>
 <div>
@@ -27,7 +19,7 @@ window.customElements.forcePolyfill = true
   transition-duration="1000"
   width="600"
   height="600"
-  src="data.json"
+  src="/demos/links/data.json"
   no-auto-centering
 >
 </eg-renderer>

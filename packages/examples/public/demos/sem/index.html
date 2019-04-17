@@ -3,17 +3,9 @@
 <head>
 <meta charset="utf-8"/>
 <title>Path Diagram for SEM | EgRenderer Example</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/6.23.0/polyfill.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/2.0.3/fetch.min.js"></script>
-<script>
-if (!window.customElements) {
-  window.customElements = {}
-}
-window.customElements.forcePolyfill = true
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/custom-elements/1.0.0/custom-elements.min.js"></script>
-<script src="../../eg-renderer.js"></script>
-<script src="../../eg-renderer-ogdf.js"></script>
+<base href="/"/>
+<script src="/eg-renderer.js"></script>
+<script src="/eg-renderer-ogdf.js"></script>
 <style>
 eg-renderer-ogdf {
   display: block;
@@ -44,35 +36,37 @@ eg-renderer-ogdf {
   default-node-label-fill-color="#fff"
   default-node-label-stroke-width="2"
   default-link-label-stroke-width="2"
-  src="sem.json">
+  src="/demos/sem/sem.json">
 </eg-renderer-ogdf>
 </div>
 <h2>Code</h2>
+<pre>
 <code>
-&lt;!DOCTYPE&ensp;html&gt;<br/>
-&lt;html&gt;<br/>
-&lt;head&gt;<br/>
-&lt;script&ensp;src="https://likr.github.io/eg-renderer/eg-renderer.js"&gt;&lt;/script&gt;<br/>
-&lt;script&ensp;src="https://likr.github.io/eg-renderer/eg-renderer-ogdf.js"&gt;&lt;/script&gt;<br/>
-&lt;/head&gt;<br/>
-&lt;body&gt;<br/>
-&lt;eg-renderer-ogdf<br/>
-&ensp;&ensp;width="960"<br/>
-&ensp;&ensp;height="600"<br/>
-&ensp;&ensp;node-id-property="id"<br/>
-&ensp;&ensp;node-fill-color-property="color"<br/>
-&ensp;&ensp;node-label-stroke-color-property="color"<br/>
-&ensp;&ensp;link-stroke-color-property="color"<br/>
-&ensp;&ensp;link-label-stroke-color-property="color"<br/>
-&ensp;&ensp;default-node-stroke-width="0"<br/>
-&ensp;&ensp;default-node-label-fill-color="#fff"<br/>
-&ensp;&ensp;default-node-label-stroke-width="2"<br/>
-&ensp;&ensp;default-link-label-stroke-width="2"<br/>
-&ensp;&ensp;src="sem.json"&gt;<br/>
-&lt;/eg-renderer-ogdf&gt;<br/>
-&lt;/body&gt;<br/>
-&lt;/html&gt;<br/>
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;script src="/eg-renderer.js"&gt;&lt;/script&gt;
+&lt;script src="/eg-renderer-ogdf.js"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;eg-renderer-ogdf
+  width="960"
+  height="600"
+  node-id-property="id"
+  node-fill-color-property="color"
+  node-label-stroke-color-property="color"
+  link-stroke-color-property="color"
+  link-label-stroke-color-property="color"
+  default-node-stroke-width="0"
+  default-node-label-fill-color="#fff"
+  default-node-label-stroke-width="2"
+  default-link-label-stroke-width="2"
+  src="/demos/sem/sem.json"&gt;
+&lt;/eg-renderer-ogdf&gt;
+&lt;/body&gt;
+&lt;/html&gt;
 </code>
+</pre>
 </div>
 </body>
 </html>

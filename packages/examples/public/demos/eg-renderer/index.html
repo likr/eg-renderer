@@ -4,17 +4,9 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
 <title>EgRenderer Demo</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/6.23.0/polyfill.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/2.0.3/fetch.min.js"></script>
-<script>
-if (!window.customElements) {
-  window.customElements = {}
-}
-window.customElements.forcePolyfill = true
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/custom-elements/1.0.0/custom-elements.min.js"></script>
-<script src="../../eg-renderer.js"></script>
-<script src="../../eg-renderer-ogdf.js"></script>
+<base href="/"/>
+<script async src="/eg-renderer.js"></script>
+<script async src="/eg-renderer-ogdf.js"></script>
 <style>
 body {
   margin: 0;
@@ -40,7 +32,7 @@ body {
 <div id="wrapper">
   <eg-renderer-ogdf
     id="renderer"
-    src="data.json"
+    src="/demos/eg-renderer/data.json"
     transition-duration="1000"
     node-id-property="u"
     link-source-property="u"
@@ -69,34 +61,36 @@ body {
   <label id="auto-centering"><input type="checkbox" checked> auto centering</label>
 </div>
 <script>
-let egRenderer = document.getElementById('renderer')
-let contentWrapper = document.getElementById('wrapper')
-egRenderer.setAttribute('width', contentWrapper.clientWidth)
-egRenderer.setAttribute('height', contentWrapper.clientHeight)
-
-window.addEventListener('resize', (event) => {
+customElements.whenDefined('eg-renderer-ogdf').then(() => {
+  const egRenderer = document.getElementById('renderer')
+  const contentWrapper = document.getElementById('wrapper')
   egRenderer.setAttribute('width', contentWrapper.clientWidth)
   egRenderer.setAttribute('height', contentWrapper.clientHeight)
-})
 
-document.getElementById('update').addEventListener('click', (event) => {
-  egRenderer.update()
-})
+  window.addEventListener('resize', (event) => {
+    egRenderer.setAttribute('width', contentWrapper.clientWidth)
+    egRenderer.setAttribute('height', contentWrapper.clientHeight)
+  })
 
-document.getElementById('center').addEventListener('click', (event) => {
-  egRenderer.center()
-})
+  document.getElementById('update').addEventListener('click', (event) => {
+    egRenderer.update()
+  })
 
-document.getElementById('layout').addEventListener('change', (event) => {
-  egRenderer.layoutMethod = event.target.value
-})
+  document.getElementById('center').addEventListener('click', (event) => {
+    egRenderer.center()
+  })
 
-document.getElementById('auto-update').addEventListener('change', (event) => {
-  egRenderer.autoUpdate = event.target.checked
-})
+  document.getElementById('layout').addEventListener('change', (event) => {
+    egRenderer.layoutMethod = event.target.value
+  })
 
-document.getElementById('auto-centering').addEventListener('change', (event) => {
-  egRenderer.autoCentering = event.target.checked
+  document.getElementById('auto-update').addEventListener('change', (event) => {
+    egRenderer.autoUpdate = event.target.checked
+  })
+
+  document.getElementById('auto-centering').addEventListener('change', (event) => {
+    egRenderer.autoCentering = event.target.checked
+  })
 })
 </script>
 </body>
