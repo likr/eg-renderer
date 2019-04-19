@@ -217,7 +217,7 @@ pub struct LinkMesh {
     program: WebGlProgram,
     vertices: VertexBuffer,
     elements: ElementBuffer,
-    geometry: WebGlVertexArrayObject,
+    geometries: Vec<WebGlVertexArrayObject>,
     link_type: LinkType,
 }
 
@@ -231,7 +231,7 @@ impl LinkMesh {
             vertices,
             elements,
             program,
-            geometry,
+            geometries: vec![geometry],
             link_type,
         })
     }
@@ -404,8 +404,8 @@ impl Mesh for LinkMesh {
         &self.program
     }
 
-    fn geometry(&self) -> &WebGlVertexArrayObject {
-        &self.geometry
+    fn geometries(&self) -> &Vec<WebGlVertexArrayObject> {
+        &self.geometries
     }
 
     fn size(&self) -> i32 {

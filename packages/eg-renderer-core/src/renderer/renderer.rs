@@ -96,14 +96,16 @@ impl Renderer {
                     self.context.height as f32,
                 );
             }
-            gl.bind_vertex_array(Some(object.geometry()));
-            gl.draw_elements_with_i32(
-                object.mode(),
-                object.size(),
-                WebGl2RenderingContext::UNSIGNED_INT,
-                0,
-            );
-            gl.bind_vertex_array(None);
+            for geometry in object.geometries() {
+                gl.bind_vertex_array(Some(geometry));
+                gl.draw_elements_with_i32(
+                    object.mode(),
+                    object.size(),
+                    WebGl2RenderingContext::UNSIGNED_INT,
+                    0,
+                );
+                gl.bind_vertex_array(None);
+            }
         }
         Ok(())
     }

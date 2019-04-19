@@ -337,7 +337,7 @@ pub struct NodeMesh {
     program: WebGlProgram,
     vertices: VertexBuffer,
     elements: ElementBuffer,
-    geometry: WebGlVertexArrayObject,
+    geometries: Vec<WebGlVertexArrayObject>,
     node_type: NodeType,
 }
 
@@ -355,7 +355,7 @@ impl NodeMesh {
             vertices,
             elements,
             program,
-            geometry,
+            geometries: vec![geometry],
             node_type,
         })
     }
@@ -589,8 +589,8 @@ impl Mesh for NodeMesh {
         &self.program
     }
 
-    fn geometry(&self) -> &WebGlVertexArrayObject {
-        &self.geometry
+    fn geometries(&self) -> &Vec<WebGlVertexArrayObject> {
+        &self.geometries
     }
 
     fn size(&self) -> i32 {
