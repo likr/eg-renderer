@@ -332,7 +332,6 @@ impl LinkMesh {
             self.set_next_stroke_b(vertex_offset + i, (next.stroke_color.b / 255.) as f32)?;
             self.set_next_stroke_alpha(vertex_offset + i, next.stroke_color.opacity as f32)?;
         }
-        let offset = vertex_offset as u32;
         for i in 0..(next.points.len() - 1) {
             *(self
                 .elements
@@ -341,7 +340,7 @@ impl LinkMesh {
                 .ok_or(format!(
                     "Element index out of bounds: {}",
                     element_offset + i
-                ))?) = offset;
+                ))?) = (i * 2 + vertex_offset) as u32;
             *(self
                 .elements
                 .data
@@ -349,7 +348,7 @@ impl LinkMesh {
                 .ok_or(format!(
                     "Element index out of bounds: {}",
                     element_offset + i
-                ))?) = offset + 1;
+                ))?) = (i * 2 + vertex_offset + 1) as u32;
             *(self
                 .elements
                 .data
@@ -357,7 +356,7 @@ impl LinkMesh {
                 .ok_or(format!(
                     "Element index out of bounds: {}",
                     element_offset + i
-                ))?) = offset + 2;
+                ))?) = (i * 2 + vertex_offset + 2) as u32;
             *(self
                 .elements
                 .data
@@ -365,7 +364,7 @@ impl LinkMesh {
                 .ok_or(format!(
                     "Element index out of bounds: {}",
                     element_offset + i
-                ))?) = offset + 1;
+                ))?) = (i * 2 + vertex_offset + 1) as u32;
             *(self
                 .elements
                 .data
@@ -373,7 +372,7 @@ impl LinkMesh {
                 .ok_or(format!(
                     "Element index out of bounds: {}",
                     element_offset + i
-                ))?) = offset + 2;
+                ))?) = (i * 2 + vertex_offset + 2) as u32;
             *(self
                 .elements
                 .data
@@ -381,7 +380,7 @@ impl LinkMesh {
                 .ok_or(format!(
                     "Element index out of bounds: {}",
                     element_offset + i
-                ))?) = offset + 3;
+                ))?) = (i * 2 + vertex_offset + 3) as u32;
         }
         *vertex_offset_ref += n;
         *element_offset_ref += next.points.len() - 1;
