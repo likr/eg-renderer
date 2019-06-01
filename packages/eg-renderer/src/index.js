@@ -94,6 +94,15 @@ const renderObjects = (ctx, r, exit, enter, update, render, interpolate) => {
   }
 }
 
+const includes = (v, x, y) => {
+  if (v.type === 'circle') {
+    const xa = 2 * (x - v.x) / v.width
+    const yb = 2 * (y - v.y) / v.height
+    return xa * xa + yb * yb <= 1
+  }
+  return v.x - v.width / 2 <= x && x <= v.x + v.width / 2 && v.y - v.height / 2 <= y && y <= v.y + v.height / 2
+}
+
 class EgRendererElement extends window.HTMLElement {
   static get observedAttributes () {
     return [
@@ -575,6 +584,28 @@ class EgRendererElement extends window.HTMLElement {
     if (this.autoUpdate) {
       privates.get(this).invalidatePositions = true
     }
+  }
+
+  findNode (px, py) {
+    const p = privates.get(this)
+    const t = p.transform
+    const x = (px - t.x - p.margin) / t.k
+    const y = (py - t.y - p.margin) / t.k
+
+    let closest = null
+    let closestDist = Infinity
+    for (const vertex of p.data.vertices.values()) {
+      if (includes(vertex, x, y)) {
+        const dx = vertex.x - x
+        const dy = vertex.y - y
+        const dist = dx * dx + dy * dy
+        if (dist < closestDist) {
+          closest = vertex.u
+          closestDist = dist
+        }
+      }
+    }
+    return closest
   }
 
   get autoUpdate () {

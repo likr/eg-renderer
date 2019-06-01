@@ -33,20 +33,6 @@ customElements.whenDefined('eg-renderer').then(() => {
     const nodes = new Map(data.nodes.map((node, i) => [`${i}`, node]))
     const links = new Map(data.links.map((link) => [`${link.source}-${link.target}`, link]))
 
-    renderer.addEventListener('nodeclick', (event) => {
-      const {id} = event.detail
-      status.textContent = `nodeclick ${id}`
-      const node = nodes.get(id)
-      if (node.checked) {
-        node.checked = false
-        delete node.fillColor
-      } else {
-        node.checked = true
-        node.fillColor = 'red'
-      }
-      renderer.update(true)
-    })
-
     renderer.addEventListener('nodemouseenter', (event) => {
       const {id} = event.detail
       status.textContent = `nodemouseenter ${id}`
@@ -105,6 +91,22 @@ customElements.whenDefined('eg-renderer').then(() => {
       const {preservePositions} = event.detail
       if (!preservePositions) {
         renderer.center()
+      }
+    })
+
+    renderer.addEventListener('click', (event) => {
+      const id = renderer.findNode(event.offsetX, event.offsetY)
+      if (id) {
+        status.textContent = `nodeclick ${id}`
+        const node = nodes.get(id)
+        if (node.checked) {
+          node.checked = false
+          delete node.fillColor
+        } else {
+          node.checked = true
+          node.fillColor = 'red'
+        }
+        renderer.update(true)
       }
     })
   })
