@@ -1,19 +1,15 @@
 import { Renderer } from 'eg-renderer-core'
 
 export class WasmWebGL2Renderer {
-  constructor (canvas) {
+  constructor(canvas) {
     this.renderer = new Renderer(canvas)
   }
 
-  render (r) {
-  }
+  render(r) {}
 
-  update (layout) {
-  }
+  update(layout) {}
 
-  transform () {
-  }
+  transform() {}
 
-  resize () {
-  }
+  resize() {}
 }

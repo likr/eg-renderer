@@ -15,7 +15,12 @@ const margin = 10
 
 const init = (gl, canvas) => {
   gl.clearColor(0.0, 0.0, 0.0, 0.0)
-  gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
+  gl.blendFuncSeparate(
+    gl.SRC_ALPHA,
+    gl.ONE_MINUS_SRC_ALPHA,
+    gl.ONE,
+    gl.ONE_MINUS_SRC_ALPHA
+  )
   gl.enable(gl.BLEND)
   gl.disable(gl.DEPTH_TEST)
   return {
@@ -48,37 +53,53 @@ const draw = (gl, context, r) => {
       const rLocation = gl.getUniformLocation(obj.program, 'r')
       gl.uniform1f(rLocation, r)
       gl.bindVertexArray(obj.geometry)
-      gl.drawElements(obj.mode, obj.elementBuffer.data.length, gl.UNSIGNED_SHORT, 0)
+      gl.drawElements(
+        obj.mode,
+        obj.elementBuffer.data.length,
+        gl.UNSIGNED_SHORT,
+        0
+      )
       gl.bindVertexArray(null)
     }
   }
 }
 
 export class WebGLRenderer {
-  constructor (canvas) {
+  constructor(canvas) {
     this.canvas = canvas
-    const gl = this.gl = canvas.getContext('webgl2')
+    const gl = (this.gl = canvas.getContext('webgl2'))
     this.context = init(gl, canvas)
   }
 
-  render (r) {
+  render(r) {
     draw(this.gl, this.context, r)
   }
 
-  update (layout) {
+  update(layout) {
     this.context.objects.vertices = setVertexData(this.gl, layout)
     this.context.objects.edges = setEdgeData(this.gl, layout)
     this.context.objects.label = setLabelData(this.gl, layout)
   }
 
-  transform (transform) {
+  transform(transform) {
     const { x, y, k } = transform
-    const mMatrix = matmul(scale(k, k), matmul(translate(x, y), translate(margin, margin)))
-    this.context.mvMatrix = matmul(viewingMatrix([0, 0, 1], [0, 1, 0], [0, 0, 0]), mMatrix)
+    const mMatrix = matmul(
+      scale(k, k),
+      matmul(translate(x, y), translate(margin, margin))
+    )
+    this.context.mvMatrix = matmul(
+      viewingMatrix([0, 0, 1], [0, 1, 0], [0, 0, 0]),
+      mMatrix
+    )
   }
 
-  resize (width, height) {
-    this.gl.viewport(0, 0, width * devicePixelRatio(), height * devicePixelRatio())
+  resize(width, height) {
+    this.gl.viewport(
+      0,
+      0,
+      width * devicePixelRatio(),
+      height * devicePixelRatio()
+    )
     const left = 0
     const right = width - 1
     const top = 0

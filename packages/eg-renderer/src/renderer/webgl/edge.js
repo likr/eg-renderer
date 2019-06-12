@@ -1,7 +1,10 @@
 import { initShader, initProgram } from './program'
 
 const edgeShaderProgram = (gl) => {
-  const vertexShader = initShader(gl, gl.VERTEX_SHADER, `#version 300 es
+  const vertexShader = initShader(
+    gl,
+    gl.VERTEX_SHADER,
+    `#version 300 es
       layout(location = 0) in vec3 aPosition0;
       layout(location = 1) in vec3 aPosition1;
       layout(location = 2) in vec4 aColor0;
@@ -14,15 +17,20 @@ const edgeShaderProgram = (gl) => {
         vColor = r * aColor1 + (1.0 - r) * aColor0;
         gl_Position = uPMatrix * uMVMatrix * vec4(r * aPosition1 + (1.0 - r) * aPosition0, 1.0);
       }
-    `)
-  const fragmentShader = initShader(gl, gl.FRAGMENT_SHADER, `#version 300 es
+    `
+  )
+  const fragmentShader = initShader(
+    gl,
+    gl.FRAGMENT_SHADER,
+    `#version 300 es
       precision mediump float;
       in vec4 vColor;
       out vec4 oFragColor;
       void main() {
         oFragColor = vColor;
       }
-    `)
+    `
+  )
   return initProgram(gl, vertexShader, fragmentShader)
 }
 
@@ -33,12 +41,12 @@ const lineGeometry = (points, width) => {
     const [p2x, p2y] = points[1]
     const theta1 = Math.atan2(p2y - p1y, p2x - p1x)
     result.push([
-      width / Math.sqrt(2) * Math.cos(theta1 + 3 * Math.PI / 4) + p1x,
-      width / Math.sqrt(2) * Math.sin(theta1 + 3 * Math.PI / 4) + p1y
+      (width / Math.sqrt(2)) * Math.cos(theta1 + (3 * Math.PI) / 4) + p1x,
+      (width / Math.sqrt(2)) * Math.sin(theta1 + (3 * Math.PI) / 4) + p1y
     ])
     result.push([
-      width / Math.sqrt(2) * Math.cos(theta1 - 3 * Math.PI / 4) + p1x,
-      width / Math.sqrt(2) * Math.sin(theta1 - 3 * Math.PI / 4) + p1y
+      (width / Math.sqrt(2)) * Math.cos(theta1 - (3 * Math.PI) / 4) + p1x,
+      (width / Math.sqrt(2)) * Math.sin(theta1 - (3 * Math.PI) / 4) + p1y
     ])
   }
   for (let j = 1; j < points.length - 1; ++j) {
@@ -48,12 +56,20 @@ const lineGeometry = (points, width) => {
     const theta1 = Math.atan2(p2y - p1y, p2x - p1x)
     const theta2 = Math.atan2(p3y - p2y, p3x - p2x)
     result.push([
-      width / Math.cos((theta1 - theta2) / 2) / 2 * Math.cos((theta1 + theta2 + Math.PI) / 2) + p2x,
-      width / Math.cos((theta1 - theta2) / 2) / 2 * Math.sin((theta1 + theta2 + Math.PI) / 2) + p2y
+      (width / Math.cos((theta1 - theta2) / 2) / 2) *
+        Math.cos((theta1 + theta2 + Math.PI) / 2) +
+        p2x,
+      (width / Math.cos((theta1 - theta2) / 2) / 2) *
+        Math.sin((theta1 + theta2 + Math.PI) / 2) +
+        p2y
     ])
     result.push([
-      width / Math.cos((theta1 - theta2) / 2) / 2 * Math.cos((theta1 + theta2 - Math.PI) / 2) + p2x,
-      width / Math.cos((theta1 - theta2) / 2) / 2 * Math.sin((theta1 + theta2 - Math.PI) / 2) + p2y
+      (width / Math.cos((theta1 - theta2) / 2) / 2) *
+        Math.cos((theta1 + theta2 - Math.PI) / 2) +
+        p2x,
+      (width / Math.cos((theta1 - theta2) / 2) / 2) *
+        Math.sin((theta1 + theta2 - Math.PI) / 2) +
+        p2y
     ])
   }
   {
@@ -61,18 +77,27 @@ const lineGeometry = (points, width) => {
     const [p3x, p3y] = points[points.length - 1]
     const theta2 = Math.atan2(p3y - p2y, p3x - p2x)
     result.push([
-      width / Math.sqrt(2) * Math.cos(theta2 + Math.PI / 4) + p3x,
-      width / Math.sqrt(2) * Math.sin(theta2 + Math.PI / 4) + p3y
+      (width / Math.sqrt(2)) * Math.cos(theta2 + Math.PI / 4) + p3x,
+      (width / Math.sqrt(2)) * Math.sin(theta2 + Math.PI / 4) + p3y
     ])
     result.push([
-      width / Math.sqrt(2) * Math.cos(theta2 - Math.PI / 4) + p3x,
-      width / Math.sqrt(2) * Math.sin(theta2 - Math.PI / 4) + p3y
+      (width / Math.sqrt(2)) * Math.cos(theta2 - Math.PI / 4) + p3x,
+      (width / Math.sqrt(2)) * Math.sin(theta2 - Math.PI / 4) + p3y
     ])
   }
   return result
 }
 
-const setData = (data, elements, dataOffset, elementOffset, current, next, a0, a1) => {
+const setData = (
+  data,
+  elements,
+  dataOffset,
+  elementOffset,
+  current,
+  next,
+  a0,
+  a1
+) => {
   const r0 = current.strokeColor.r / 255
   const g0 = current.strokeColor.g / 255
   const b0 = current.strokeColor.b / 255
@@ -155,15 +180,60 @@ const createEdgeObject = (gl, edges, items, f1, f2) => {
 
 export const setEdgeData = (gl, layout) => {
   const items = []
-  createEdgeObject(gl, layout.exit.edges, items, (item) => item.points.length, (item, data, elements, dataOffset, elementOffset) => {
-    setData(data, elements, dataOffset, elementOffset, item, item, item.strokeColor.opacity, 0)
-  })
-  createEdgeObject(gl, layout.update.edges, items, ({ next }) => next.points.length, ({ current, next }, data, elements, dataOffset, elementOffset) => {
-    setData(data, elements, dataOffset, elementOffset, current, next, current.strokeColor.opacity, next.strokeColor.opacity)
-  })
-  createEdgeObject(gl, layout.enter.edges, items, (item) => item.points.length, (item, data, elements, dataOffset, elementOffset) => {
-    setData(data, elements, dataOffset, elementOffset, item, item, 0, item.strokeColor.opacity)
-  })
+  createEdgeObject(
+    gl,
+    layout.exit.edges,
+    items,
+    (item) => item.points.length,
+    (item, data, elements, dataOffset, elementOffset) => {
+      setData(
+        data,
+        elements,
+        dataOffset,
+        elementOffset,
+        item,
+        item,
+        item.strokeColor.opacity,
+        0
+      )
+    }
+  )
+  createEdgeObject(
+    gl,
+    layout.update.edges,
+    items,
+    ({ next }) => next.points.length,
+    ({ current, next }, data, elements, dataOffset, elementOffset) => {
+      setData(
+        data,
+        elements,
+        dataOffset,
+        elementOffset,
+        current,
+        next,
+        current.strokeColor.opacity,
+        next.strokeColor.opacity
+      )
+    }
+  )
+  createEdgeObject(
+    gl,
+    layout.enter.edges,
+    items,
+    (item) => item.points.length,
+    (item, data, elements, dataOffset, elementOffset) => {
+      setData(
+        data,
+        elements,
+        dataOffset,
+        elementOffset,
+        item,
+        item,
+        0,
+        item.strokeColor.opacity
+      )
+    }
+  )
   return items
 }
 

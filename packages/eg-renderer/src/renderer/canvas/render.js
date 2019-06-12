@@ -5,21 +5,14 @@ const withContext = (ctx, f) => {
 }
 
 const setVertexStyles = (ctx, args) => {
-  const {
-    fillColor,
-    strokeColor,
-    strokeWidth
-  } = args
+  const { fillColor, strokeColor, strokeWidth } = args
   ctx.fillStyle = fillColor.toString()
   ctx.strokeStyle = strokeColor.toString()
   ctx.lineWidth = strokeWidth
 }
 
 const setEdgeStyles = (ctx, args) => {
-  const {
-    strokeColor,
-    strokeWidth
-  } = args
+  const { strokeColor, strokeWidth } = args
   ctx.strokeStyle = strokeColor.toString()
   ctx.lineWidth = strokeWidth
 }
@@ -51,14 +44,7 @@ const renderCircleVertex = (ctx, width, height) => {
 }
 
 export const renderGroupLabel = (ctx, args) => {
-  const {
-    type,
-    x,
-    y,
-    width,
-    height,
-    label
-  } = args
+  const { type, x, y, width, height, label } = args
   if (!label) {
     return
   }
@@ -77,7 +63,7 @@ export const renderGroupLabel = (ctx, args) => {
         break
     }
     const lines = label.split('\n')
-    let offset = -lines.length * args.labelFontSize / 2
+    let offset = (-lines.length * args.labelFontSize) / 2
     for (const line of lines) {
       if (args.labelStrokeWidth > 0) {
         ctx.strokeText(line, 0, offset)
@@ -89,15 +75,7 @@ export const renderGroupLabel = (ctx, args) => {
 }
 
 export const renderVertex = (ctx, args) => {
-  const {
-    type,
-    u,
-    x,
-    y,
-    width,
-    height,
-    strokeWidth
-  } = args
+  const { type, u, x, y, width, height, strokeWidth } = args
   withContext(ctx, () => {
     ctx.translate(x, y)
     withContext(ctx, () => {
@@ -126,11 +104,7 @@ export const renderVertex = (ctx, args) => {
 }
 
 export const renderVertexLabel = (ctx, args) => {
-  const {
-    x,
-    y,
-    label
-  } = args
+  const { x, y, label } = args
   if (!label) {
     return
   }
@@ -139,7 +113,7 @@ export const renderVertexLabel = (ctx, args) => {
     ctx.textAlign = 'center'
     ctx.textBaseline = 'top'
     const lines = label.split('\n')
-    let offset = -lines.length * args.labelFontSize / 2
+    let offset = (-lines.length * args.labelFontSize) / 2
     for (const line of lines) {
       if (args.labelStrokeWidth > 0) {
         ctx.strokeText(line, x, y + offset)
@@ -160,7 +134,9 @@ const renderLineEdge = (ctx, points) => {
 const renderQuadraticCurveEdge = (ctx, points) => {
   const n = points.length
   if (n < 3 || n % 2 === 0) {
-    throw new Error(`The number of edge points should be an odd number greater than 2 for quadratic curve edges: got ${n}`)
+    throw new Error(
+      `The number of edge points should be an odd number greater than 2 for quadratic curve edges: got ${n}`
+    )
   }
   ctx.moveTo(points[0][0], points[0][1])
   for (let i = 2; i < n; i += 2) {
@@ -181,11 +157,7 @@ const renderArcEdge = (ctx, points) => {
 }
 
 export const renderEdgeRegion = (ctx, args) => {
-  const {
-    u,
-    v,
-    points
-  } = args
+  const { u, v, points } = args
   withContext(ctx, () => {
     const x1 = points[0][0]
     const y1 = points[0][1]
@@ -196,8 +168,14 @@ export const renderEdgeRegion = (ctx, args) => {
     ctx.strokeStyle = '#fff'
     ctx.moveTo(x1 + d * Math.cos(theta), y1 + d * Math.sin(theta))
     ctx.lineTo(x2 + d * Math.cos(theta), y2 + d * Math.sin(theta))
-    ctx.lineTo(x2 + d * Math.cos(theta + Math.PI), y2 + d * Math.sin(theta + Math.PI))
-    ctx.lineTo(x1 + d * Math.cos(theta + Math.PI), y1 + d * Math.sin(theta + Math.PI))
+    ctx.lineTo(
+      x2 + d * Math.cos(theta + Math.PI),
+      y2 + d * Math.sin(theta + Math.PI)
+    )
+    ctx.lineTo(
+      x1 + d * Math.cos(theta + Math.PI),
+      y1 + d * Math.sin(theta + Math.PI)
+    )
     ctx.closePath()
     ctx.stroke()
     if (ctx.addHitRegion) {
@@ -252,12 +230,18 @@ export const renderEdge = (ctx, args) => {
           const [x, y] = points[0]
           const [x0, y0] = points[1]
           const theta = Math.atan2(y - y0, x - x0)
-          const r = sourceMarkerSize * 2 / 3
+          const r = (sourceMarkerSize * 2) / 3
           ctx.fillStyle = args.strokeColor.toString()
           ctx.beginPath()
           ctx.moveTo(x + Math.cos(theta) * r, y + Math.sin(theta) * r)
-          ctx.lineTo(x + Math.cos(theta + Math.PI * 2 / 3) * r, y + Math.sin(theta + Math.PI * 2 / 3) * r)
-          ctx.lineTo(x + Math.cos(theta + Math.PI * 4 / 3) * r, y + Math.sin(theta + Math.PI * 4 / 3) * r)
+          ctx.lineTo(
+            x + Math.cos(theta + (Math.PI * 2) / 3) * r,
+            y + Math.sin(theta + (Math.PI * 2) / 3) * r
+          )
+          ctx.lineTo(
+            x + Math.cos(theta + (Math.PI * 4) / 3) * r,
+            y + Math.sin(theta + (Math.PI * 4) / 3) * r
+          )
           ctx.closePath()
           ctx.fill()
         })
@@ -281,12 +265,18 @@ export const renderEdge = (ctx, args) => {
           const [x, y] = points[points.length - 1]
           const [x0, y0] = points[points.length - 2]
           const theta = Math.atan2(y - y0, x - x0)
-          const r = targetMarkerSize * 2 / 3
+          const r = (targetMarkerSize * 2) / 3
           ctx.fillStyle = args.strokeColor.toString()
           ctx.beginPath()
           ctx.moveTo(x + Math.cos(theta) * r, y + Math.sin(theta) * r)
-          ctx.lineTo(x + Math.cos(theta + Math.PI * 2 / 3) * r, y + Math.sin(theta + Math.PI * 2 / 3) * r)
-          ctx.lineTo(x + Math.cos(theta + Math.PI * 4 / 3) * r, y + Math.sin(theta + Math.PI * 4 / 3) * r)
+          ctx.lineTo(
+            x + Math.cos(theta + (Math.PI * 2) / 3) * r,
+            y + Math.sin(theta + (Math.PI * 2) / 3) * r
+          )
+          ctx.lineTo(
+            x + Math.cos(theta + (Math.PI * 4) / 3) * r,
+            y + Math.sin(theta + (Math.PI * 4) / 3) * r
+          )
           ctx.closePath()
           ctx.fill()
         })
@@ -296,10 +286,7 @@ export const renderEdge = (ctx, args) => {
 }
 
 export const renderEdgeLabel = (ctx, args) => {
-  const {
-    points,
-    label
-  } = args
+  const { points, label } = args
   if (!label) {
     return
   }

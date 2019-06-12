@@ -1,6 +1,4 @@
-import {
-  interpolateRgb as d3InterpolateRgb
-} from 'd3-interpolate'
+import { interpolateRgb as d3InterpolateRgb } from 'd3-interpolate'
 
 const interpolate = (current, next, r) => {
   return (next - current) * r + current
@@ -11,13 +9,7 @@ export const interpolateGroup = (current, next, r) => {
 }
 
 export const interpolateVertex = (current, next, r) => {
-  const copyProperties = [
-    'u',
-    'type',
-    'label',
-    'labelFontFamily',
-    'd'
-  ]
+  const copyProperties = ['u', 'type', 'label', 'labelFontFamily', 'd']
   const interpolateProperties = [
     'x',
     'y',
@@ -81,7 +73,10 @@ export const interpolateEdge = (current, next, r) => {
   for (const p of colorInterpolateProperties) {
     result[p] = d3InterpolateRgb(current[p], next[p])(r)
   }
-  result.points = current.points.map(([x, y], i) => [interpolate(x, next.points[i][0], r), interpolate(y, next.points[i][1], r)])
+  result.points = current.points.map(([x, y], i) => [
+    interpolate(x, next.points[i][0], r),
+    interpolate(y, next.points[i][1], r)
+  ])
   return result
 }
 
@@ -110,7 +105,10 @@ export const diff = (current, next) => {
         }
         const nextEdge = next.edges.get(u).get(v)
         const currentEdge = current.edges.get(u).get(v)
-        return nextEdge.type === currentEdge.type && nextEdge.points.length === currentEdge.points.length
+        return (
+          nextEdge.type === currentEdge.type &&
+          nextEdge.points.length === currentEdge.points.length
+        )
       })
       .map(([u, v]) => {
         return {
@@ -133,7 +131,10 @@ export const diff = (current, next) => {
         }
         const nextEdge = next.edges.get(u).get(v)
         const currentEdge = current.edges.get(u).get(v)
-        return nextEdge.type !== currentEdge.type || nextEdge.points.length !== currentEdge.points.length
+        return (
+          nextEdge.type !== currentEdge.type ||
+          nextEdge.points.length !== currentEdge.points.length
+        )
       })
       .map(([u, v]) => next.edges.get(u).get(v))
   }
@@ -151,7 +152,10 @@ export const diff = (current, next) => {
         }
         const nextEdge = next.edges.get(u).get(v)
         const currentEdge = current.edges.get(u).get(v)
-        return nextEdge.type !== currentEdge.type || nextEdge.points.length !== currentEdge.points.length
+        return (
+          nextEdge.type !== currentEdge.type ||
+          nextEdge.points.length !== currentEdge.points.length
+        )
       })
       .map(([u, v]) => current.edges.get(u).get(v))
   }

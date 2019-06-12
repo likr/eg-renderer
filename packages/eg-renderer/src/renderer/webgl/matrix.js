@@ -1,28 +1,13 @@
 export const identity = () => {
-  return new Float32Array([
-    1, 0, 0, 0,
-    0, 1, 0, 0,
-    0, 0, 1, 0,
-    0, 0, 0, 1
-  ])
+  return new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1])
 }
 
 export const translate = (dx, dy, dz = 0) => {
-  return new Float32Array([
-    1, 0, 0, 0,
-    0, 1, 0, 0,
-    0, 0, 1, 0,
-    dx, dy, dz, 1
-  ])
+  return new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, dx, dy, dz, 1])
 }
 
 export const scale = (sx, sy, sz = 1) => {
-  return new Float32Array([
-    sx, 0, 0, 0,
-    0, sy, 0, 0,
-    0, 0, sz, 0,
-    0, 0, 0, 1
-  ])
+  return new Float32Array([sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, sz, 0, 0, 0, 0, 1])
 }
 
 export const cross = (v1, v2) => {
@@ -61,10 +46,22 @@ export const viewingMatrix = (eye, up, target) => {
   normalize(r)
   normalize(f)
   return new Float32Array([
-    r[0], f[0], -d[0], 0,
-    r[1], f[1], -d[1], 0,
-    r[2], f[2], -d[2], 0,
-    0, 0, 0, 1
+    r[0],
+    f[0],
+    -d[0],
+    0,
+    r[1],
+    f[1],
+    -d[1],
+    0,
+    r[2],
+    f[2],
+    -d[2],
+    0,
+    0,
+    0,
+    0,
+    1
   ])
 }
 
@@ -76,9 +73,21 @@ export const orthogonalMatrix = (left, right, top, bottom, near, far) => {
   const d = far - near
   const z = far + near
   return new Float32Array([
-    2 / w, 0, 0, 0,
-    0, 2 / h, 0, 0,
-    0, 0, -2 / d, 0,
-    -x / w, -y / h, -z / d, 1
+    2 / w,
+    0,
+    0,
+    0,
+    0,
+    2 / h,
+    0,
+    0,
+    0,
+    0,
+    -2 / d,
+    0,
+    -x / w,
+    -y / h,
+    -z / d,
+    1
   ])
 }

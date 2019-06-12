@@ -36,13 +36,13 @@ const renderObjects = (ctx, r, exit, enter, update, render, interpolate) => {
 }
 
 export class CanvasRenderer {
-  constructor (canvas, layout, transform) {
+  constructor(canvas, layout, transform) {
     this.canvas = canvas
     this.t = transform
     this.layout = layout
   }
 
-  render (r) {
+  render(r) {
     const margin = 10
     const { canvas, layout } = this
     const transform = this.t
@@ -54,27 +54,82 @@ export class CanvasRenderer {
     ctx.translate(transform.x, transform.y)
     ctx.scale(transform.k, transform.k)
 
-    renderObjects(ctx, r, layout.exit.groups, layout.enter.groups, layout.update.groups, renderGroup, interpolateGroup)
-    renderObjects(ctx, r, layout.exit.groups, layout.enter.groups, layout.update.groups, renderGroupLabel, interpolateGroup)
+    renderObjects(
+      ctx,
+      r,
+      layout.exit.groups,
+      layout.enter.groups,
+      layout.update.groups,
+      renderGroup,
+      interpolateGroup
+    )
+    renderObjects(
+      ctx,
+      r,
+      layout.exit.groups,
+      layout.enter.groups,
+      layout.update.groups,
+      renderGroupLabel,
+      interpolateGroup
+    )
     if (this.enableLinkEvents) {
-      renderObjects(ctx, r, layout.exit.edges, layout.enter.edges, layout.update.edges, renderEdgeRegion, interpolateEdge)
+      renderObjects(
+        ctx,
+        r,
+        layout.exit.edges,
+        layout.enter.edges,
+        layout.update.edges,
+        renderEdgeRegion,
+        interpolateEdge
+      )
     }
-    renderObjects(ctx, r, layout.exit.edges, layout.enter.edges, layout.update.edges, renderEdge, interpolateEdge)
-    renderObjects(ctx, r, layout.exit.edges, layout.enter.edges, layout.update.edges, renderEdgeLabel, interpolateEdge)
-    renderObjects(ctx, r, layout.exit.vertices, layout.enter.vertices, layout.update.vertices, renderVertex, interpolateVertex)
-    renderObjects(ctx, r, layout.exit.vertices, layout.enter.vertices, layout.update.vertices, renderVertexLabel, interpolateVertex)
+    renderObjects(
+      ctx,
+      r,
+      layout.exit.edges,
+      layout.enter.edges,
+      layout.update.edges,
+      renderEdge,
+      interpolateEdge
+    )
+    renderObjects(
+      ctx,
+      r,
+      layout.exit.edges,
+      layout.enter.edges,
+      layout.update.edges,
+      renderEdgeLabel,
+      interpolateEdge
+    )
+    renderObjects(
+      ctx,
+      r,
+      layout.exit.vertices,
+      layout.enter.vertices,
+      layout.update.vertices,
+      renderVertex,
+      interpolateVertex
+    )
+    renderObjects(
+      ctx,
+      r,
+      layout.exit.vertices,
+      layout.enter.vertices,
+      layout.update.vertices,
+      renderVertexLabel,
+      interpolateVertex
+    )
 
     ctx.restore()
   }
 
-  resize () {
-  }
+  resize() {}
 
-  update (layout) {
+  update(layout) {
     this.layout = layout
   }
 
-  transform (transform) {
+  transform(transform) {
     this.t = transform
   }
 }

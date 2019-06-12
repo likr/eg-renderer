@@ -2,7 +2,10 @@ import { devicePixelRatio } from '../../device-pixel-ratio'
 import { initShader, initProgram } from './program'
 
 const vertexShaderProgram = (gl) => {
-  const vertexShader = initShader(gl, gl.VERTEX_SHADER, `#version 300 es
+  const vertexShader = initShader(
+    gl,
+    gl.VERTEX_SHADER,
+    `#version 300 es
       layout(location = 0) in vec3 aPosition0;
       layout(location = 1) in vec3 aPosition1;
       layout(location = 2) in vec4 aColor0;
@@ -18,8 +21,12 @@ const vertexShaderProgram = (gl) => {
         gl_Position = uPMatrix * mvPosition;
         vColor = r * aColor1 + (1.0 - r) * aColor0;
       }
-    `)
-  const fragmentShader = initShader(gl, gl.FRAGMENT_SHADER, `#version 300 es
+    `
+  )
+  const fragmentShader = initShader(
+    gl,
+    gl.FRAGMENT_SHADER,
+    `#version 300 es
       precision mediump float;
       in vec4 vColor;
       out vec4 oFragColor;
@@ -32,7 +39,8 @@ const vertexShaderProgram = (gl) => {
         }
         oFragColor = vColor;
       }
-    `)
+    `
+  )
   return initProgram(gl, vertexShader, fragmentShader)
 }
 
@@ -55,7 +63,10 @@ const setData = (data, index, current, next, a0, a1) => {
 }
 
 export const setVertexData = (gl, layout) => {
-  const n = layout.enter.vertices.length + layout.update.vertices.length + layout.exit.vertices.length
+  const n =
+    layout.enter.vertices.length +
+    layout.update.vertices.length +
+    layout.exit.vertices.length
   const data = new Float32Array(n * 15)
   let offset = 0
   for (let i = 0; i < layout.enter.vertices.length; ++i) {
@@ -65,7 +76,14 @@ export const setVertexData = (gl, layout) => {
   offset += layout.enter.vertices.length
   for (let i = 0; i < layout.update.vertices.length; ++i) {
     const { current, next } = layout.update.vertices[i]
-    setData(data, offset + i, current, next, current.fillColor.opacity, next.fillColor.opacity)
+    setData(
+      data,
+      offset + i,
+      current,
+      next,
+      current.fillColor.opacity,
+      next.fillColor.opacity
+    )
   }
   offset += layout.update.vertices.length
   for (let i = 0; i < layout.exit.vertices.length; ++i) {

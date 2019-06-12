@@ -1,7 +1,10 @@
 import { initShader, initProgram } from './program'
 
 const labelShaderProgram = (gl) => {
-  const vertexShader = initShader(gl, gl.VERTEX_SHADER, `#version 300 es
+  const vertexShader = initShader(
+    gl,
+    gl.VERTEX_SHADER,
+    `#version 300 es
       layout(location = 0) in vec3 aPosition0;
       layout(location = 1) in vec3 aPosition1;
       layout(location = 2) in vec2 aTextureCoord;
@@ -13,8 +16,12 @@ const labelShaderProgram = (gl) => {
         vTextureCoord = aTextureCoord;
         gl_Position = uPMatrix * uMVMatrix * vec4(r * aPosition1 + (1.0 - r) * aPosition0, 1.0);
       }
-    `)
-  const fragmentShader = initShader(gl, gl.FRAGMENT_SHADER, `#version 300 es
+    `
+  )
+  const fragmentShader = initShader(
+    gl,
+    gl.FRAGMENT_SHADER,
+    `#version 300 es
       precision mediump float;
       uniform sampler2D image;
       in vec2 vTextureCoord;
@@ -23,7 +30,8 @@ const labelShaderProgram = (gl) => {
         vec4 smpColor = texture(image, vTextureCoord);
         oFragColor = smpColor;
       }
-    `)
+    `
+  )
   return initProgram(gl, vertexShader, fragmentShader)
 }
 
@@ -78,7 +86,17 @@ const createTextImage = (text, options, scale) => {
 const createTexture = (gl, canvas) => {
   const texture = gl.createTexture()
   gl.bindTexture(gl.TEXTURE_2D, texture)
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, canvas.width, canvas.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, canvas)
+  gl.texImage2D(
+    gl.TEXTURE_2D,
+    0,
+    gl.RGBA,
+    canvas.width,
+    canvas.height,
+    0,
+    gl.RGBA,
+    gl.UNSIGNED_BYTE,
+    canvas
+  )
   gl.generateMipmap(gl.TEXTURE_2D)
   gl.bindTexture(gl.TEXTURE_2D, null)
   return texture
@@ -93,10 +111,38 @@ const createLabelObject = (gl, item) => {
   const width = canvas.width / scale
   const height = canvas.height / scale
   const data = new Float32Array([
-    x - width / 2, y + height / 2, 0.0, x - width / 2, y + height / 2, 0.0, 0.0, 1.0,
-    x + width / 2, y + height / 2, 0.0, x + width / 2, y + height / 2, 0.0, 1.0, 1.0,
-    x - width / 2, y - height / 2, 0.0, x - width / 2, y - height / 2, 0.0, 0.0, 0.0,
-    x + width / 2, y - height / 2, 0.0, x + width / 2, y - height / 2, 0.0, 1.0, 0.0
+    x - width / 2,
+    y + height / 2,
+    0.0,
+    x - width / 2,
+    y + height / 2,
+    0.0,
+    0.0,
+    1.0,
+    x + width / 2,
+    y + height / 2,
+    0.0,
+    x + width / 2,
+    y + height / 2,
+    0.0,
+    1.0,
+    1.0,
+    x - width / 2,
+    y - height / 2,
+    0.0,
+    x - width / 2,
+    y - height / 2,
+    0.0,
+    0.0,
+    0.0,
+    x + width / 2,
+    y - height / 2,
+    0.0,
+    x + width / 2,
+    y - height / 2,
+    0.0,
+    1.0,
+    0.0
   ])
   const elements = new Uint16Array([0, 1, 2, 3, 2, 1])
 

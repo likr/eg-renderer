@@ -20,7 +20,15 @@ export const layoutRect = (items) => {
   }
 }
 
-export const centerTransform = (lWidth, lHeight, left, top, cWidth, cHeight, margin) => {
+export const centerTransform = (
+  lWidth,
+  lHeight,
+  left,
+  top,
+  cWidth,
+  cHeight,
+  margin
+) => {
   if (lWidth === 0 || lHeight === 0) {
     return {
       x: 0,

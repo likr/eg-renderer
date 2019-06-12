@@ -1,11 +1,5 @@
-import {
-  event as d3Event,
-  select as d3Select
-} from 'd3-selection'
-import {
-  zoom as d3Zoom,
-  zoomIdentity as d3ZoomIdentity
-} from 'd3-zoom'
+import { event as d3Event, select as d3Select } from 'd3-selection'
+import { zoom as d3Zoom, zoomIdentity as d3ZoomIdentity } from 'd3-zoom'
 import { adjustEdge } from './marker-point'
 
 const dispatchNodeMoveStartEvent = (element, u) => {
@@ -47,8 +41,15 @@ export const zoom = (element, attrs) => {
   const zoom = d3Zoom()
   zoom
     .on('start', () => {
-      if (!element.canZoom || (element.canDragNode && d3Event.sourceEvent && d3Event.sourceEvent.region)) {
-        const u = d3Event.sourceEvent ? JSON.parse(d3Event.sourceEvent.region).id : null
+      if (
+        !element.canZoom ||
+        (element.canDragNode &&
+          d3Event.sourceEvent &&
+          d3Event.sourceEvent.region)
+      ) {
+        const u = d3Event.sourceEvent
+          ? JSON.parse(d3Event.sourceEvent.region).id
+          : null
         const { x, y, k } = d3Event.transform
         pos.region = u
         pos.x0 = x / k
@@ -92,13 +93,17 @@ export const zoom = (element, attrs) => {
         attrs.renderer.transform(attrs.transform)
       }
     })
-    .on('end', function () {
+    .on('end', function() {
       if (!restoreTransform && (!element.canZoom || pos.region)) {
         const u = pos.region
         pos.region = null
         restoreTransform = true
-        d3Select(this)
-          .call(zoom.transform, d3ZoomIdentity.translate(attrs.transform.x, attrs.transform.y).scale(attrs.transform.k))
+        d3Select(this).call(
+          zoom.transform,
+          d3ZoomIdentity
+            .translate(attrs.transform.x, attrs.transform.y)
+            .scale(attrs.transform.k)
+        )
         restoreTransform = false
         if (u) {
           dispatchNodeMoveEndEvent(element, u)

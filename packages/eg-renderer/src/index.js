@@ -1,25 +1,12 @@
-import {
-  easeCubic as d3EaseCubic
-} from 'd3-ease'
-import {
-  color as d3Color
-} from 'd3-color'
-import {
-  select as d3Select
-} from 'd3-selection'
-import {
-  zoomIdentity as d3ZoomIdentity
-} from 'd3-zoom'
+import { easeCubic as d3EaseCubic } from 'd3-ease'
+import { color as d3Color } from 'd3-color'
+import { select as d3Select } from 'd3-selection'
+import { zoomIdentity as d3ZoomIdentity } from 'd3-zoom'
 // import { CanvasRenderer as Renderer } from './renderer/canvas'
 // import { WebGLRenderer as Renderer } from './renderer/webgl'
 import { Renderer } from 'eg-renderer-core'
-import {
-  centerTransform,
-  layoutRect
-} from './centering'
-import {
-  diff
-} from './interpolate'
+import { centerTransform, layoutRect } from './centering'
+import { diff } from './interpolate'
 import { devicePixelRatio } from './device-pixel-ratio'
 import { zoom } from './zoom'
 import { adjustEdge } from './marker-point'
@@ -65,15 +52,20 @@ const getter = (element, attributeName, defaultValue) => {
 
 const includes = (v, x, y) => {
   if (v.type === 'circle') {
-    const xa = 2 * (x - v.x) / v.width
-    const yb = 2 * (y - v.y) / v.height
+    const xa = (2 * (x - v.x)) / v.width
+    const yb = (2 * (y - v.y)) / v.height
     return xa * xa + yb * yb <= 1
   }
-  return v.x - v.width / 2 <= x && x <= v.x + v.width / 2 && v.y - v.height / 2 <= y && y <= v.y + v.height / 2
+  return (
+    v.x - v.width / 2 <= x &&
+    x <= v.x + v.width / 2 &&
+    v.y - v.height / 2 <= y &&
+    y <= v.y + v.height / 2
+  )
 }
 
 class EgRendererElement extends window.HTMLElement {
-  static get observedAttributes () {
+  static get observedAttributes() {
     return [
       'src',
       'width',
@@ -195,7 +187,7 @@ class EgRendererElement extends window.HTMLElement {
     ]
   }
 
-  constructor () {
+  constructor() {
     super()
     const canvas = document.createElement('canvas')
     const p = {
@@ -243,8 +235,7 @@ class EgRendererElement extends window.HTMLElement {
     p.zoom = zoom(this, p)
     privates.set(this, p)
 
-    d3Select(p.canvas)
-      .call(p.zoom)
+    d3Select(p.canvas).call(p.zoom)
 
     p.canvas.addEventListener('mousemove', (event) => {
       if (event.region) {
@@ -252,14 +243,18 @@ class EgRendererElement extends window.HTMLElement {
         if (p.currentRegion == null) {
           if (obj.id) {
             const { id } = obj
-            this.dispatchEvent(new window.CustomEvent('nodemouseenter', {
-              detail: { id }
-            }))
+            this.dispatchEvent(
+              new window.CustomEvent('nodemouseenter', {
+                detail: { id }
+              })
+            )
           } else if (obj.source && obj.target) {
             const { source, target } = obj
-            this.dispatchEvent(new window.CustomEvent('linkmouseenter', {
-              detail: { source, target }
-            }))
+            this.dispatchEvent(
+              new window.CustomEvent('linkmouseenter', {
+                detail: { source, target }
+              })
+            )
           }
         }
         p.currentRegion = obj
@@ -268,14 +263,18 @@ class EgRendererElement extends window.HTMLElement {
           const obj = p.currentRegion
           if (obj.id) {
             const { id } = obj
-            this.dispatchEvent(new window.CustomEvent('nodemouseleave', {
-              detail: { id }
-            }))
+            this.dispatchEvent(
+              new window.CustomEvent('nodemouseleave', {
+                detail: { id }
+              })
+            )
           } else if (obj.source && obj.target) {
             const { source, target } = obj
-            this.dispatchEvent(new window.CustomEvent('linkmouseleave', {
-              detail: { source, target }
-            }))
+            this.dispatchEvent(
+              new window.CustomEvent('linkmouseleave', {
+                detail: { source, target }
+              })
+            )
           }
         }
         p.currentRegion = null
@@ -297,20 +296,24 @@ class EgRendererElement extends window.HTMLElement {
         const obj = JSON.parse(event.region)
         if (obj.id) {
           const { id } = obj
-          this.dispatchEvent(new window.CustomEvent('nodeclick', {
-            detail: { id }
-          }))
+          this.dispatchEvent(
+            new window.CustomEvent('nodeclick', {
+              detail: { id }
+            })
+          )
         } else if (obj.source && obj.target) {
           const { source, target } = obj
-          this.dispatchEvent(new window.CustomEvent('linkclick', {
-            detail: { source, target }
-          }))
+          this.dispatchEvent(
+            new window.CustomEvent('linkclick', {
+              detail: { source, target }
+            })
+          )
         }
       }
     })
   }
 
-  connectedCallback () {
+  connectedCallback() {
     const p = privates.get(this)
     this.appendChild(p.canvas)
 
@@ -322,7 +325,12 @@ class EgRendererElement extends window.HTMLElement {
       p.invalidatePositions = false
       const now = new Date()
       const transitionDuration = this.transitionDuration
-      const t = Math.min(1, now > p.layoutTime ? (now - p.layoutTime) / transitionDuration : 1 / transitionDuration)
+      const t = Math.min(
+        1,
+        now > p.layoutTime
+          ? (now - p.layoutTime) / transitionDuration
+          : 1 / transitionDuration
+      )
       const r = p.ease(t)
       p.renderer.enableLinkEvents = this.enableLinkEvents
       p.renderer.render(r)
@@ -331,13 +339,16 @@ class EgRendererElement extends window.HTMLElement {
     render()
   }
 
-  attributeChangedCallback (attr, oldValue, newValue) {
+  attributeChangedCallback(attr, oldValue, newValue) {
     switch (attr) {
       case 'src':
-        window.fetch(newValue)
+        window
+          .fetch(newValue)
           .then((response) => response.json())
           .then((data) => {
-            this.dispatchEvent(new window.CustomEvent('datafetchend', { detail: data }))
+            this.dispatchEvent(
+              new window.CustomEvent('datafetchend', { detail: data })
+            )
             this.load(data)
           })
         break
@@ -352,96 +363,256 @@ class EgRendererElement extends window.HTMLElement {
     }
   }
 
-  center () {
+  center() {
     const { canvas, data, margin, zoom } = privates.get(this)
-    const items = [].concat(Array.from(data.vertices.values()), Array.from(data.groups.values()))
+    const items = [].concat(
+      Array.from(data.vertices.values()),
+      Array.from(data.groups.values())
+    )
     const { layoutWidth, layoutHeight, left, top } = layoutRect(items)
     const canvasWidth = canvas.width / devicePixelRatio()
     const canvasHeight = canvas.height / devicePixelRatio()
-    const { x, y, k } = centerTransform(layoutWidth, layoutHeight, left, top, canvasWidth, canvasHeight, margin)
-    zoom.transform(d3Select(canvas), d3ZoomIdentity.translate(x, y).scale(k).translate(-left, -top))
+    const { x, y, k } = centerTransform(
+      layoutWidth,
+      layoutHeight,
+      left,
+      top,
+      canvasWidth,
+      canvasHeight,
+      margin
+    )
+    zoom.transform(
+      d3Select(canvas),
+      d3ZoomIdentity
+        .translate(x, y)
+        .scale(k)
+        .translate(-left, -top)
+    )
     return this
   }
 
-  focus (x, y) {
+  focus(x, y) {
     const { canvas, data, margin, zoom } = privates.get(this)
-    const items = [].concat(Array.from(data.vertices.values()), Array.from(data.groups.values()))
+    const items = [].concat(
+      Array.from(data.vertices.values()),
+      Array.from(data.groups.values())
+    )
     const { layoutWidth, layoutHeight, left, top } = layoutRect(items)
     const canvasWidth = canvas.width / devicePixelRatio()
     const canvasHeight = canvas.height / devicePixelRatio()
-    const { k } = centerTransform(layoutWidth, layoutHeight, left, top, canvasWidth, canvasHeight, margin)
-    zoom.transform(d3Select(canvas), d3ZoomIdentity.translate(x, y).scale(k).translate(-left, -top))
+    const { k } = centerTransform(
+      layoutWidth,
+      layoutHeight,
+      left,
+      top,
+      canvasWidth,
+      canvasHeight,
+      margin
+    )
+    zoom.transform(
+      d3Select(canvas),
+      d3ZoomIdentity
+        .translate(x, y)
+        .scale(k)
+        .translate(-left, -top)
+    )
     return this
   }
 
-  load (data) {
+  load(data) {
     privates.get(this).originalData = data
     return this.update()
   }
 
-  update (preservePositions = false) {
+  update(preservePositions = false) {
     const p = privates.get(this)
     p.prevData = p.data
     const data = p.originalData
     const groups = Array.from(get(data, this.graphGroupsProperty, []))
-      .filter((group) => get(group, this.groupVisibilityProperty, this.defaultGroupVisibility))
+      .filter((group) =>
+        get(group, this.groupVisibilityProperty, this.defaultGroupVisibility)
+      )
       .map((group, i) => {
-        const fillColor = d3Color(get(group, this.groupFillColorProperty, this.defaultGroupFillColor))
-        fillColor.opacity = +get(group, this.groupFillOpacityProperty, this.defaultGroupFillOpacity)
-        const strokeColor = d3Color(get(group, this.groupStrokeColorProperty, this.defaultGroupStrokeColor))
-        strokeColor.opacity = +get(group, this.groupStrokeOpacityProperty, this.defaultGroupStrokeOpacity)
-        const labelFillColor = d3Color(get(group, this.groupLabelFillColorProperty, this.defaultGroupLabelFillColor))
-        labelFillColor.opacity = +get(group, this.groupLabelFillOpacityProperty, this.defaultGroupLabelFillOpacity)
-        const labelStrokeColor = d3Color(get(group, this.groupLabelStrokeColorProperty, this.defaultGroupLabelStrokeColor))
-        labelStrokeColor.opacity = +get(group, this.groupLabelStrokeOpacityProperty, this.defaultGroupLabelStrokeOpacity)
-        const g = (this.groupIdProperty === '$index' ? i : get(group, this.groupIdProperty)).toString()
+        const fillColor = d3Color(
+          get(group, this.groupFillColorProperty, this.defaultGroupFillColor)
+        )
+        fillColor.opacity = +get(
+          group,
+          this.groupFillOpacityProperty,
+          this.defaultGroupFillOpacity
+        )
+        const strokeColor = d3Color(
+          get(
+            group,
+            this.groupStrokeColorProperty,
+            this.defaultGroupStrokeColor
+          )
+        )
+        strokeColor.opacity = +get(
+          group,
+          this.groupStrokeOpacityProperty,
+          this.defaultGroupStrokeOpacity
+        )
+        const labelFillColor = d3Color(
+          get(
+            group,
+            this.groupLabelFillColorProperty,
+            this.defaultGroupLabelFillColor
+          )
+        )
+        labelFillColor.opacity = +get(
+          group,
+          this.groupLabelFillOpacityProperty,
+          this.defaultGroupLabelFillOpacity
+        )
+        const labelStrokeColor = d3Color(
+          get(
+            group,
+            this.groupLabelStrokeColorProperty,
+            this.defaultGroupLabelStrokeColor
+          )
+        )
+        labelStrokeColor.opacity = +get(
+          group,
+          this.groupLabelStrokeOpacityProperty,
+          this.defaultGroupLabelStrokeOpacity
+        )
+        const g = (this.groupIdProperty === '$index'
+          ? i
+          : get(group, this.groupIdProperty)
+        ).toString()
         return {
           g,
-          x: preservePositions && p.prevData.groups.has(g) ? p.prevData.groups.get(g).x : +get(group, this.groupXProperty, this.defaultGroupX),
-          y: preservePositions && p.prevData.groups.has(g) ? p.prevData.groups.get(g).y : +get(group, this.groupYProperty, this.defaultGroupY),
+          x:
+            preservePositions && p.prevData.groups.has(g)
+              ? p.prevData.groups.get(g).x
+              : +get(group, this.groupXProperty, this.defaultGroupX),
+          y:
+            preservePositions && p.prevData.groups.has(g)
+              ? p.prevData.groups.get(g).y
+              : +get(group, this.groupYProperty, this.defaultGroupY),
           width: +get(group, this.groupWidthProperty, this.defaultGroupWidth),
-          height: +get(group, this.groupHeightProperty, this.defaultGroupHeight),
+          height: +get(
+            group,
+            this.groupHeightProperty,
+            this.defaultGroupHeight
+          ),
           type: get(group, this.groupTypeProperty, this.defaultGroupType),
           fillColor,
           strokeColor,
-          strokeWidth: +get(group, this.groupStrokeWidthProperty, this.defaultGroupStrokeWidth),
+          strokeWidth: +get(
+            group,
+            this.groupStrokeWidthProperty,
+            this.defaultGroupStrokeWidth
+          ),
           label: get(group, this.groupLabelProperty, this.defaultGroupLabel),
           labelFillColor,
           labelStrokeColor,
-          labelStrokeWidth: +get(group, this.groupLabelStrokeWidthProperty, this.defaultGroupLabelStrokeWidth),
-          labelFontSize: +get(group, this.groupLabelFontSizeProperty, this.defaultGroupLabelFontSize),
-          labelFontFamily: get(group, this.groupLabelFontFamilyProperty, this.defaultGroupLabelFontFamily),
+          labelStrokeWidth: +get(
+            group,
+            this.groupLabelStrokeWidthProperty,
+            this.defaultGroupLabelStrokeWidth
+          ),
+          labelFontSize: +get(
+            group,
+            this.groupLabelFontSizeProperty,
+            this.defaultGroupLabelFontSize
+          ),
+          labelFontFamily: get(
+            group,
+            this.groupLabelFontFamilyProperty,
+            this.defaultGroupLabelFontFamily
+          ),
           d: group
         }
       })
     const vertices = Array.from(get(data, this.graphNodesProperty))
-      .filter((node) => get(node, this.nodeVisibilityProperty, this.defaultNodeVisibility))
+      .filter((node) =>
+        get(node, this.nodeVisibilityProperty, this.defaultNodeVisibility)
+      )
       .map((node, i) => {
-        const fillColor = d3Color(get(node, this.nodeFillColorProperty, this.defaultNodeFillColor))
-        fillColor.opacity = +get(node, this.nodeFillOpacityProperty, this.defaultNodeFillOpacity)
-        const strokeColor = d3Color(get(node, this.nodeStrokeColorProperty, this.defaultNodeStrokeColor))
-        strokeColor.opacity = +get(node, this.nodeStrokeOpacityProperty, this.defaultNodeStrokeOpacity)
-        const labelFillColor = d3Color(get(node, this.nodeLabelFillColorProperty, this.defaultNodeLabelFillColor))
-        labelFillColor.opacity = +get(node, this.nodeLabelFillOpacityProperty, this.defaultNodeLabelFillOpacity)
-        const labelStrokeColor = d3Color(get(node, this.nodeLabelStrokeColorProperty, this.defaultNodeLabelStrokeColor))
-        labelStrokeColor.opacity = +get(node, this.nodeLabelStrokeOpacityProperty, this.defaultNodeLabelStrokeOpacity)
-        const u = (this.nodeIdProperty === '$index' ? i : get(node, this.nodeIdProperty)).toString()
+        const fillColor = d3Color(
+          get(node, this.nodeFillColorProperty, this.defaultNodeFillColor)
+        )
+        fillColor.opacity = +get(
+          node,
+          this.nodeFillOpacityProperty,
+          this.defaultNodeFillOpacity
+        )
+        const strokeColor = d3Color(
+          get(node, this.nodeStrokeColorProperty, this.defaultNodeStrokeColor)
+        )
+        strokeColor.opacity = +get(
+          node,
+          this.nodeStrokeOpacityProperty,
+          this.defaultNodeStrokeOpacity
+        )
+        const labelFillColor = d3Color(
+          get(
+            node,
+            this.nodeLabelFillColorProperty,
+            this.defaultNodeLabelFillColor
+          )
+        )
+        labelFillColor.opacity = +get(
+          node,
+          this.nodeLabelFillOpacityProperty,
+          this.defaultNodeLabelFillOpacity
+        )
+        const labelStrokeColor = d3Color(
+          get(
+            node,
+            this.nodeLabelStrokeColorProperty,
+            this.defaultNodeLabelStrokeColor
+          )
+        )
+        labelStrokeColor.opacity = +get(
+          node,
+          this.nodeLabelStrokeOpacityProperty,
+          this.defaultNodeLabelStrokeOpacity
+        )
+        const u = (this.nodeIdProperty === '$index'
+          ? i
+          : get(node, this.nodeIdProperty)
+        ).toString()
         return {
           u,
-          x: preservePositions && p.prevData.vertices.has(u) ? p.prevData.vertices.get(u).x : +get(node, this.nodeXProperty, this.defaultNodeX),
-          y: preservePositions && p.prevData.vertices.has(u) ? p.prevData.vertices.get(u).y : +get(node, this.nodeYProperty, this.defaultNodeY),
+          x:
+            preservePositions && p.prevData.vertices.has(u)
+              ? p.prevData.vertices.get(u).x
+              : +get(node, this.nodeXProperty, this.defaultNodeX),
+          y:
+            preservePositions && p.prevData.vertices.has(u)
+              ? p.prevData.vertices.get(u).y
+              : +get(node, this.nodeYProperty, this.defaultNodeY),
           width: +get(node, this.nodeWidthProperty, this.defaultNodeWidth),
           height: +get(node, this.nodeHeightProperty, this.defaultNodeHeight),
           type: get(node, this.nodeTypeProperty, this.defaultNodeType),
           fillColor,
           strokeColor,
-          strokeWidth: +get(node, this.nodeStrokeWidthProperty, this.defaultNodeStrokeWidth),
+          strokeWidth: +get(
+            node,
+            this.nodeStrokeWidthProperty,
+            this.defaultNodeStrokeWidth
+          ),
           label: get(node, this.nodeLabelProperty, this.defaultNodeLabel),
           labelFillColor,
           labelStrokeColor,
-          labelStrokeWidth: +get(node, this.nodeLabelStrokeWidthProperty, this.defaultNodeLabelStrokeWidth),
-          labelFontSize: +get(node, this.nodeLabelFontSizeProperty, this.defaultNodeLabelFontSize),
-          labelFontFamily: get(node, this.nodeLabelFontFamilyProperty, this.defaultNodeLabelFontFamily),
+          labelStrokeWidth: +get(
+            node,
+            this.nodeLabelStrokeWidthProperty,
+            this.defaultNodeLabelStrokeWidth
+          ),
+          labelFontSize: +get(
+            node,
+            this.nodeLabelFontSizeProperty,
+            this.defaultNodeLabelFontSize
+          ),
+          labelFontFamily: get(
+            node,
+            this.nodeLabelFontFamilyProperty,
+            this.defaultNodeLabelFontFamily
+          ),
           inEdges: [],
           outEdges: [],
           d: node
@@ -449,7 +620,9 @@ class EgRendererElement extends window.HTMLElement {
       })
     const indices = new Map(vertices.map(({ u }, i) => [u, i]))
     const edges = Array.from(get(data, this.graphLinksProperty))
-      .filter((link) => get(link, this.linkVisibilityProperty, this.defaultLinkVisibility))
+      .filter((link) =>
+        get(link, this.linkVisibilityProperty, this.defaultLinkVisibility)
+      )
       .filter((link) => {
         const u = get(link, this.linkSourceProperty).toString()
         const v = get(link, this.linkTargetProperty).toString()
@@ -458,12 +631,38 @@ class EgRendererElement extends window.HTMLElement {
       .map((link) => {
         const u = get(link, this.linkSourceProperty).toString()
         const v = get(link, this.linkTargetProperty).toString()
-        const strokeColor = d3Color(get(link, this.linkStrokeColorProperty, this.defaultLinkStrokeColor))
-        strokeColor.opacity = +get(link, this.linkStrokeOpacityProperty, this.defaultLinkStrokeOpacity)
-        const labelFillColor = d3Color(get(link, this.linkLabelFillColorProperty, this.defaultLinkLabelFillColor))
-        labelFillColor.opacity = +get(link, this.linkLabelFillOpacityProperty, this.defaultLinkLabelFillOpacity)
-        const labelStrokeColor = d3Color(get(link, this.linkLabelStrokeColorProperty, this.defaultLinkLabelStrokeColor))
-        labelStrokeColor.opacity = +get(link, this.linkLabelStrokeOpacityProperty, this.defaultLinkLabelStrokeOpacity)
+        const strokeColor = d3Color(
+          get(link, this.linkStrokeColorProperty, this.defaultLinkStrokeColor)
+        )
+        strokeColor.opacity = +get(
+          link,
+          this.linkStrokeOpacityProperty,
+          this.defaultLinkStrokeOpacity
+        )
+        const labelFillColor = d3Color(
+          get(
+            link,
+            this.linkLabelFillColorProperty,
+            this.defaultLinkLabelFillColor
+          )
+        )
+        labelFillColor.opacity = +get(
+          link,
+          this.linkLabelFillOpacityProperty,
+          this.defaultLinkLabelFillOpacity
+        )
+        const labelStrokeColor = d3Color(
+          get(
+            link,
+            this.linkLabelStrokeColorProperty,
+            this.defaultLinkLabelStrokeColor
+          )
+        )
+        labelStrokeColor.opacity = +get(
+          link,
+          this.linkLabelStrokeOpacityProperty,
+          this.defaultLinkLabelStrokeOpacity
+        )
         const du = vertices[indices.get(u)]
         const dv = vertices[indices.get(v)]
         const newPoints = [[du.x, du.y]]
@@ -471,26 +670,61 @@ class EgRendererElement extends window.HTMLElement {
           newPoints.push([x, y])
         }
         newPoints.push([dv.x, dv.y])
-        const points = preservePositions && p.prevData.edges.has(u) && p.prevData.edges.get(u).has(v)
-          ? p.prevData.edges.get(u).get(v).points
-          : newPoints
+        const points =
+          preservePositions &&
+          p.prevData.edges.has(u) &&
+          p.prevData.edges.get(u).has(v)
+            ? p.prevData.edges.get(u).get(v).points
+            : newPoints
         const edge = {
           u,
           v,
           points,
           type: get(link, this.linkTypeProperty, this.defaultLinkType),
           strokeColor,
-          strokeWidth: +get(link, this.linkStrokeWidthProperty, this.defaultLinkStrokeWidth),
-          sourceMarkerShape: get(link, this.linkSourceMarkerShapeProperty, this.defaultLinkSourceMarkerShape),
-          sourceMarkerSize: +get(link, this.linkSourceMarkerSizeProperty, this.defaultLinkSourceMarkerSize),
-          targetMarkerShape: get(link, this.linkTargetMarkerShapeProperty, this.defaultLinkTargetMarkerShape),
-          targetMarkerSize: +get(link, this.linkTargetMarkerSizeProperty, this.defaultLinkTargetMarkerSize),
+          strokeWidth: +get(
+            link,
+            this.linkStrokeWidthProperty,
+            this.defaultLinkStrokeWidth
+          ),
+          sourceMarkerShape: get(
+            link,
+            this.linkSourceMarkerShapeProperty,
+            this.defaultLinkSourceMarkerShape
+          ),
+          sourceMarkerSize: +get(
+            link,
+            this.linkSourceMarkerSizeProperty,
+            this.defaultLinkSourceMarkerSize
+          ),
+          targetMarkerShape: get(
+            link,
+            this.linkTargetMarkerShapeProperty,
+            this.defaultLinkTargetMarkerShape
+          ),
+          targetMarkerSize: +get(
+            link,
+            this.linkTargetMarkerSizeProperty,
+            this.defaultLinkTargetMarkerSize
+          ),
           label: get(link, this.linkLabelProperty, this.defaultLinkLabel),
           labelFillColor,
           labelStrokeColor,
-          labelStrokeWidth: +get(link, this.linkLabelStrokeWidthProperty, this.defaultLinkLabelStrokeWidth),
-          labelFontSize: +get(link, this.linkLabelFontSizeProperty, this.defaultLinkLabelFontSize),
-          labelFontFamily: get(link, this.linkLabelFontFamilyProperty, this.defaultLinkLabelFontFamily),
+          labelStrokeWidth: +get(
+            link,
+            this.linkLabelStrokeWidthProperty,
+            this.defaultLinkLabelStrokeWidth
+          ),
+          labelFontSize: +get(
+            link,
+            this.linkLabelFontSizeProperty,
+            this.defaultLinkLabelFontSize
+          ),
+          labelFontFamily: get(
+            link,
+            this.linkLabelFontFamilyProperty,
+            this.defaultLinkLabelFontFamily
+          ),
           d: link
         }
         du.outEdges.push(edge)
@@ -521,28 +755,29 @@ class EgRendererElement extends window.HTMLElement {
     if (this.autoCentering) {
       this.center()
     }
-    this.dispatchEvent(new window.CustomEvent('updateend', {
-      detail: { preservePositions }
-    }))
+    this.dispatchEvent(
+      new window.CustomEvent('updateend', {
+        detail: { preservePositions }
+      })
+    )
     return this
   }
 
-  onLayout () {
-  }
+  onLayout() {}
 
-  invalidate () {
+  invalidate() {
     if (this.autoUpdate) {
       privates.get(this).invalidate = true
     }
   }
 
-  invalidatePositions () {
+  invalidatePositions() {
     if (this.autoUpdate) {
       privates.get(this).invalidatePositions = true
     }
   }
 
-  findNode (px, py) {
+  findNode(px, py) {
     const p = privates.get(this)
     const t = p.transform
     const x = (px - t.x - p.margin) / t.k
@@ -564,11 +799,11 @@ class EgRendererElement extends window.HTMLElement {
     return closest
   }
 
-  get autoUpdate () {
+  get autoUpdate() {
     return !this.hasAttribute('no-auto-update')
   }
 
-  set autoUpdate (value) {
+  set autoUpdate(value) {
     if (value) {
       this.removeAttribute('no-auto-update')
     } else {
@@ -576,11 +811,11 @@ class EgRendererElement extends window.HTMLElement {
     }
   }
 
-  get autoCentering () {
+  get autoCentering() {
     return !this.hasAttribute('no-auto-centering')
   }
 
-  set autoCentering (value) {
+  set autoCentering(value) {
     if (value) {
       this.removeAttribute('no-auto-centering')
     } else {
@@ -588,11 +823,11 @@ class EgRendererElement extends window.HTMLElement {
     }
   }
 
-  get canZoom () {
+  get canZoom() {
     return !this.hasAttribute('no-zoom')
   }
 
-  set canZoom (value) {
+  set canZoom(value) {
     if (value) {
       this.removeAttribute('no-zoom')
     } else {
@@ -600,11 +835,11 @@ class EgRendererElement extends window.HTMLElement {
     }
   }
 
-  get canDragNode () {
+  get canDragNode() {
     return !this.hasAttribute('no-drag-node')
   }
 
-  set canDragNode (value) {
+  set canDragNode(value) {
     if (value) {
       this.removeAttribute('no-drag-node')
     } else {
@@ -612,11 +847,11 @@ class EgRendererElement extends window.HTMLElement {
     }
   }
 
-  get enableLinkEvents () {
+  get enableLinkEvents() {
     return this.hasAttribute('enable-link-events')
   }
 
-  set enableLinkEvents (value) {
+  set enableLinkEvents(value) {
     if (value) {
       this.removeAttribute('no-drag-node')
     } else {
@@ -624,983 +859,1003 @@ class EgRendererElement extends window.HTMLElement {
     }
   }
 
-  get src () {
+  get src() {
     return getter(this, 'src', null)
   }
 
-  set src (value) {
+  set src(value) {
     this.setAttribute('src', value)
   }
 
-  get width () {
+  get width() {
     return getter(this, 'width', 300)
   }
 
-  set width (value) {
+  set width(value) {
     this.setAttribute('width', value)
   }
 
-  get height () {
+  get height() {
     return getter(this, 'height', 150)
   }
 
-  set height (value) {
+  set height(value) {
     this.setAttribute('height', value)
   }
 
-  get transitionDuration () {
+  get transitionDuration() {
     return getter(this, 'transition-duration', 0)
   }
 
-  set transitionDuration (value) {
+  set transitionDuration(value) {
     this.setAttribute('transition-duration', value)
   }
 
-  get graphGroupsProperty () {
+  get graphGroupsProperty() {
     return getter(this, 'graph-groups-property', 'groups')
   }
 
-  set graphGroupsProperty (value) {
+  set graphGroupsProperty(value) {
     this.setAttribute('graph-groups-property', value)
   }
 
-  get graphNodesProperty () {
+  get graphNodesProperty() {
     return getter(this, 'graph-nodes-property', 'nodes')
   }
 
-  set graphNodesProperty (value) {
+  set graphNodesProperty(value) {
     this.setAttribute('graph-nodes-property', value)
   }
 
-  get graphLinksProperty () {
+  get graphLinksProperty() {
     return getter(this, 'graph-links-property', 'links')
   }
 
-  set graphLinksProperty (value) {
+  set graphLinksProperty(value) {
     this.setAttribute('graph-links-property', value)
   }
 
-  get groupIdProperty () {
+  get groupIdProperty() {
     return getter(this, 'group-id-property', '$index')
   }
 
-  set groupIdProperty (value) {
+  set groupIdProperty(value) {
     this.setAttribute('group-id-property', value)
   }
 
-  get groupXProperty () {
+  get groupXProperty() {
     return getter(this, 'group-x-property', 'x')
   }
 
-  set groupXProperty (value) {
+  set groupXProperty(value) {
     this.setAttribute('group-x-property', value)
   }
 
-  get groupYProperty () {
+  get groupYProperty() {
     return getter(this, 'group-y-property', 'y')
   }
 
-  set groupYProperty (value) {
+  set groupYProperty(value) {
     this.setAttribute('group-y-property', value)
   }
 
-  get groupWidthProperty () {
+  get groupWidthProperty() {
     return getter(this, 'group-width-property', 'width')
   }
 
-  set groupWidthProperty (value) {
+  set groupWidthProperty(value) {
     this.setAttribute('group-width-property', value)
   }
 
-  get groupHeightProperty () {
+  get groupHeightProperty() {
     return getter(this, 'group-height-property', 'height')
   }
 
-  set groupHeightProperty (value) {
+  set groupHeightProperty(value) {
     this.setAttribute('group-height-property', value)
   }
 
-  get groupFillColorProperty () {
+  get groupFillColorProperty() {
     return getter(this, 'group-fill-color-property', 'fillColor')
   }
 
-  set groupFillColorProperty (value) {
+  set groupFillColorProperty(value) {
     this.setAttribute('group-fill-color-property', value)
   }
 
-  get groupFillOpacityProperty () {
+  get groupFillOpacityProperty() {
     return getter(this, 'group-fill-opacity-property', 'fillOpacity')
   }
 
-  set groupFillOpacityProperty (value) {
+  set groupFillOpacityProperty(value) {
     this.setAttribute('group-fill-opacity-property', value)
   }
 
-  get groupStrokeColorProperty () {
+  get groupStrokeColorProperty() {
     return getter(this, 'group-stroke-color-property', 'strokeColor')
   }
 
-  set groupStrokeColorProperty (value) {
+  set groupStrokeColorProperty(value) {
     this.setAttribute('group-stroke-color-property', value)
   }
 
-  get groupStrokeOpacityProperty () {
+  get groupStrokeOpacityProperty() {
     return getter(this, 'group-stroke-opacity-property', 'strokeOpacity')
   }
 
-  set groupStrokeOpacityProperty (value) {
+  set groupStrokeOpacityProperty(value) {
     this.setAttribute('group-stroke-opacity-property', value)
   }
 
-  get groupStrokeWidthProperty () {
+  get groupStrokeWidthProperty() {
     return getter(this, 'group-stroke-width-property', 'strokeWidth')
   }
 
-  set groupStrokeWidthProperty (value) {
+  set groupStrokeWidthProperty(value) {
     this.setAttribute('group-stroke-width-property', value)
   }
 
-  get groupTypeProperty () {
+  get groupTypeProperty() {
     return getter(this, 'group-type-property', 'type')
   }
 
-  set groupTypeProperty (value) {
+  set groupTypeProperty(value) {
     this.setAttribute('group-type-property', value)
   }
 
-  get groupVisibilityProperty () {
+  get groupVisibilityProperty() {
     return getter(this, 'group-visibility-property', 'visibility')
   }
 
-  set groupVisibilityProperty (value) {
+  set groupVisibilityProperty(value) {
     this.setAttribute('group-visibility-property', value)
   }
 
-  get groupLabelProperty () {
+  get groupLabelProperty() {
     return getter(this, 'group-label-property', 'label')
   }
 
-  set groupLabelProperty (value) {
+  set groupLabelProperty(value) {
     this.setAttribute('group-label-property', value)
   }
 
-  get groupLabelFillColorProperty () {
+  get groupLabelFillColorProperty() {
     return getter(this, 'group-label-fill-color-property', 'labelFillColor')
   }
 
-  set groupLabelFillColorProperty (value) {
+  set groupLabelFillColorProperty(value) {
     this.setAttribute('group-label-fill-color-property', value)
   }
 
-  get groupLabelFillOpacityProperty () {
+  get groupLabelFillOpacityProperty() {
     return getter(this, 'group-label-fill-opacity-property', 'labelFillOpacity')
   }
 
-  set groupLabelFillOpacityProperty (value) {
+  set groupLabelFillOpacityProperty(value) {
     this.setAttribute('group-label-fill-opacity-property', value)
   }
 
-  get groupLabelStrokeColorProperty () {
+  get groupLabelStrokeColorProperty() {
     return getter(this, 'group-label-stroke-color-property', 'labelStrokeColor')
   }
 
-  set groupLabelStrokeColorProperty (value) {
+  set groupLabelStrokeColorProperty(value) {
     this.setAttribute('group-label-stroke-color-property', value)
   }
 
-  get groupLabelStrokeOpacityProperty () {
-    return getter(this, 'group-label-stroke-opacity-property', 'labelStrokeOpacity')
+  get groupLabelStrokeOpacityProperty() {
+    return getter(
+      this,
+      'group-label-stroke-opacity-property',
+      'labelStrokeOpacity'
+    )
   }
 
-  set groupLabelStrokeOpacityProperty (value) {
+  set groupLabelStrokeOpacityProperty(value) {
     this.setAttribute('group-label-stroke-opacity-property', value)
   }
 
-  get groupLabelStrokeWidthProperty () {
+  get groupLabelStrokeWidthProperty() {
     return getter(this, 'group-label-stroke-width-property', 'labelStrokeWidth')
   }
 
-  set groupLabelStrokeWidthProperty (value) {
+  set groupLabelStrokeWidthProperty(value) {
     this.setAttribute('group-label-stroke-width-property', value)
   }
 
-  get groupLabelFontSizeProperty () {
+  get groupLabelFontSizeProperty() {
     return getter(this, 'group-label-font-size-property', 'labelFontSize')
   }
 
-  set groupLabelFontSizeProperty (value) {
+  set groupLabelFontSizeProperty(value) {
     this.setAttribute('group-label-font-size-property', value)
   }
 
-  get groupLabelFontFamilyProperty () {
+  get groupLabelFontFamilyProperty() {
     return getter(this, 'group-label-font-family-property', 'labelFontFamily')
   }
 
-  set groupLabelFontFamilyProperty (value) {
+  set groupLabelFontFamilyProperty(value) {
     this.setAttribute('group-label-font-family-property', value)
   }
 
-  get nodeIdProperty () {
+  get nodeIdProperty() {
     return getter(this, 'node-id-property', '$index')
   }
 
-  set nodeIdProperty (value) {
+  set nodeIdProperty(value) {
     this.setAttribute('node-id-property', value)
   }
 
-  get nodeXProperty () {
+  get nodeXProperty() {
     return getter(this, 'node-x-property', 'x')
   }
 
-  set nodeXProperty (value) {
+  set nodeXProperty(value) {
     this.setAttribute('node-x-property', value)
   }
 
-  get nodeYProperty () {
+  get nodeYProperty() {
     return getter(this, 'node-y-property', 'y')
   }
 
-  set nodeYProperty (value) {
+  set nodeYProperty(value) {
     this.setAttribute('node-y-property', value)
   }
 
-  get nodeWidthProperty () {
+  get nodeWidthProperty() {
     return getter(this, 'node-width-property', 'width')
   }
 
-  set nodeWidthProperty (value) {
+  set nodeWidthProperty(value) {
     this.setAttribute('node-width-property', value)
   }
 
-  get nodeHeightProperty () {
+  get nodeHeightProperty() {
     return getter(this, 'node-height-property', 'height')
   }
 
-  set nodeHeightProperty (value) {
+  set nodeHeightProperty(value) {
     this.setAttribute('node-height-property', value)
   }
 
-  get nodeFillColorProperty () {
+  get nodeFillColorProperty() {
     return getter(this, 'node-fill-color-property', 'fillColor')
   }
 
-  set nodeFillColorProperty (value) {
+  set nodeFillColorProperty(value) {
     this.setAttribute('node-fill-color-property', value)
   }
 
-  get nodeFillOpacityProperty () {
+  get nodeFillOpacityProperty() {
     return getter(this, 'node-fill-opacity-property', 'fillOpacity')
   }
 
-  set nodeFillOpacityProperty (value) {
+  set nodeFillOpacityProperty(value) {
     this.setAttribute('node-fill-opacity-property', value)
   }
 
-  get nodeStrokeColorProperty () {
+  get nodeStrokeColorProperty() {
     return getter(this, 'node-stroke-color-property', 'strokeColor')
   }
 
-  set nodeStrokeColorProperty (value) {
+  set nodeStrokeColorProperty(value) {
     this.setAttribute('node-stroke-color-property', value)
   }
 
-  get nodeStrokeOpacityProperty () {
+  get nodeStrokeOpacityProperty() {
     return getter(this, 'node-stroke-opacity-property', 'strokeOpacity')
   }
 
-  set nodeStrokeOpacityProperty (value) {
+  set nodeStrokeOpacityProperty(value) {
     this.setAttribute('node-stroke-opacity-property', value)
   }
 
-  get nodeStrokeWidthProperty () {
+  get nodeStrokeWidthProperty() {
     return getter(this, 'node-stroke-width-property', 'strokeWidth')
   }
 
-  set nodeStrokeWidthProperty (value) {
+  set nodeStrokeWidthProperty(value) {
     this.setAttribute('node-stroke-width-property', value)
   }
 
-  get nodeTypeProperty () {
+  get nodeTypeProperty() {
     return getter(this, 'node-type-property', 'type')
   }
 
-  set nodeTypeProperty (value) {
+  set nodeTypeProperty(value) {
     this.setAttribute('node-type-property', value)
   }
 
-  get nodeVisibilityProperty () {
+  get nodeVisibilityProperty() {
     return getter(this, 'node-visibility-property', 'visibility')
   }
 
-  set nodeVisibilityProperty (value) {
+  set nodeVisibilityProperty(value) {
     this.setAttribute('node-visibility-property', value)
   }
 
-  get nodeLabelProperty () {
+  get nodeLabelProperty() {
     return getter(this, 'node-label-property', 'label')
   }
 
-  set nodeLabelProperty (value) {
+  set nodeLabelProperty(value) {
     this.setAttribute('node-label-property', value)
   }
 
-  get nodeLabelFillColorProperty () {
+  get nodeLabelFillColorProperty() {
     return getter(this, 'node-label-fill-color-property', 'labelFillColor')
   }
 
-  set nodeLabelFillColorProperty (value) {
+  set nodeLabelFillColorProperty(value) {
     this.setAttribute('node-label-fill-color-property', value)
   }
 
-  get nodeLabelFillOpacityProperty () {
+  get nodeLabelFillOpacityProperty() {
     return getter(this, 'node-label-fill-opacity-property', 'labelFillOpacity')
   }
 
-  set nodeLabelFillOpacityProperty (value) {
+  set nodeLabelFillOpacityProperty(value) {
     this.setAttribute('node-label-fill-opacity-property', value)
   }
 
-  get nodeLabelStrokeColorProperty () {
+  get nodeLabelStrokeColorProperty() {
     return getter(this, 'node-label-stroke-color-property', 'labelStrokeColor')
   }
 
-  set nodeLabelStrokeColorProperty (value) {
+  set nodeLabelStrokeColorProperty(value) {
     this.setAttribute('node-label-stroke-color-property', value)
   }
 
-  get nodeLabelStrokeOpacityProperty () {
-    return getter(this, 'node-label-stroke-opacity-property', 'labelStrokeOpacity')
+  get nodeLabelStrokeOpacityProperty() {
+    return getter(
+      this,
+      'node-label-stroke-opacity-property',
+      'labelStrokeOpacity'
+    )
   }
 
-  set nodeLabelStrokeOpacityProperty (value) {
+  set nodeLabelStrokeOpacityProperty(value) {
     this.setAttribute('node-label-stroke-opacity-property', value)
   }
 
-  get nodeLabelStrokeWidthProperty () {
+  get nodeLabelStrokeWidthProperty() {
     return getter(this, 'node-label-stroke-width-property', 'labelStrokeWidth')
   }
 
-  set nodeLabelStrokeWidthProperty (value) {
+  set nodeLabelStrokeWidthProperty(value) {
     this.setAttribute('node-label-stroke-width-property', value)
   }
 
-  get nodeLabelFontSizeProperty () {
+  get nodeLabelFontSizeProperty() {
     return getter(this, 'node-label-font-size-property', 'labelFontSize')
   }
 
-  set nodeLabelFontSizeProperty (value) {
+  set nodeLabelFontSizeProperty(value) {
     this.setAttribute('node-label-font-size-property', value)
   }
 
-  get nodeLabelFontFamilyProperty () {
+  get nodeLabelFontFamilyProperty() {
     return getter(this, 'node-label-font-family-property', 'labelFontFamily')
   }
 
-  set nodeLabelFontFamilyProperty (value) {
+  set nodeLabelFontFamilyProperty(value) {
     this.setAttribute('node-label-font-family-property', value)
   }
 
-  get linkSourceProperty () {
+  get linkSourceProperty() {
     return getter(this, 'link-source-property', 'source')
   }
 
-  set linkSourceProperty (value) {
+  set linkSourceProperty(value) {
     this.setAttribute('link-source-property', value)
   }
 
-  get linkTargetProperty () {
+  get linkTargetProperty() {
     return getter(this, 'link-target-property', 'target')
   }
 
-  set linkTargetProperty (value) {
+  set linkTargetProperty(value) {
     this.setAttribute('link-target-property', value)
   }
 
-  get linkBendsProperty () {
+  get linkBendsProperty() {
     return getter(this, 'link-bends-property', 'bends')
   }
 
-  set linkBendsProperty (value) {
+  set linkBendsProperty(value) {
     this.setAttribute('link-bends-property', value)
   }
 
-  get linkStrokeColorProperty () {
+  get linkStrokeColorProperty() {
     return getter(this, 'link-stroke-color-property', 'strokeColor')
   }
 
-  set linkStrokeColorProperty (value) {
+  set linkStrokeColorProperty(value) {
     this.setAttribute('link-stroke-color-property', value)
   }
 
-  get linkStrokeOpacityProperty () {
+  get linkStrokeOpacityProperty() {
     return getter(this, 'link-stroke-opacity-property', 'strokeOpacity')
   }
 
-  set linkStrokeOpacityProperty (value) {
+  set linkStrokeOpacityProperty(value) {
     this.setAttribute('link-stroke-opacity-property', value)
   }
 
-  get linkStrokeWidthProperty () {
+  get linkStrokeWidthProperty() {
     return getter(this, 'link-stroke-width-property', 'strokeWidth')
   }
 
-  set linkStrokeWidthProperty (value) {
+  set linkStrokeWidthProperty(value) {
     this.setAttribute('link-stroke-width-property', value)
   }
 
-  get linkTypeProperty () {
+  get linkTypeProperty() {
     return getter(this, 'link-type-property', 'type')
   }
 
-  set linkTypeProperty (value) {
+  set linkTypeProperty(value) {
     this.setAttribute('link-type-property', value)
   }
 
-  get linkVisibilityProperty () {
+  get linkVisibilityProperty() {
     return getter(this, 'link-visibility-property', 'visibility')
   }
 
-  set linkVisibilityProperty (value) {
+  set linkVisibilityProperty(value) {
     this.setAttribute('link-visibility-property', value)
   }
 
-  get linkSourceMarkerShapeProperty () {
-    return getter(this, 'link-source-marker-shape-property', 'sourceMarkerShape')
+  get linkSourceMarkerShapeProperty() {
+    return getter(
+      this,
+      'link-source-marker-shape-property',
+      'sourceMarkerShape'
+    )
   }
 
-  set linkSourceMarkerShapeProperty (value) {
+  set linkSourceMarkerShapeProperty(value) {
     this.setAttribute('link-source-marker-shape-property', value)
   }
 
-  get linkSourceMarkerSizeProperty () {
+  get linkSourceMarkerSizeProperty() {
     return getter(this, 'link-source-marker-size-property', 'sourceMarkerSize')
   }
 
-  set linkSourceMarkerSizeProperty (value) {
+  set linkSourceMarkerSizeProperty(value) {
     this.setAttribute('link-source-marker-size-property', value)
   }
 
-  get linkTargetMarkerShapeProperty () {
-    return getter(this, 'link-target-marker-shape-property', 'targetMarkerShape')
+  get linkTargetMarkerShapeProperty() {
+    return getter(
+      this,
+      'link-target-marker-shape-property',
+      'targetMarkerShape'
+    )
   }
 
-  set linkTargetMarkerShapeProperty (value) {
+  set linkTargetMarkerShapeProperty(value) {
     this.setAttribute('link-target-marker-shape-property', value)
   }
 
-  get linkTargetMarkerSizeProperty () {
+  get linkTargetMarkerSizeProperty() {
     return getter(this, 'link-target-marker-size-property', 'targetMarkerSize')
   }
 
-  set linkTargetMarkerSizeProperty (value) {
+  set linkTargetMarkerSizeProperty(value) {
     this.setAttribute('link-target-marker-size-property', value)
   }
 
-  get linkLabelProperty () {
+  get linkLabelProperty() {
     return getter(this, 'link-label-property', 'label')
   }
 
-  set linkLabelProperty (value) {
+  set linkLabelProperty(value) {
     this.setAttribute('link-label-property', value)
   }
 
-  get linkLabelFillColorProperty () {
+  get linkLabelFillColorProperty() {
     return getter(this, 'link-label-fill-color-property', 'labelFillColor')
   }
 
-  set linkLabelFillColorProperty (value) {
+  set linkLabelFillColorProperty(value) {
     this.setAttribute('link-label-fill-color-property', value)
   }
 
-  get linkLabelFillOpacityProperty () {
+  get linkLabelFillOpacityProperty() {
     return getter(this, 'link-label-fill-opacity-property', 'labelFillOpacity')
   }
 
-  set linkLabelFillOpacityProperty (value) {
+  set linkLabelFillOpacityProperty(value) {
     this.setAttribute('link-label-fill-opacity-property', value)
   }
 
-  get linkLabelStrokeColorProperty () {
+  get linkLabelStrokeColorProperty() {
     return getter(this, 'link-label-stroke-color-property', 'labelStrokeColor')
   }
 
-  set linkLabelStrokeColorProperty (value) {
+  set linkLabelStrokeColorProperty(value) {
     this.setAttribute('link-label-stroke-color-property', value)
   }
 
-  get linkLabelStrokeOpacityProperty () {
-    return getter(this, 'link-label-stroke-opacity-property', 'labelStrokeOpacity')
+  get linkLabelStrokeOpacityProperty() {
+    return getter(
+      this,
+      'link-label-stroke-opacity-property',
+      'labelStrokeOpacity'
+    )
   }
 
-  set linkLabelStrokeOpacityProperty (value) {
+  set linkLabelStrokeOpacityProperty(value) {
     this.setAttribute('link-label-stroke-opacity-property', value)
   }
 
-  get linkLabelStrokeWidthProperty () {
+  get linkLabelStrokeWidthProperty() {
     return getter(this, 'link-label-stroke-width-property', 'labelStrokeWidth')
   }
 
-  set linkLabelStrokeWidthProperty (value) {
+  set linkLabelStrokeWidthProperty(value) {
     this.setAttribute('link-label-stroke-width-property', value)
   }
 
-  get linkLabelFontSizeProperty () {
+  get linkLabelFontSizeProperty() {
     return getter(this, 'link-label-font-size-property', 'labelFontSize')
   }
 
-  set linkLabelFontSizeProperty (value) {
+  set linkLabelFontSizeProperty(value) {
     this.setAttribute('link-label-font-size-property', value)
   }
 
-  get linkLabelFontFamilyProperty () {
+  get linkLabelFontFamilyProperty() {
     return getter(this, 'link-label-font-family-property', 'labelFontFamily')
   }
 
-  set linkLabelFontFamilyProperty (value) {
+  set linkLabelFontFamilyProperty(value) {
     this.setAttribute('link-label-font-family-property', value)
   }
 
-  get defaultGroupX () {
+  get defaultGroupX() {
     return getter(this, 'default-group-x', 0)
   }
 
-  set defaultGroupX (value) {
+  set defaultGroupX(value) {
     this.setAttribute('default-group-x', value)
   }
 
-  get defaultGroupY () {
+  get defaultGroupY() {
     return getter(this, 'default-group-y', 0)
   }
 
-  set defaultGroupY (value) {
+  set defaultGroupY(value) {
     this.setAttribute('default-group-y', value)
   }
 
-  get defaultGroupWidth () {
+  get defaultGroupWidth() {
     return getter(this, 'default-group-width', 10)
   }
 
-  set defaultGroupWidth (value) {
+  set defaultGroupWidth(value) {
     this.setAttribute('default-group-width', value)
   }
 
-  get defaultGroupHeight () {
+  get defaultGroupHeight() {
     return getter(this, 'default-group-height', 10)
   }
 
-  set defaultGroupHeight (value) {
+  set defaultGroupHeight(value) {
     this.setAttribute('default-group-height', value)
   }
 
-  get defaultGroupFillColor () {
+  get defaultGroupFillColor() {
     return getter(this, 'default-group-fill-color', '#fff')
   }
 
-  set defaultGroupFillColor (value) {
+  set defaultGroupFillColor(value) {
     this.setAttribute('default-group-fill-color', value)
   }
 
-  get defaultGroupFillOpacity () {
+  get defaultGroupFillOpacity() {
     return getter(this, 'default-group-fill-opacity', 1)
   }
 
-  set defaultGroupFillOpacity (value) {
+  set defaultGroupFillOpacity(value) {
     this.setAttribute('default-group-fill-opacity', value)
   }
 
-  get defaultGroupStrokeColor () {
+  get defaultGroupStrokeColor() {
     return getter(this, 'default-group-stroke-color', '#000')
   }
 
-  set defaultGroupStrokeColor (value) {
+  set defaultGroupStrokeColor(value) {
     this.setAttribute('default-group-stroke-color', value)
   }
 
-  get defaultGroupStrokeOpacity () {
+  get defaultGroupStrokeOpacity() {
     return getter(this, 'default-group-stroke-opacity', 1)
   }
 
-  set defaultGroupStrokeOpacity (value) {
+  set defaultGroupStrokeOpacity(value) {
     this.setAttribute('default-group-stroke-opacity', value)
   }
 
-  get defaultGroupStrokeWidth () {
+  get defaultGroupStrokeWidth() {
     return getter(this, 'default-group-stroke-width', 1)
   }
 
-  set defaultGroupStrokeWidth (value) {
+  set defaultGroupStrokeWidth(value) {
     this.setAttribute('default-group-stroke-width', value)
   }
 
-  get defaultGroupType () {
+  get defaultGroupType() {
     return getter(this, 'default-group-type', 'rect')
   }
 
-  set defaultGroupType (value) {
+  set defaultGroupType(value) {
     this.setAttribute('default-group-type', value)
   }
 
-  get defaultGroupVisibility () {
+  get defaultGroupVisibility() {
     return getter(this, 'default-group-visibility', true)
   }
 
-  set defaultGroupVisibility (value) {
+  set defaultGroupVisibility(value) {
     this.setAttribute('default-group-visibility', value)
   }
 
-  get defaultGroupLabel () {
+  get defaultGroupLabel() {
     return getter(this, 'default-group-label', '')
   }
 
-  set defaultGroupLabel (value) {
+  set defaultGroupLabel(value) {
     this.setAttribute('default-group-label', value)
   }
 
-  get defaultGroupLabelFillColor () {
+  get defaultGroupLabelFillColor() {
     return getter(this, 'default-group-label-fill-color', '#000')
   }
 
-  set defaultGroupLabelFillColor (value) {
+  set defaultGroupLabelFillColor(value) {
     this.setAttribute('default-group-label-fill-color', value)
   }
 
-  get defaultGroupLabelFillOpacity () {
+  get defaultGroupLabelFillOpacity() {
     return getter(this, 'default-group-label-fill-opacity', 1)
   }
 
-  set defaultGroupLabelFillOpacity (value) {
+  set defaultGroupLabelFillOpacity(value) {
     this.setAttribute('default-group-label-fill-opacity', value)
   }
 
-  get defaultGroupLabelStrokeColor () {
+  get defaultGroupLabelStrokeColor() {
     return getter(this, 'default-group-label-stroke-color', '#fff')
   }
 
-  set defaultGroupLabelStrokeColor (value) {
+  set defaultGroupLabelStrokeColor(value) {
     this.setAttribute('default-group-label-stroke-color', value)
   }
 
-  get defaultGroupLabelStrokeOpacity () {
+  get defaultGroupLabelStrokeOpacity() {
     return getter(this, 'default-group-label-stroke-opacity', 1)
   }
 
-  set defaultGroupLabelStrokeOpacity (value) {
+  set defaultGroupLabelStrokeOpacity(value) {
     this.setAttribute('default-group-label-stroke-opacity', value)
   }
 
-  get defaultGroupLabelStrokeWidth () {
+  get defaultGroupLabelStrokeWidth() {
     return getter(this, 'default-group-label-stroke-width', 0)
   }
 
-  set defaultGroupLabelStrokeWidth (value) {
+  set defaultGroupLabelStrokeWidth(value) {
     this.setAttribute('default-group-label-stroke-width', value)
   }
 
-  get defaultGroupLabelFontSize () {
+  get defaultGroupLabelFontSize() {
     return getter(this, 'default-group-label-font-size', 10)
   }
 
-  set defaultGroupLabelFontSize (value) {
+  set defaultGroupLabelFontSize(value) {
     this.setAttribute('default-group-label-font-size', value)
   }
 
-  get defaultGroupLabelFontFamily () {
+  get defaultGroupLabelFontFamily() {
     return getter(this, 'default-group-label-font-family', 'serif')
   }
 
-  set defaultGroupLabelFontFamily (value) {
+  set defaultGroupLabelFontFamily(value) {
     this.setAttribute('default-group-label-font-family', value)
   }
 
-  get defaultNodeX () {
+  get defaultNodeX() {
     return getter(this, 'default-node-x', 0)
   }
 
-  set defaultNodeX (value) {
+  set defaultNodeX(value) {
     this.setAttribute('default-node-x', value)
   }
 
-  get defaultNodeY () {
+  get defaultNodeY() {
     return getter(this, 'default-node-y', 0)
   }
 
-  set defaultNodeY (value) {
+  set defaultNodeY(value) {
     this.setAttribute('default-node-y', value)
   }
 
-  get defaultNodeWidth () {
+  get defaultNodeWidth() {
     return getter(this, 'default-node-width', 10)
   }
 
-  set defaultNodeWidth (value) {
+  set defaultNodeWidth(value) {
     this.setAttribute('default-node-width', value)
   }
 
-  get defaultNodeHeight () {
+  get defaultNodeHeight() {
     return getter(this, 'default-node-height', 10)
   }
 
-  set defaultNodeHeight (value) {
+  set defaultNodeHeight(value) {
     this.setAttribute('default-node-height', value)
   }
 
-  get defaultNodeFillColor () {
+  get defaultNodeFillColor() {
     return getter(this, 'default-node-fill-color', '#fff')
   }
 
-  set defaultNodeFillColor (value) {
+  set defaultNodeFillColor(value) {
     this.setAttribute('default-node-fill-color', value)
   }
 
-  get defaultNodeFillOpacity () {
+  get defaultNodeFillOpacity() {
     return getter(this, 'default-node-fill-opacity', 1)
   }
 
-  set defaultNodeFillOpacity (value) {
+  set defaultNodeFillOpacity(value) {
     this.setAttribute('default-node-fill-opacity', value)
   }
 
-  get defaultNodeStrokeColor () {
+  get defaultNodeStrokeColor() {
     return getter(this, 'default-node-stroke-color', '#000')
   }
 
-  set defaultNodeStrokeColor (value) {
+  set defaultNodeStrokeColor(value) {
     this.setAttribute('default-node-stroke-color', value)
   }
 
-  get defaultNodeStrokeOpacity () {
+  get defaultNodeStrokeOpacity() {
     return getter(this, 'default-node-stroke-opacity', 1)
   }
 
-  set defaultNodeStrokeOpacity (value) {
+  set defaultNodeStrokeOpacity(value) {
     this.setAttribute('default-node-stroke-opacity', value)
   }
 
-  get defaultNodeStrokeWidth () {
+  get defaultNodeStrokeWidth() {
     return getter(this, 'default-node-stroke-width', 1)
   }
 
-  set defaultNodeStrokeWidth (value) {
+  set defaultNodeStrokeWidth(value) {
     this.setAttribute('default-node-stroke-width', value)
   }
 
-  get defaultNodeType () {
+  get defaultNodeType() {
     return getter(this, 'default-node-type', 'circle')
   }
 
-  set defaultNodeType (value) {
+  set defaultNodeType(value) {
     this.setAttribute('default-node-type', value)
   }
 
-  get defaultNodeVisibility () {
+  get defaultNodeVisibility() {
     return getter(this, 'default-node-visibility', true)
   }
 
-  set defaultNodeVisibility (value) {
+  set defaultNodeVisibility(value) {
     this.setAttribute('default-node-visibility', value)
   }
 
-  get defaultNodeLabel () {
+  get defaultNodeLabel() {
     return getter(this, 'default-node-label', '')
   }
 
-  set defaultNodeLabel (value) {
+  set defaultNodeLabel(value) {
     this.setAttribute('default-node-label', value)
   }
 
-  get defaultNodeLabelFillColor () {
+  get defaultNodeLabelFillColor() {
     return getter(this, 'default-node-label-fill-color', '#000')
   }
 
-  set defaultNodeLabelFillColor (value) {
+  set defaultNodeLabelFillColor(value) {
     this.setAttribute('default-node-label-fill-color', value)
   }
 
-  get defaultNodeLabelFillOpacity () {
+  get defaultNodeLabelFillOpacity() {
     return getter(this, 'default-node-label-fill-opacity', 1)
   }
 
-  set defaultNodeLabelFillOpacity (value) {
+  set defaultNodeLabelFillOpacity(value) {
     this.setAttribute('default-node-label-fill-opacity', value)
   }
 
-  get defaultNodeLabelStrokeColor () {
+  get defaultNodeLabelStrokeColor() {
     return getter(this, 'default-node-label-stroke-color', '#fff')
   }
 
-  set defaultNodeLabelStrokeColor (value) {
+  set defaultNodeLabelStrokeColor(value) {
     this.setAttribute('default-node-label-stroke-color', value)
   }
 
-  get defaultNodeLabelStrokeOpacity () {
+  get defaultNodeLabelStrokeOpacity() {
     return getter(this, 'default-node-label-stroke-opacity', 1)
   }
 
-  set defaultNodeLabelStrokeOpacity (value) {
+  set defaultNodeLabelStrokeOpacity(value) {
     this.setAttribute('default-node-label-stroke-opacity', value)
   }
 
-  get defaultNodeLabelStrokeWidth () {
+  get defaultNodeLabelStrokeWidth() {
     return getter(this, 'default-node-label-stroke-width', 0)
   }
 
-  set defaultNodeLabelStrokeWidth (value) {
+  set defaultNodeLabelStrokeWidth(value) {
     this.setAttribute('default-node-label-stroke-width', value)
   }
 
-  get defaultNodeLabelFontSize () {
+  get defaultNodeLabelFontSize() {
     return getter(this, 'default-node-label-font-size', 10)
   }
 
-  set defaultNodeLabelFontSize (value) {
+  set defaultNodeLabelFontSize(value) {
     this.setAttribute('default-node-label-font-size', value)
   }
 
-  get defaultNodeLabelFontFamily () {
+  get defaultNodeLabelFontFamily() {
     return getter(this, 'default-node-label-font-family', 'serif')
   }
 
-  set defaultNodeLabelFontFamily (value) {
+  set defaultNodeLabelFontFamily(value) {
     this.setAttribute('default-node-label-font-family', value)
   }
 
-  get defaultLinkStrokeColor () {
+  get defaultLinkStrokeColor() {
     return getter(this, 'default-link-stroke-color', '#000')
   }
 
-  set defaultLinkStrokeColor (value) {
+  set defaultLinkStrokeColor(value) {
     this.setAttribute('default-link-stroke-color', value)
   }
 
-  get defaultLinkStrokeOpacity () {
+  get defaultLinkStrokeOpacity() {
     return getter(this, 'default-link-stroke-opacity', 1)
   }
 
-  set defaultLinkStrokeOpacity (value) {
+  set defaultLinkStrokeOpacity(value) {
     this.setAttribute('default-link-stroke-opacity', value)
   }
 
-  get defaultLinkStrokeWidth () {
+  get defaultLinkStrokeWidth() {
     return getter(this, 'default-link-stroke-width', 1)
   }
 
-  set defaultLinkStrokeWidth (value) {
+  set defaultLinkStrokeWidth(value) {
     this.setAttribute('default-link-stroke-width', value)
   }
 
-  get defaultLinkType () {
+  get defaultLinkType() {
     return getter(this, 'default-link-type', 'line')
   }
 
-  set defaultLinkType (value) {
+  set defaultLinkType(value) {
     this.setAttribute('default-link-type', value)
   }
 
-  get defaultLinkVisibility () {
+  get defaultLinkVisibility() {
     return getter(this, 'default-link-visibility', true)
   }
 
-  set defaultLinkVisibility (value) {
+  set defaultLinkVisibility(value) {
     this.setAttribute('default-link-visibility', value)
   }
 
-  get defaultLinkSourceMarkerShape () {
+  get defaultLinkSourceMarkerShape() {
     return getter(this, 'default-link-source-marker-shape', 'none')
   }
 
-  set defaultLinkSourceMarkerShape (value) {
+  set defaultLinkSourceMarkerShape(value) {
     this.setAttribute('default-link-source-marker-shape', value)
   }
 
-  get defaultLinkSourceMarkerSize () {
+  get defaultLinkSourceMarkerSize() {
     return getter(this, 'default-link-source-marker-size', 5)
   }
 
-  set defaultLinkSourceMarkerSize (value) {
+  set defaultLinkSourceMarkerSize(value) {
     this.setAttribute('default-link-source-marker-size', value)
   }
 
-  get defaultLinkTargetMarkerShape () {
+  get defaultLinkTargetMarkerShape() {
     return getter(this, 'default-link-target-marker-shape', 'none')
   }
 
-  set defaultLinkTargetMarkerShape (value) {
+  set defaultLinkTargetMarkerShape(value) {
     this.setAttribute('default-link-target-marker-shape', value)
   }
 
-  get defaultLinkTargetMarkerSize () {
+  get defaultLinkTargetMarkerSize() {
     return getter(this, 'default-link-target-marker-size', 5)
   }
 
-  set defaultLinkTargetMarkerSize (value) {
+  set defaultLinkTargetMarkerSize(value) {
     this.setAttribute('default-link-target-marker-size', value)
   }
 
-  get defaultLinkLabel () {
+  get defaultLinkLabel() {
     return getter(this, 'default-link-label', '')
   }
 
-  set defaultLinkLabel (value) {
+  set defaultLinkLabel(value) {
     this.setAttribute('default-link-label', value)
   }
 
-  get defaultLinkLabelFillColor () {
+  get defaultLinkLabelFillColor() {
     return getter(this, 'default-link-label-fill-color', '#000')
   }
 
-  set defaultLinkLabelFillColor (value) {
+  set defaultLinkLabelFillColor(value) {
     this.setAttribute('default-link-label-fill-color', value)
   }
 
-  get defaultLinkLabelFillOpacity () {
+  get defaultLinkLabelFillOpacity() {
     return getter(this, 'default-link-label-fill-opacity', 1)
   }
 
-  set defaultLinkLabelFillOpacity (value) {
+  set defaultLinkLabelFillOpacity(value) {
     this.setAttribute('default-link-label-fill-opacity', value)
   }
 
-  get defaultLinkLabelStrokeColor () {
+  get defaultLinkLabelStrokeColor() {
     return getter(this, 'default-link-label-stroke-color', '#fff')
   }
 
-  set defaultLinkLabelStrokeColor (value) {
+  set defaultLinkLabelStrokeColor(value) {
     this.setAttribute('default-link-label-stroke-color', value)
   }
 
-  get defaultLinkLabelStrokeOpacity () {
+  get defaultLinkLabelStrokeOpacity() {
     return getter(this, 'default-link-label-stroke-opacity', 1)
   }
 
-  set defaultLinkLabelStrokeOpacity (value) {
+  set defaultLinkLabelStrokeOpacity(value) {
     this.setAttribute('default-link-label-stroke-opacity', value)
   }
 
-  get defaultLinkLabelStrokeWidth () {
+  get defaultLinkLabelStrokeWidth() {
     return getter(this, 'default-link-label-stroke-width', 0)
   }
 
-  set defaultLinkLabelStrokeWidth (value) {
+  set defaultLinkLabelStrokeWidth(value) {
     this.setAttribute('default-link-label-stroke-width', value)
   }
 
-  get defaultLinkLabelFontSize () {
+  get defaultLinkLabelFontSize() {
     return getter(this, 'default-link-label-font-size', 10)
   }
 
-  set defaultLinkLabelFontSize (value) {
+  set defaultLinkLabelFontSize(value) {
     this.setAttribute('default-link-label-font-size', value)
   }
 
-  get defaultLinkLabelFontFamily () {
+  get defaultLinkLabelFontFamily() {
     return getter(this, 'default-link-label-font-family', 'serif')
   }
 
-  set defaultLinkLabelFontFamily (value) {
+  set defaultLinkLabelFontFamily(value) {
     this.setAttribute('default-link-label-font-family', value)
   }
 
-  get data () {
+  get data() {
     return privates.get(this).originalData
   }
 }
