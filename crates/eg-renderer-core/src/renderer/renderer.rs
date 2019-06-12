@@ -1,4 +1,6 @@
-use super::meshes::{LayoutData, LinkMesh, LinkType, Mesh, MeshGeometry, NodeMesh, NodeType};
+use super::meshes::{
+    LabelMesh, LayoutData, LinkMesh, LinkType, Mesh, MeshGeometry, NodeMesh, NodeType,
+};
 use cgmatrix::{identity, matmul, orthogonal_matrix, scale, translate, viewing_matrix, Matrix44};
 use std::collections::HashMap;
 use wasm_bindgen::prelude::*;
@@ -26,6 +28,7 @@ impl Context {
         let line_links = LinkMesh::new(gl, LinkType::Line)?;
         let circle_nodes = NodeMesh::new(gl, NodeType::Circle)?;
         let rectangle_nodes = NodeMesh::new(gl, NodeType::Rectangle)?;
+        let node_labels = LabelMesh::new(gl)?;
         Ok(Context {
             width: 0,
             height: 0,
@@ -35,6 +38,7 @@ impl Context {
                 Box::new(line_links),
                 Box::new(circle_nodes),
                 Box::new(rectangle_nodes),
+                Box::new(node_labels),
             ],
             geometries: Vec::new(),
         })
