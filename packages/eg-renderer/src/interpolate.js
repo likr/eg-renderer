@@ -1,4 +1,5 @@
 import { interpolateRgb as d3InterpolateRgb } from 'd3-interpolate'
+import { color as d3Color } from 'd3-color'
 
 const interpolate = (current, next, r) => {
   return (next - current) * r + current
@@ -34,7 +35,7 @@ export const interpolateVertex = (current, next, r) => {
     result[p] = interpolate(current[p], next[p], r)
   }
   for (const p of colorInterpolateProperties) {
-    result[p] = d3InterpolateRgb(current[p], next[p])(r)
+    result[p] = d3Color(d3InterpolateRgb(current[p], next[p])(r))
   }
   return result
 }
