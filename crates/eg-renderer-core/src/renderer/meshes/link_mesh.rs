@@ -1,7 +1,10 @@
 use super::program::{init_fragment_shader, init_program, init_vertex_shader};
-use super::{EdgeData, LayoutData, Mesh};
-use web_sys::{WebGl2RenderingContext, WebGlBuffer, WebGlProgram, WebGlVertexArrayObject};
+use super::{EdgeData, LayoutData, Mesh, MeshGeometry};
+use web_sys::{
+    WebGl2RenderingContext, WebGlBuffer, WebGlProgram, WebGlTexture, WebGlVertexArrayObject,
+};
 
+#[derive(Clone)]
 pub enum LinkType {
     Line,
 }
@@ -213,26 +216,27 @@ fn line_geometry(points: &Vec<[f64; 2]>, width: f64) -> Vec<[f32; 2]> {
     result
 }
 
-pub struct LinkMesh {
-    program: WebGlProgram,
+pub struct LinkMeshGeometry {
+    link_type: LinkType,
     vertices: VertexBuffer,
     elements: ElementBuffer,
-    geometries: Vec<WebGlVertexArrayObject>,
-    link_type: LinkType,
+    vao: WebGlVertexArrayObject,
 }
 
-impl LinkMesh {
-    pub fn new(gl: &WebGl2RenderingContext, link_type: LinkType) -> Result<LinkMesh, String> {
+impl LinkMeshGeometry {
+    fn new(
+        gl: &WebGl2RenderingContext,
+        program: &WebGlProgram,
+        link_type: LinkType,
+    ) -> Result<LinkMeshGeometry, String> {
         let vertices = VertexBuffer::new(gl)?;
         let elements = ElementBuffer::new(gl)?;
-        let program = create_link_shader_program(gl)?;
-        let geometry = init_vertex_array(gl, &program, &vertices.buffer, &elements.buffer)?;
-        Ok(LinkMesh {
+        let vao = init_vertex_array(gl, &program, &vertices.buffer, &elements.buffer)?;
+        Ok(LinkMeshGeometry {
+            link_type,
             vertices,
             elements,
-            program,
-            geometries: vec![geometry],
-            link_type,
+            vao,
         })
     }
 
@@ -392,24 +396,6 @@ impl LinkMesh {
             LinkType::Line => s == "line",
         }
     }
-}
-
-impl Mesh for LinkMesh {
-    fn mode(&self) -> u32 {
-        WebGl2RenderingContext::TRIANGLES
-    }
-
-    fn program(&self) -> &WebGlProgram {
-        &self.program
-    }
-
-    fn geometries(&self) -> &Vec<WebGlVertexArrayObject> {
-        &self.geometries
-    }
-
-    fn size(&self) -> i32 {
-        self.elements.data.len() as i32
-    }
 
     fn update(&mut self, gl: &WebGl2RenderingContext, layout: &LayoutData) -> Result<(), String> {
         let mut vertex_count = 0;
@@ -493,6 +479,58 @@ impl Mesh for LinkMesh {
             WebGl2RenderingContext::STATIC_DRAW,
         );
 
+        Ok(())
+    }
+}
+
+impl MeshGeometry for LinkMeshGeometry {
+    fn vao(&self) -> &WebGlVertexArrayObject {
+        &self.vao
+    }
+
+    fn size(&self) -> i32 {
+        self.elements.data.len() as i32
+    }
+
+    fn texture(&self) -> Option<&WebGlTexture> {
+        None
+    }
+}
+
+pub struct LinkMesh {
+    program: WebGlProgram,
+    geometries: Vec<Box<LinkMeshGeometry>>,
+    link_type: LinkType,
+}
+
+impl LinkMesh {
+    pub fn new(gl: &WebGl2RenderingContext, link_type: LinkType) -> Result<LinkMesh, String> {
+        let program = create_link_shader_program(gl)?;
+        Ok(LinkMesh {
+            program,
+            geometries: vec![],
+            link_type,
+        })
+    }
+}
+
+impl Mesh for LinkMesh {
+    fn mode(&self) -> u32 {
+        WebGl2RenderingContext::TRIANGLES
+    }
+
+    fn program(&self) -> &WebGlProgram {
+        &self.program
+    }
+
+    fn geometries(&self) -> &Vec<Box<MeshGeometry>> {
+        unsafe { std::mem::transmute(&self.geometries) }
+    }
+
+    fn update(&mut self, gl: &WebGl2RenderingContext, layout: &LayoutData) -> Result<(), String> {
+        let mut geometry = LinkMeshGeometry::new(gl, &self.program, self.link_type.clone())?;
+        geometry.update(gl, layout);
+        self.geometries.push(Box::new(geometry));
         Ok(())
     }
 }

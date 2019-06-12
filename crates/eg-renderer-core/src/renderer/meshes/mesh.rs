@@ -1,4 +1,4 @@
-use web_sys::{WebGl2RenderingContext, WebGlProgram, WebGlVertexArrayObject};
+use web_sys::{WebGl2RenderingContext, WebGlProgram, WebGlTexture, WebGlVertexArrayObject};
 
 #[derive(Serialize, Deserialize)]
 pub struct ColorData {
@@ -84,10 +84,15 @@ pub struct LayoutData {
     pub exit: ExitData,
 }
 
+pub trait MeshGeometry {
+    fn vao(&self) -> &WebGlVertexArrayObject;
+    fn size(&self) -> i32;
+    fn texture(&self) -> Option<&WebGlTexture>;
+}
+
 pub trait Mesh {
     fn mode(&self) -> u32;
     fn program(&self) -> &WebGlProgram;
-    fn geometries(&self) -> &Vec<WebGlVertexArrayObject>;
-    fn size(&self) -> i32;
+    fn geometries(&self) -> &Vec<Box<MeshGeometry>>;
     fn update(&mut self, gl: &WebGl2RenderingContext, graph: &LayoutData) -> Result<(), String>;
 }

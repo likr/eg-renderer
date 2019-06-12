@@ -50,7 +50,7 @@ impl Renderer {
     #[wasm_bindgen(constructor)]
     pub fn new(canvas: HtmlCanvasElement) -> Result<Renderer, JsValue> {
         let mut options = HashMap::new();
-        options.insert("antialias", false);
+        options.insert("antialias", true);
         let options = JsValue::from_serde(&options).unwrap();
         let gl = canvas
             .get_context_with_context_options("webgl2", &options)?
@@ -97,10 +97,10 @@ impl Renderer {
                 );
             }
             for geometry in object.geometries() {
-                gl.bind_vertex_array(Some(geometry));
+                gl.bind_vertex_array(Some(geometry.vao()));
                 gl.draw_elements_with_i32(
                     object.mode(),
-                    object.size(),
+                    geometry.size(),
                     WebGl2RenderingContext::UNSIGNED_INT,
                     0,
                 );
