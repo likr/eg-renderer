@@ -217,26 +217,28 @@ fn line_geometry(points: &Vec<[f64; 2]>, width: f64) -> Vec<[f32; 2]> {
 }
 
 pub struct LinkMeshGeometry {
-    link_type: LinkType,
     vertices: VertexBuffer,
     elements: ElementBuffer,
     vao: WebGlVertexArrayObject,
+    program: WebGlProgram,
+    link_type: LinkType,
 }
 
 impl LinkMeshGeometry {
     fn new(
         gl: &WebGl2RenderingContext,
-        program: &WebGlProgram,
+        program: WebGlProgram,
         link_type: LinkType,
     ) -> Result<LinkMeshGeometry, String> {
         let vertices = VertexBuffer::new(gl)?;
         let elements = ElementBuffer::new(gl)?;
         let vao = init_vertex_array(gl, &program, &vertices.buffer, &elements.buffer)?;
         Ok(LinkMeshGeometry {
-            link_type,
             vertices,
             elements,
             vao,
+            program,
+            link_type,
         })
     }
 
@@ -484,6 +486,14 @@ impl LinkMeshGeometry {
 }
 
 impl MeshGeometry for LinkMeshGeometry {
+    fn mode(&self) -> u32 {
+        WebGl2RenderingContext::TRIANGLES
+    }
+
+    fn program(&self) -> &WebGlProgram {
+        &self.program
+    }
+
     fn vao(&self) -> &WebGlVertexArrayObject {
         &self.vao
     }
@@ -499,38 +509,26 @@ impl MeshGeometry for LinkMeshGeometry {
 
 pub struct LinkMesh {
     program: WebGlProgram,
-    geometries: Vec<Box<LinkMeshGeometry>>,
     link_type: LinkType,
 }
 
 impl LinkMesh {
     pub fn new(gl: &WebGl2RenderingContext, link_type: LinkType) -> Result<LinkMesh, String> {
         let program = create_link_shader_program(gl)?;
-        Ok(LinkMesh {
-            program,
-            geometries: vec![],
-            link_type,
-        })
+        Ok(LinkMesh { program, link_type })
     }
 }
 
 impl Mesh for LinkMesh {
-    fn mode(&self) -> u32 {
-        WebGl2RenderingContext::TRIANGLES
-    }
-
-    fn program(&self) -> &WebGlProgram {
-        &self.program
-    }
-
-    fn geometries(&self) -> &Vec<Box<MeshGeometry>> {
-        unsafe { std::mem::transmute(&self.geometries) }
-    }
-
-    fn update(&mut self, gl: &WebGl2RenderingContext, layout: &LayoutData) -> Result<(), String> {
-        let mut geometry = LinkMeshGeometry::new(gl, &self.program, self.link_type.clone())?;
-        geometry.update(gl, layout);
-        self.geometries.push(Box::new(geometry));
+    fn update(
+        &self,
+        gl: &WebGl2RenderingContext,
+        layout: &LayoutData,
+        geometries: &mut Vec<Box<MeshGeometry>>,
+    ) -> Result<(), String> {
+        let mut geometry = LinkMeshGeometry::new(gl, self.program.clone(), self.link_type.clone())?;
+        geometry.update(gl, layout)?;
+        geometries.push(Box::new(geometry));
         Ok(())
     }
 }

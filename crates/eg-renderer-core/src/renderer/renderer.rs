@@ -1,4 +1,4 @@
-use super::meshes::{LayoutData, LinkMesh, LinkType, Mesh, NodeMesh, NodeType};
+use super::meshes::{LayoutData, LinkMesh, LinkType, Mesh, MeshGeometry, NodeMesh, NodeType};
 use cgmatrix::{identity, matmul, orthogonal_matrix, scale, translate, viewing_matrix, Matrix44};
 use std::collections::HashMap;
 use wasm_bindgen::prelude::*;
@@ -18,13 +18,14 @@ struct Context {
     mv_matrix: Matrix44,
     p_matrix: Matrix44,
     objects: Vec<Box<Mesh>>,
+    geometries: Vec<Box<MeshGeometry>>,
 }
 
 impl Context {
     fn new(gl: &WebGl2RenderingContext) -> Result<Context, String> {
         let line_links = LinkMesh::new(gl, LinkType::Line)?;
-        let circle_nodes = NodeMesh::new(gl, 0, NodeType::Circle)?;
-        let rectangle_nodes = NodeMesh::new(gl, 0, NodeType::Rectangle)?;
+        let circle_nodes = NodeMesh::new(gl, NodeType::Circle)?;
+        let rectangle_nodes = NodeMesh::new(gl, NodeType::Rectangle)?;
         Ok(Context {
             width: 0,
             height: 0,
@@ -35,6 +36,7 @@ impl Context {
                 Box::new(circle_nodes),
                 Box::new(rectangle_nodes),
             ],
+            geometries: Vec::new(),
         })
     }
 }
@@ -74,8 +76,8 @@ impl Renderer {
     pub fn render(&self, r: f32) -> Result<(), JsValue> {
         let gl = &self.gl;
         gl.clear(WebGl2RenderingContext::COLOR_BUFFER_BIT);
-        for object in &self.context.objects {
-            let program = object.program();
+        for geometry in &self.context.geometries {
+            let program = geometry.program();
             gl.use_program(Some(program));
             let mv_location = gl
                 .get_uniform_location(program, "uMVMatrix")
@@ -96,25 +98,25 @@ impl Renderer {
                     self.context.height as f32,
                 );
             }
-            for geometry in object.geometries() {
-                gl.bind_vertex_array(Some(geometry.vao()));
-                gl.draw_elements_with_i32(
-                    object.mode(),
-                    geometry.size(),
-                    WebGl2RenderingContext::UNSIGNED_INT,
-                    0,
-                );
-                gl.bind_vertex_array(None);
-            }
+            gl.bind_vertex_array(Some(geometry.vao()));
+            gl.draw_elements_with_i32(
+                geometry.mode(),
+                geometry.size(),
+                WebGl2RenderingContext::UNSIGNED_INT,
+                0,
+            );
+            gl.bind_vertex_array(None);
         }
         Ok(())
     }
 
     pub fn update(&mut self, layout: JsValue) -> Result<(), JsValue> {
+        let mut geometries = Vec::new();
         let layout: LayoutData = layout.into_serde().map_err(|e| format!("{}", e))?;
         for object in self.context.objects.iter_mut() {
-            object.update(&self.gl, &layout)?;
+            object.update(&self.gl, &layout, &mut geometries)?;
         }
+        self.context.geometries = geometries;
         Ok(())
     }
 

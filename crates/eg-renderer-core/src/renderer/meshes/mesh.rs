@@ -85,14 +85,18 @@ pub struct LayoutData {
 }
 
 pub trait MeshGeometry {
+    fn mode(&self) -> u32;
+    fn program(&self) -> &WebGlProgram;
     fn vao(&self) -> &WebGlVertexArrayObject;
     fn size(&self) -> i32;
     fn texture(&self) -> Option<&WebGlTexture>;
 }
 
 pub trait Mesh {
-    fn mode(&self) -> u32;
-    fn program(&self) -> &WebGlProgram;
-    fn geometries(&self) -> &Vec<Box<MeshGeometry>>;
-    fn update(&mut self, gl: &WebGl2RenderingContext, graph: &LayoutData) -> Result<(), String>;
+    fn update(
+        &self,
+        gl: &WebGl2RenderingContext,
+        graph: &LayoutData,
+        geometries: &mut Vec<Box<MeshGeometry>>,
+    ) -> Result<(), String>;
 }

@@ -299,7 +299,7 @@ impl VertexBuffer {
     fn new(gl: &WebGl2RenderingContext) -> Result<VertexBuffer, String> {
         let buffer = gl.create_buffer().ok_or("failed to create buffer")?;
         let data = Vec::new();
-        let mut obj = VertexBuffer { buffer, data };
+        let obj = VertexBuffer { buffer, data };
         Ok(obj)
     }
 
@@ -317,7 +317,7 @@ impl ElementBuffer {
     fn new(gl: &WebGl2RenderingContext) -> Result<ElementBuffer, String> {
         let buffer = gl.create_buffer().ok_or("failed to create buffer")?;
         let data = Vec::new();
-        let mut obj = ElementBuffer { buffer, data };
+        let obj = ElementBuffer { buffer, data };
         Ok(obj)
     }
 
@@ -338,13 +338,14 @@ pub struct NodeMeshGeometry {
     vertices: VertexBuffer,
     elements: ElementBuffer,
     vao: WebGlVertexArrayObject,
+    program: WebGlProgram,
     node_type: NodeType,
 }
 
 impl NodeMeshGeometry {
     fn new(
         gl: &WebGl2RenderingContext,
-        program: &WebGlProgram,
+        program: WebGlProgram,
         node_type: NodeType,
     ) -> Result<NodeMeshGeometry, String> {
         let vertices = VertexBuffer::new(gl)?;
@@ -354,6 +355,7 @@ impl NodeMeshGeometry {
             vertices,
             elements,
             vao,
+            program,
             node_type,
         })
     }
@@ -652,6 +654,14 @@ impl NodeMeshGeometry {
 }
 
 impl MeshGeometry for NodeMeshGeometry {
+    fn mode(&self) -> u32 {
+        WebGl2RenderingContext::TRIANGLES
+    }
+
+    fn program(&self) -> &WebGlProgram {
+        &self.program
+    }
+
     fn vao(&self) -> &WebGlVertexArrayObject {
         &self.vao
     }
@@ -667,42 +677,26 @@ impl MeshGeometry for NodeMeshGeometry {
 
 pub struct NodeMesh {
     program: WebGlProgram,
-    geometries: Vec<Box<NodeMeshGeometry>>,
     node_type: NodeType,
 }
 
 impl NodeMesh {
-    pub fn new(
-        gl: &WebGl2RenderingContext,
-        n: usize,
-        node_type: NodeType,
-    ) -> Result<NodeMesh, String> {
+    pub fn new(gl: &WebGl2RenderingContext, node_type: NodeType) -> Result<NodeMesh, String> {
         let program = create_node_shader_program(gl, &node_type)?;
-        Ok(NodeMesh {
-            program,
-            geometries: vec![],
-            node_type,
-        })
+        Ok(NodeMesh { program, node_type })
     }
 }
 
 impl Mesh for NodeMesh {
-    fn mode(&self) -> u32 {
-        WebGl2RenderingContext::TRIANGLES
-    }
-
-    fn program(&self) -> &WebGlProgram {
-        &self.program
-    }
-
-    fn geometries(&self) -> &Vec<Box<MeshGeometry>> {
-        unsafe { std::mem::transmute(&self.geometries) }
-    }
-
-    fn update(&mut self, gl: &WebGl2RenderingContext, layout: &LayoutData) -> Result<(), String> {
-        let mut geometry = NodeMeshGeometry::new(gl, &self.program, self.node_type.clone())?;
-        geometry.update(gl, layout);
-        self.geometries.push(Box::new(geometry));
+    fn update(
+        &self,
+        gl: &WebGl2RenderingContext,
+        layout: &LayoutData,
+        geometries: &mut Vec<Box<MeshGeometry>>,
+    ) -> Result<(), String> {
+        let mut geometry = NodeMeshGeometry::new(gl, self.program.clone(), self.node_type.clone())?;
+        geometry.update(gl, layout)?;
+        geometries.push(Box::new(geometry));
         Ok(())
     }
 }
