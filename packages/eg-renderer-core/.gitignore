@@ -1,6 +1,0 @@
-target
-eg_renderer_core.d.ts
-eg_renderer_core.js
-eg_renderer_core_bg.d.ts
-eg_renderer_core_bg.wasm
-package.json
