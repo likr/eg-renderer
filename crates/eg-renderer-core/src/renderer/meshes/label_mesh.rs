@@ -1,7 +1,10 @@
 use super::program::{init_fragment_shader, init_program, init_vertex_shader};
-use super::{LayoutData, Mesh, MeshGeometry, VertexData};
+use super::{ColorData, LayoutData, Mesh, MeshGeometry, VertexData};
+use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsCast;
 use web_sys::{
-    WebGl2RenderingContext, WebGlBuffer, WebGlProgram, WebGlTexture, WebGlVertexArrayObject,
+    CanvasRenderingContext2d, HtmlCanvasElement, WebGl2RenderingContext, WebGlBuffer, WebGlProgram,
+    WebGlTexture, WebGlVertexArrayObject,
 };
 
 const LABEL_VERTEX_SHADER_SOURCE: &str = r#"#version 300 es
@@ -25,15 +28,83 @@ in vec2 vTextureCoord;
 out vec4 oFragColor;
 void main() {
   vec4 smpColor = texture(image, vTextureCoord);
-  // oFragColor = smpColor;
-  oFragColor = vec4(0.0, 0.0, 0.0, 0.0);
+  oFragColor = smpColor;
 }
 "#;
 
-fn create_label_shader_program(gl: &WebGl2RenderingContext) -> Result<WebGlProgram, String> {
+fn create_text_image(
+    text: &String,
+    scale: f64,
+    label_font_size: f64,
+    label_font_family: &String,
+    label_fill_color: &ColorData,
+    label_stroke_color: &ColorData,
+    label_stroke_width: f64,
+) -> Result<HtmlCanvasElement, JsValue> {
+    let window = web_sys::window().unwrap();
+    let document = window.document().unwrap();
+    let canvas = document
+        .create_element("canvas")?
+        .dyn_into::<HtmlCanvasElement>()?;
+    canvas.set_width((64. * scale) as u32);
+    canvas.set_height((16. * scale) as u32);
+    let ctx = canvas
+        .get_context("2d")?
+        .unwrap()
+        .dyn_into::<CanvasRenderingContext2d>()?;
+    ctx.set_font(&format!(
+        "{}px {}",
+        label_font_size * scale,
+        label_font_family
+    ));
+    ctx.set_fill_style(
+        &format!(
+            "rgb({},{},{})",
+            label_fill_color.r, label_fill_color.g, label_fill_color.b
+        )
+        .into(),
+    );
+    ctx.set_stroke_style(
+        &format!(
+            "rgb({},{},{})",
+            label_stroke_color.r, label_stroke_color.g, label_stroke_color.b
+        )
+        .into(),
+    );
+    ctx.set_line_width(label_stroke_width * scale);
+    ctx.set_text_align("center");
+    ctx.set_text_baseline("middle");
+    ctx.fill_text(
+        &text,
+        (canvas.width() / 2) as f64,
+        (canvas.height() / 2) as f64,
+    )?;
+    Ok(canvas)
+}
+
+fn create_label_shader_program(gl: &WebGl2RenderingContext) -> Result<WebGlProgram, JsValue> {
     let vertex_shader = init_vertex_shader(gl, LABEL_VERTEX_SHADER_SOURCE)?;
     let fragment_shader = init_fragment_shader(gl, LABEL_FRAGMENT_SHADER_SOURCE)?;
     init_program(gl, vertex_shader, fragment_shader)
+}
+
+fn create_texture(
+    gl: &WebGl2RenderingContext,
+    canvas: &HtmlCanvasElement,
+) -> Result<WebGlTexture, JsValue> {
+    let texture = gl.create_texture().ok_or("failed")?;
+    gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, Some(&texture));
+    gl.tex_image_2d_with_u32_and_u32_and_html_canvas_element(
+        WebGl2RenderingContext::TEXTURE_2D,
+        0,
+        WebGl2RenderingContext::RGBA as i32,
+        WebGl2RenderingContext::RGBA,
+        WebGl2RenderingContext::UNSIGNED_BYTE,
+        &canvas,
+    )?;
+    gl.generate_mipmap(WebGl2RenderingContext::TEXTURE_2D);
+    gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, None);
+    Ok(texture)
 }
 
 fn init_vertex_array(
@@ -41,7 +112,7 @@ fn init_vertex_array(
     program: &WebGlProgram,
     vertex_buffer: &WebGlBuffer,
     element_buffer: &WebGlBuffer,
-) -> Result<WebGlVertexArrayObject, String> {
+) -> Result<WebGlVertexArrayObject, JsValue> {
     let position0_location = gl.get_attrib_location(program, "aPosition0");
     let position1_location = gl.get_attrib_location(program, "aPosition1");
     let texture_coord_location = gl.get_attrib_location(program, "aTextureCoord");
@@ -94,7 +165,7 @@ impl VertexBuffer {
         gl: &WebGl2RenderingContext,
         current: &VertexData,
         next: &VertexData,
-    ) -> Result<VertexBuffer, String> {
+    ) -> Result<VertexBuffer, JsValue> {
         let buffer = gl.create_buffer().ok_or("failed to create buffer")?;
         let data = vec![
             (current.x - (current.width + current.stroke_width) / 2.) as f32,
@@ -133,7 +204,7 @@ struct ElementBuffer {
 }
 
 impl ElementBuffer {
-    fn new(gl: &WebGl2RenderingContext) -> Result<ElementBuffer, String> {
+    fn new(gl: &WebGl2RenderingContext) -> Result<ElementBuffer, JsValue> {
         let buffer = gl.create_buffer().ok_or("failed to create buffer")?;
         let data = vec![0 as u32, 1 as u32, 2 as u32, 1 as u32, 2 as u32, 3 as u32];
         let obj = ElementBuffer { buffer, data };
@@ -146,6 +217,7 @@ pub struct LabelMeshGeometry {
     elements: ElementBuffer,
     vao: WebGlVertexArrayObject,
     program: WebGlProgram,
+    texture: WebGlTexture,
 }
 
 impl LabelMeshGeometry {
@@ -154,7 +226,18 @@ impl LabelMeshGeometry {
         program: WebGlProgram,
         current: &VertexData,
         next: &VertexData,
-    ) -> Result<LabelMeshGeometry, String> {
+    ) -> Result<LabelMeshGeometry, JsValue> {
+        let scale = 2.0;
+        let canvas = create_text_image(
+            &next.label,
+            scale,
+            next.label_font_size,
+            &next.label_font_family,
+            &next.label_fill_color,
+            &next.label_stroke_color,
+            next.label_stroke_width,
+        )?;
+        let texture = create_texture(gl, &canvas)?;
         let vertices = VertexBuffer::new(gl, current, next)?;
         let elements = ElementBuffer::new(gl)?;
         let vao = init_vertex_array(gl, &program, &vertices.buffer, &elements.buffer)?;
@@ -190,6 +273,7 @@ impl LabelMeshGeometry {
             elements,
             vao,
             program,
+            texture,
         })
     }
 }
@@ -212,7 +296,7 @@ impl MeshGeometry for LabelMeshGeometry {
     }
 
     fn texture(&self) -> Option<&WebGlTexture> {
-        None
+        Some(&self.texture)
     }
 }
 
@@ -221,7 +305,7 @@ pub struct LabelMesh {
 }
 
 impl LabelMesh {
-    pub fn new(gl: &WebGl2RenderingContext) -> Result<LabelMesh, String> {
+    pub fn new(gl: &WebGl2RenderingContext) -> Result<LabelMesh, JsValue> {
         let program = create_label_shader_program(gl)?;
         Ok(LabelMesh { program })
     }
@@ -233,7 +317,7 @@ impl Mesh for LabelMesh {
         gl: &WebGl2RenderingContext,
         layout: &LayoutData,
         geometries: &mut Vec<Box<MeshGeometry>>,
-    ) -> Result<(), String> {
+    ) -> Result<(), JsValue> {
         for node in &layout.enter.vertices {
             if node.label.len() > 0 {
                 let geometry = LabelMeshGeometry::new(gl, self.program.clone(), &node, &node)?;

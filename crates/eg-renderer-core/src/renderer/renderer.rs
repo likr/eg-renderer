@@ -24,7 +24,7 @@ struct Context {
 }
 
 impl Context {
-    fn new(gl: &WebGl2RenderingContext) -> Result<Context, String> {
+    fn new(gl: &WebGl2RenderingContext) -> Result<Context, JsValue> {
         let line_links = LinkMesh::new(gl, LinkType::Line)?;
         let circle_nodes = NodeMesh::new(gl, NodeType::Circle)?;
         let rectangle_nodes = NodeMesh::new(gl, NodeType::Rectangle)?;
@@ -83,6 +83,13 @@ impl Renderer {
         for geometry in &self.context.geometries {
             let program = geometry.program();
             gl.use_program(Some(program));
+            if let Some(texture) = geometry.texture() {
+                gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, Some(texture));
+                let image_location = gl
+                    .get_uniform_location(program, "image")
+                    .ok_or("failed to get uniform location of image")?;
+                gl.uniform1i(Some(&image_location), 0);
+            }
             let mv_location = gl
                 .get_uniform_location(program, "uMVMatrix")
                 .ok_or("failed to get uniform location of uMVMatrix")?;

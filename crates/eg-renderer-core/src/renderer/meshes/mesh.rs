@@ -1,3 +1,4 @@
+use wasm_bindgen::prelude::*;
 use web_sys::{WebGl2RenderingContext, WebGlProgram, WebGlTexture, WebGlVertexArrayObject};
 
 #[derive(Serialize, Deserialize)]
@@ -98,5 +99,5 @@ pub trait Mesh {
         gl: &WebGl2RenderingContext,
         graph: &LayoutData,
         geometries: &mut Vec<Box<MeshGeometry>>,
-    ) -> Result<(), String>;
+    ) -> Result<(), JsValue>;
 }

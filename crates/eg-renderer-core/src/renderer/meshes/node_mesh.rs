@@ -1,5 +1,6 @@
 use super::program::{init_fragment_shader, init_program, init_vertex_shader};
 use super::{LayoutData, Mesh, MeshGeometry, VertexData};
+use wasm_bindgen::prelude::*;
 use web_sys::{
     WebGl2RenderingContext, WebGlBuffer, WebGlProgram, WebGlTexture, WebGlVertexArrayObject,
 };
@@ -121,7 +122,7 @@ void main() {
 fn create_node_shader_program(
     gl: &WebGl2RenderingContext,
     node_type: &NodeType,
-) -> Result<WebGlProgram, String> {
+) -> Result<WebGlProgram, JsValue> {
     let vertex_shader = init_vertex_shader(gl, NODE_VERTEX_SHADER_SOURCE)?;
     let fragment_shader_source = if let NodeType::Circle = node_type {
         CIRCLE_NODE_FRAGMENT_SHADER_SOURCE
@@ -137,7 +138,7 @@ fn init_vertex_array(
     program: &WebGlProgram,
     vertex_buffer: &WebGlBuffer,
     element_buffer: &WebGlBuffer,
-) -> Result<WebGlVertexArrayObject, String> {
+) -> Result<WebGlVertexArrayObject, JsValue> {
     let alpha0_location = gl.get_attrib_location(program, "aAlpha0");
     let alpha1_location = gl.get_attrib_location(program, "aAlpha1");
     let position0_location = gl.get_attrib_location(program, "aPosition0");
@@ -296,7 +297,7 @@ struct VertexBuffer {
 }
 
 impl VertexBuffer {
-    fn new(gl: &WebGl2RenderingContext) -> Result<VertexBuffer, String> {
+    fn new(gl: &WebGl2RenderingContext) -> Result<VertexBuffer, JsValue> {
         let buffer = gl.create_buffer().ok_or("failed to create buffer")?;
         let data = Vec::new();
         let obj = VertexBuffer { buffer, data };
@@ -314,7 +315,7 @@ struct ElementBuffer {
 }
 
 impl ElementBuffer {
-    fn new(gl: &WebGl2RenderingContext) -> Result<ElementBuffer, String> {
+    fn new(gl: &WebGl2RenderingContext) -> Result<ElementBuffer, JsValue> {
         let buffer = gl.create_buffer().ok_or("failed to create buffer")?;
         let data = Vec::new();
         let obj = ElementBuffer { buffer, data };
@@ -347,7 +348,7 @@ impl NodeMeshGeometry {
         gl: &WebGl2RenderingContext,
         program: WebGlProgram,
         node_type: NodeType,
-    ) -> Result<NodeMeshGeometry, String> {
+    ) -> Result<NodeMeshGeometry, JsValue> {
         let vertices = VertexBuffer::new(gl)?;
         let elements = ElementBuffer::new(gl)?;
         let vao = init_vertex_array(gl, &program, &vertices.buffer, &elements.buffer)?;
@@ -365,7 +366,7 @@ impl NodeMeshGeometry {
         self.elements.resize(n);
     }
 
-    fn set_value(&mut self, index: usize, value: f32, offset: usize) -> Result<(), String> {
+    fn set_value(&mut self, index: usize, value: f32, offset: usize) -> Result<(), JsValue> {
         let e = self
             .vertices
             .data
@@ -375,131 +376,131 @@ impl NodeMeshGeometry {
         Ok(())
     }
 
-    fn set_current_alpha(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_current_alpha(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 0)
     }
 
-    fn set_next_alpha(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_next_alpha(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 1)
     }
 
-    fn set_current_x(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_current_x(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 2)
     }
 
-    fn set_current_y(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_current_y(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 3)
     }
 
-    fn set_next_x(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_next_x(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 4)
     }
 
-    fn set_next_y(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_next_y(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 5)
     }
 
-    fn set_current_fill_r(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_current_fill_r(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 6)
     }
 
-    fn set_current_fill_g(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_current_fill_g(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 7)
     }
 
-    fn set_current_fill_b(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_current_fill_b(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 8)
     }
 
-    fn set_current_fill_alpha(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_current_fill_alpha(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 9)
     }
 
-    fn set_next_fill_r(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_next_fill_r(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 10)
     }
 
-    fn set_next_fill_g(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_next_fill_g(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 11)
     }
 
-    fn set_next_fill_b(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_next_fill_b(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 12)
     }
 
-    fn set_next_fill_alpha(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_next_fill_alpha(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 13)
     }
 
-    fn set_current_center_x(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_current_center_x(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 14)
     }
 
-    fn set_current_center_y(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_current_center_y(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 15)
     }
 
-    fn set_next_center_x(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_next_center_x(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 16)
     }
 
-    fn set_next_center_y(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_next_center_y(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 17)
     }
 
-    fn set_current_width(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_current_width(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 18)
     }
 
-    fn set_current_height(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_current_height(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 19)
     }
 
-    fn set_next_width(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_next_width(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 20)
     }
 
-    fn set_next_height(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_next_height(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 21)
     }
 
-    fn set_current_stroke_r(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_current_stroke_r(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 22)
     }
 
-    fn set_current_stroke_g(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_current_stroke_g(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 23)
     }
 
-    fn set_current_stroke_b(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_current_stroke_b(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 24)
     }
 
-    fn set_current_stroke_alpha(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_current_stroke_alpha(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 25)
     }
 
-    fn set_next_stroke_r(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_next_stroke_r(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 26)
     }
 
-    fn set_next_stroke_g(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_next_stroke_g(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 27)
     }
 
-    fn set_next_stroke_b(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_next_stroke_b(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 28)
     }
 
-    fn set_next_stroke_alpha(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_next_stroke_alpha(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 29)
     }
 
-    fn set_current_stroke_width(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_current_stroke_width(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 30)
     }
 
-    fn set_next_stroke_width(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_next_stroke_width(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 31)
     }
 
@@ -510,7 +511,7 @@ impl NodeMeshGeometry {
         next: &VertexData,
         a0: f32,
         a1: f32,
-    ) -> Result<(), String> {
+    ) -> Result<(), JsValue> {
         let current_x = [
             current.x - (current.width + current.stroke_width) / 2.,
             current.x + (current.width + current.stroke_width) / 2.,
@@ -579,7 +580,7 @@ impl NodeMeshGeometry {
         }
     }
 
-    fn update(&mut self, gl: &WebGl2RenderingContext, layout: &LayoutData) -> Result<(), String> {
+    fn update(&mut self, gl: &WebGl2RenderingContext, layout: &LayoutData) -> Result<(), JsValue> {
         let mut n = 0;
         for node in &layout.enter.vertices {
             if self.is_same_node_type(&node.shape) {
@@ -681,7 +682,7 @@ pub struct NodeMesh {
 }
 
 impl NodeMesh {
-    pub fn new(gl: &WebGl2RenderingContext, node_type: NodeType) -> Result<NodeMesh, String> {
+    pub fn new(gl: &WebGl2RenderingContext, node_type: NodeType) -> Result<NodeMesh, JsValue> {
         let program = create_node_shader_program(gl, &node_type)?;
         Ok(NodeMesh { program, node_type })
     }
@@ -693,7 +694,7 @@ impl Mesh for NodeMesh {
         gl: &WebGl2RenderingContext,
         layout: &LayoutData,
         geometries: &mut Vec<Box<MeshGeometry>>,
-    ) -> Result<(), String> {
+    ) -> Result<(), JsValue> {
         let mut geometry = NodeMeshGeometry::new(gl, self.program.clone(), self.node_type.clone())?;
         geometry.update(gl, layout)?;
         geometries.push(Box::new(geometry));

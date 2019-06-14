@@ -1,5 +1,6 @@
 use super::program::{init_fragment_shader, init_program, init_vertex_shader};
 use super::{EdgeData, LayoutData, Mesh, MeshGeometry};
+use wasm_bindgen::prelude::*;
 use web_sys::{
     WebGl2RenderingContext, WebGlBuffer, WebGlProgram, WebGlTexture, WebGlVertexArrayObject,
 };
@@ -41,7 +42,7 @@ void main() {
 }
 "#;
 
-fn create_link_shader_program(gl: &WebGl2RenderingContext) -> Result<WebGlProgram, String> {
+fn create_link_shader_program(gl: &WebGl2RenderingContext) -> Result<WebGlProgram, JsValue> {
     let vertex_shader = init_vertex_shader(gl, LINK_VERTEX_SHADER_SOURCE)?;
     let fragment_shader = init_fragment_shader(gl, LINK_FRAGMENT_SHADER_SOURCE)?;
     init_program(gl, vertex_shader, fragment_shader)
@@ -52,7 +53,7 @@ fn init_vertex_array(
     program: &WebGlProgram,
     vertex_buffer: &WebGlBuffer,
     element_buffer: &WebGlBuffer,
-) -> Result<WebGlVertexArrayObject, String> {
+) -> Result<WebGlVertexArrayObject, JsValue> {
     let alpha0_location = gl.get_attrib_location(program, "aAlpha0");
     let alpha1_location = gl.get_attrib_location(program, "aAlpha1");
     let position0_location = gl.get_attrib_location(program, "aPosition0");
@@ -131,7 +132,7 @@ struct VertexBuffer {
 }
 
 impl VertexBuffer {
-    fn new(gl: &WebGl2RenderingContext) -> Result<VertexBuffer, String> {
+    fn new(gl: &WebGl2RenderingContext) -> Result<VertexBuffer, JsValue> {
         let buffer = gl.create_buffer().ok_or("failed to create buffer")?;
         let data = Vec::new();
         let obj = VertexBuffer { buffer, data };
@@ -145,7 +146,7 @@ struct ElementBuffer {
 }
 
 impl ElementBuffer {
-    fn new(gl: &WebGl2RenderingContext) -> Result<ElementBuffer, String> {
+    fn new(gl: &WebGl2RenderingContext) -> Result<ElementBuffer, JsValue> {
         let buffer = gl.create_buffer().ok_or("failed to create buffer")?;
         let data = Vec::new();
         let obj = ElementBuffer { buffer, data };
@@ -229,7 +230,7 @@ impl LinkMeshGeometry {
         gl: &WebGl2RenderingContext,
         program: WebGlProgram,
         link_type: LinkType,
-    ) -> Result<LinkMeshGeometry, String> {
+    ) -> Result<LinkMeshGeometry, JsValue> {
         let vertices = VertexBuffer::new(gl)?;
         let elements = ElementBuffer::new(gl)?;
         let vao = init_vertex_array(gl, &program, &vertices.buffer, &elements.buffer)?;
@@ -242,7 +243,7 @@ impl LinkMeshGeometry {
         })
     }
 
-    fn set_value(&mut self, index: usize, value: f32, offset: usize) -> Result<(), String> {
+    fn set_value(&mut self, index: usize, value: f32, offset: usize) -> Result<(), JsValue> {
         let e = self
             .vertices
             .data
@@ -252,59 +253,59 @@ impl LinkMeshGeometry {
         Ok(())
     }
 
-    fn set_current_alpha(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_current_alpha(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 0)
     }
 
-    fn set_next_alpha(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_next_alpha(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 1)
     }
 
-    fn set_current_x(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_current_x(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 2)
     }
 
-    fn set_current_y(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_current_y(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 3)
     }
 
-    fn set_next_x(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_next_x(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 4)
     }
 
-    fn set_next_y(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_next_y(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 5)
     }
 
-    fn set_current_stroke_r(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_current_stroke_r(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 6)
     }
 
-    fn set_current_stroke_g(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_current_stroke_g(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 7)
     }
 
-    fn set_current_stroke_b(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_current_stroke_b(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 8)
     }
 
-    fn set_current_stroke_alpha(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_current_stroke_alpha(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 9)
     }
 
-    fn set_next_stroke_r(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_next_stroke_r(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 10)
     }
 
-    fn set_next_stroke_g(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_next_stroke_g(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 11)
     }
 
-    fn set_next_stroke_b(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_next_stroke_b(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 12)
     }
 
-    fn set_next_stroke_alpha(&mut self, index: usize, value: f32) -> Result<(), String> {
+    fn set_next_stroke_alpha(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 13)
     }
 
@@ -316,7 +317,7 @@ impl LinkMeshGeometry {
         next: &EdgeData,
         a0: f32,
         a1: f32,
-    ) -> Result<usize, String> {
+    ) -> Result<usize, JsValue> {
         let vertex_offset = *vertex_offset_ref;
         let element_offset = *element_offset_ref;
         let current_points = line_geometry(&current.points, current.stroke_width);
@@ -399,7 +400,7 @@ impl LinkMeshGeometry {
         }
     }
 
-    fn update(&mut self, gl: &WebGl2RenderingContext, layout: &LayoutData) -> Result<(), String> {
+    fn update(&mut self, gl: &WebGl2RenderingContext, layout: &LayoutData) -> Result<(), JsValue> {
         let mut vertex_count = 0;
         let mut element_count = 0;
         for link in &layout.enter.edges {
@@ -513,7 +514,7 @@ pub struct LinkMesh {
 }
 
 impl LinkMesh {
-    pub fn new(gl: &WebGl2RenderingContext, link_type: LinkType) -> Result<LinkMesh, String> {
+    pub fn new(gl: &WebGl2RenderingContext, link_type: LinkType) -> Result<LinkMesh, JsValue> {
         let program = create_link_shader_program(gl)?;
         Ok(LinkMesh { program, link_type })
     }
@@ -525,7 +526,7 @@ impl Mesh for LinkMesh {
         gl: &WebGl2RenderingContext,
         layout: &LayoutData,
         geometries: &mut Vec<Box<MeshGeometry>>,
-    ) -> Result<(), String> {
+    ) -> Result<(), JsValue> {
         let mut geometry = LinkMeshGeometry::new(gl, self.program.clone(), self.link_type.clone())?;
         geometry.update(gl, layout)?;
         geometries.push(Box::new(geometry));
