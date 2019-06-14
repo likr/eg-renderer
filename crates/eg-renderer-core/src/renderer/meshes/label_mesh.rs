@@ -35,6 +35,7 @@ void main() {
 fn create_text_image(
     text: &String,
     scale: f64,
+    margin: f64,
     label_font_size: f64,
     label_font_family: &String,
     label_fill_color: &ColorData,
@@ -46,17 +47,33 @@ fn create_text_image(
     let canvas = document
         .create_element("canvas")?
         .dyn_into::<HtmlCanvasElement>()?;
-    canvas.set_width((64. * scale) as u32);
-    canvas.set_height((16. * scale) as u32);
+
     let ctx = canvas
         .get_context("2d")?
         .unwrap()
         .dyn_into::<CanvasRenderingContext2d>()?;
+
     ctx.set_font(&format!(
         "{}px {}",
         label_font_size * scale,
         label_font_family
     ));
+    ctx.set_text_align("center");
+    ctx.set_text_baseline("middle");
+    ctx.set_line_width(label_stroke_width * scale);
+    let bbox = ctx.measure_text(&text)?;
+
+    canvas.set_width(((bbox.width() + margin) * scale) as u32);
+    canvas.set_height(((label_font_size + margin) * scale) as u32);
+
+    ctx.set_font(&format!(
+        "{}px {}",
+        label_font_size * scale,
+        label_font_family
+    ));
+    ctx.set_text_align("center");
+    ctx.set_text_baseline("middle");
+    ctx.set_line_width(label_stroke_width * scale);
     ctx.set_fill_style(
         &format!(
             "rgb({},{},{})",
@@ -71,9 +88,7 @@ fn create_text_image(
         )
         .into(),
     );
-    ctx.set_line_width(label_stroke_width * scale);
-    ctx.set_text_align("center");
-    ctx.set_text_baseline("middle");
+
     ctx.fill_text(
         &text,
         (canvas.width() / 2) as f64,
@@ -165,33 +180,37 @@ impl VertexBuffer {
         gl: &WebGl2RenderingContext,
         current: &VertexData,
         next: &VertexData,
+        canvas: &HtmlCanvasElement,
+        scale: f64,
     ) -> Result<VertexBuffer, JsValue> {
+        let width = canvas.width() as f64 / scale;
+        let height = canvas.height() as f64 / scale;
         let buffer = gl.create_buffer().ok_or("failed to create buffer")?;
         let data = vec![
-            (current.x - (current.width + current.stroke_width) / 2.) as f32,
-            (current.y - (current.height + current.stroke_width) / 2.) as f32,
-            (next.x - (next.width + next.stroke_width) / 2.) as f32,
-            (next.y - (next.height + next.stroke_width) / 2.) as f32,
+            (current.x - width / 2.) as f32,
+            (current.y + height / 2.) as f32,
+            (next.x - width / 2.) as f32,
+            (next.y + height / 2.) as f32,
             0.0,
             1.0,
-            (current.x + (current.width + current.stroke_width) / 2.) as f32,
-            (current.y - (current.height + current.stroke_width) / 2.) as f32,
-            (next.x + (next.width + next.stroke_width) / 2.) as f32,
-            (next.y - (next.height + next.stroke_width) / 2.) as f32,
-            0.0,
+            (current.x + width / 2.) as f32,
+            (current.y + height / 2.) as f32,
+            (next.x + width / 2.) as f32,
+            (next.y + height / 2.) as f32,
             1.0,
-            (current.x - (current.width + current.stroke_width) / 2.) as f32,
-            (current.y + (current.height + current.stroke_width) / 2.) as f32,
-            (next.x - (next.width + next.stroke_width) / 2.) as f32,
-            (next.y + (next.height + next.stroke_width) / 2.) as f32,
-            0.0,
             1.0,
-            (current.x + (current.width + current.stroke_width) / 2.) as f32,
-            (current.y + (current.height + current.stroke_width) / 2.) as f32,
-            (next.x + (next.width + next.stroke_width) / 2.) as f32,
-            (next.y + (next.height + next.stroke_width) / 2.) as f32,
+            (current.x - width / 2.) as f32,
+            (current.y - height / 2.) as f32,
+            (next.x - width / 2.) as f32,
+            (next.y - height / 2.) as f32,
             0.0,
+            0.0,
+            (current.x + width / 2.) as f32,
+            (current.y - height / 2.) as f32,
+            (next.x + width / 2.) as f32,
+            (next.y - height / 2.) as f32,
             1.0,
+            0.0,
         ];
         let obj = VertexBuffer { buffer, data };
         Ok(obj)
@@ -206,7 +225,7 @@ struct ElementBuffer {
 impl ElementBuffer {
     fn new(gl: &WebGl2RenderingContext) -> Result<ElementBuffer, JsValue> {
         let buffer = gl.create_buffer().ok_or("failed to create buffer")?;
-        let data = vec![0 as u32, 1 as u32, 2 as u32, 1 as u32, 2 as u32, 3 as u32];
+        let data = vec![0 as u32, 1 as u32, 2 as u32, 3 as u32, 2 as u32, 1 as u32];
         let obj = ElementBuffer { buffer, data };
         Ok(obj)
     }
@@ -227,10 +246,11 @@ impl LabelMeshGeometry {
         current: &VertexData,
         next: &VertexData,
     ) -> Result<LabelMeshGeometry, JsValue> {
-        let scale = 2.0;
+        let scale = 10.0;
         let canvas = create_text_image(
             &next.label,
             scale,
+            1.0,
             next.label_font_size,
             &next.label_font_family,
             &next.label_fill_color,
@@ -238,7 +258,7 @@ impl LabelMeshGeometry {
             next.label_stroke_width,
         )?;
         let texture = create_texture(gl, &canvas)?;
-        let vertices = VertexBuffer::new(gl, current, next)?;
+        let vertices = VertexBuffer::new(gl, current, next, &canvas, scale)?;
         let elements = ElementBuffer::new(gl)?;
         let vao = init_vertex_array(gl, &program, &vertices.buffer, &elements.buffer)?;
         gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&vertices.buffer));
