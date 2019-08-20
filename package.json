@@ -7,7 +7,7 @@
     "deploy": "npx lerna exec --scope examples -- npm run deploy"
   },
   "devDependencies": {
-    "lerna": "^3.13.1"
+    "lerna": "^3.16.4"
   },
   "private": true
 }

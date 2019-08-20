@@ -16,10 +16,10 @@
   },
   "license": "MIT",
   "dependencies": {
-    "d3-color": "^1.2.0",
-    "d3-ease": "^1.0.3",
-    "d3-selection": "^1.3.0",
-    "d3-zoom": "^1.7.1"
+    "d3-color": "^1.3.0",
+    "d3-ease": "^1.0.5",
+    "d3-selection": "^1.4.0",
+    "d3-zoom": "^1.8.3"
   },
   "gitHead": "2f560e640150ede9617842ac8e55c81ac8b0ffb5"
 }
