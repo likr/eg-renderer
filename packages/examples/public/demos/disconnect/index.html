@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>HTML API Demo | EgRenderer Example</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/6.23.0/polyfill.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/2.0.3/fetch.min.js"></script>
+    <script>
+      if (!window.customElements) {
+        window.customElements = {};
+      }
+      window.customElements.forcePolyfill = true;
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/custom-elements/1.0.0/custom-elements.min.js"></script>
+    <script async src="../../eg-renderer.js"></script>
+  </head>
+  <body>
+    <div>
+      <a href="../../">back</a>
+      <h1>Disconnect Test</h1>
+      <button id="toggle-button">ON/OFF</button>
+      <div id="container"></div>
+    </div>
+    <script>
+      document.getElementById('toggle-button').addEventListener('click', () => {
+        const e = document.getElementById('container');
+        if (e.innerHTML) {
+          e.innerHTML = '';
+        } else {
+          e.innerHTML = `<eg-renderer width="600" height="400" src="data.json"></eg-renderer>`;
+        }
+      });
+    </script>
+  </body>
+</html>
