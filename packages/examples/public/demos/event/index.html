@@ -102,20 +102,26 @@
             }
           })
 
-          renderer.addEventListener('click', (event) => {
-            const id = renderer.findNode(event.offsetX, event.offsetY)
-            if (id) {
-              status.textContent = `nodeclick ${id}`
-              const node = nodes.get(id)
-              if (node.checked) {
-                node.checked = false
-                delete node.fillColor
-              } else {
-                node.checked = true
-                node.fillColor = 'red'
-              }
-              renderer.update(true)
+          renderer.addEventListener('nodeclick', (event) => {
+            const { id } = event.detail
+            status.textContent = `nodeclick ${id}`
+            const node = nodes.get(id)
+            if (node.checked) {
+              node.checked = false
+              delete node.fillColor
+            } else {
+              node.checked = true
+              node.fillColor = 'red'
             }
+            renderer.update(true)
+          })
+
+          renderer.addEventListener('nodedblclick', (event) => {
+            status.textContent = `nodedblclick ${event.detail.id}`
+          })
+
+          renderer.addEventListener('nodecontextmenu', (event) => {
+            status.textContent = `nodecontextmenu ${event.detail.id}`
           })
         })
       })

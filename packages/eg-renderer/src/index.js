@@ -266,7 +266,9 @@ class EgRendererElement extends window.HTMLElement {
     p.zoom = zoom(this, p)
     privates.set(this, p)
 
-    d3Select(p.canvas).call(p.zoom)
+    d3Select(p.canvas)
+      .call(p.zoom)
+      .on('dblclick.zoom', null)
 
     p.canvas.addEventListener('mousemove', (event) => {
       if (event.region) {
@@ -322,26 +324,22 @@ class EgRendererElement extends window.HTMLElement {
       }
     })
 
-    p.canvas.addEventListener('click', (event) => {
-      if (event.region) {
-        const obj = JSON.parse(event.region)
-        if (obj.id) {
-          const { id } = obj
+    const events = ['click', 'dblclick', 'contextmenu']
+    for (const name of events) {
+      p.canvas.addEventListener(name, (event) => {
+        const id = this.findNode(event.offsetX, event.offsetY)
+        if (id) {
+          if (name === 'contextmenu') {
+            event.preventDefault()
+          }
           this.dispatchEvent(
-            new window.CustomEvent('nodeclick', {
+            new window.CustomEvent(`node${name}`, {
               detail: { id }
             })
           )
-        } else if (obj.source && obj.target) {
-          const { source, target } = obj
-          this.dispatchEvent(
-            new window.CustomEvent('linkclick', {
-              detail: { source, target }
-            })
-          )
         }
-      }
-    })
+      })
+    }
   }
 
   connectedCallback() {
