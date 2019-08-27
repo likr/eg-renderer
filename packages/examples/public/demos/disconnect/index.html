@@ -7,9 +7,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/2.0.3/fetch.min.js"></script>
     <script>
       if (!window.customElements) {
-        window.customElements = {};
+        window.customElements = {}
       }
-      window.customElements.forcePolyfill = true;
+      window.customElements.forcePolyfill = true
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/custom-elements/1.0.0/custom-elements.min.js"></script>
     <script async src="../../eg-renderer.js"></script>
@@ -23,13 +23,13 @@
     </div>
     <script>
       document.getElementById('toggle-button').addEventListener('click', () => {
-        const e = document.getElementById('container');
+        const e = document.getElementById('container')
         if (e.innerHTML) {
-          e.innerHTML = '';
+          e.innerHTML = ''
         } else {
-          e.innerHTML = `<eg-renderer width="600" height="400" src="data.json"></eg-renderer>`;
+          e.innerHTML = `<eg-renderer width="600" height="400" src="data.json"></eg-renderer>`
         }
-      });
+      })
     </script>
   </body>
 </html>
