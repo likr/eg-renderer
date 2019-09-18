@@ -90,7 +90,9 @@ export const zoom = (element, attrs) => {
           y,
           k
         })
-        attrs.renderer.transform(attrs.transform)
+        if (attrs.renderer) {
+          attrs.renderer.transform(attrs.transform)
+        }
       }
     })
     .on('end', function() {

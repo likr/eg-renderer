@@ -2,14 +2,27 @@ import { easeCubic as d3EaseCubic } from 'd3-ease'
 import { color as d3Color } from 'd3-color'
 import { select as d3Select } from 'd3-selection'
 import { zoomIdentity as d3ZoomIdentity } from 'd3-zoom'
-// import { CanvasRenderer as Renderer } from './renderer/canvas'
-// import { WebGLRenderer as Renderer } from './renderer/webgl'
-import { Renderer } from 'eg-renderer-core'
 import { centerTransform, layoutRect } from './centering'
 import { diff } from './interpolate'
 import { devicePixelRatio } from './device-pixel-ratio'
 import { zoom } from './zoom'
 import { adjustEdge } from './marker-point'
+
+const getRenderer = (type) => {
+  switch (type) {
+    case 'wasm-webgl':
+      return import('eg-renderer-core').then(({ Renderer }) => Renderer)
+    case 'js-webgl':
+      return import('./renderer/webgl').then(
+        ({ WebGlRenderer }) => WebGlRenderer
+      )
+    case 'js-canvas':
+    default:
+      return import('./renderer/canvas').then(
+        ({ CanvasRenderer }) => CanvasRenderer
+      )
+  }
+}
 
 const get = (...args) => {
   let d = args[0]
@@ -33,14 +46,18 @@ const setWidth = (e, width) => {
   const p = privates.get(e)
   p.canvas.width = width * devicePixelRatio()
   p.canvas.style.width = `${width}px`
-  p.renderer.resize(e.width, e.height)
+  if (p.renderer) {
+    p.renderer.resize(e.width, e.height)
+  }
 }
 
 const setHeight = (e, height) => {
   const p = privates.get(e)
   p.canvas.height = height * devicePixelRatio()
   p.canvas.style.height = `${height}px`
-  p.renderer.resize(e.width, e.height)
+  if (p.renderer) {
+    p.renderer.resize(e.width, e.height)
+  }
 }
 
 const getter = (element, attributeName, defaultValue) => {
@@ -232,7 +249,6 @@ class EgRendererElement extends window.HTMLElement {
       stop: false
     }
 
-    p.renderer = new Renderer(canvas, p.layout, p.transform)
     p.zoom = zoom(this, p)
     privates.set(this, p)
 
@@ -338,7 +354,11 @@ class EgRendererElement extends window.HTMLElement {
       p.renderer.render(r)
       window.requestAnimationFrame(render)
     }
-    render()
+
+    getRenderer('js-canvas').then((Renderer) => {
+      p.renderer = new Renderer(p.canvas, p.layout, p.transform)
+      render()
+    })
   }
 
   disconnectedCallback() {
@@ -757,7 +777,9 @@ class EgRendererElement extends window.HTMLElement {
       adjustEdge(edge, du, dv)
     }
     p.layout = diff(p.prevData, p.data)
-    p.renderer.update(p.layout)
+    if (p.renderer) {
+      p.renderer.update(p.layout)
+    }
     p.layoutTime = new Date()
     if (this.autoCentering) {
       this.center()
