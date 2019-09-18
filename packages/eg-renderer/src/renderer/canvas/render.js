@@ -131,6 +131,26 @@ const renderLineEdge = (ctx, points) => {
   }
 }
 
+const renderCurveEdge = (ctx, points, curveRatio) => {
+  ctx.moveTo(points[0][0], points[0][1])
+  for (let i = 1; i < points.length; ++i) {
+    const [x1, y1] = points[i - 1]
+    const [x2, y2] = points[i]
+    const x = (x1 + x2) / 2
+    const y = (y1 + y2) / 2
+    const dx = x2 - x1
+    const dy = y2 - y1
+    const r = Math.sqrt(dx * dx + dy * dy) * curveRatio
+    const theta = Math.atan2(dy, dx) - Math.PI / 2
+    ctx.quadraticCurveTo(
+      x + r * Math.cos(theta),
+      y + r * Math.sin(theta),
+      x2,
+      y2
+    )
+  }
+}
+
 const renderQuadraticCurveEdge = (ctx, points) => {
   const n = points.length
   if (n < 3 || n % 2 === 0) {
@@ -206,6 +226,9 @@ export const renderEdge = (ctx, args) => {
           break
         case 'line':
           renderLineEdge(ctx, points)
+          break
+        case 'curve':
+          renderCurveEdge(ctx, points, 0.25)
           break
         default:
           throw new Error(`Unknown type "${type}"`)

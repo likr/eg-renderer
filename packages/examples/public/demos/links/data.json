@@ -5,7 +5,9 @@
     { "id": "2", "x": 100, "y": 200, "width": 30, "height": 30 },
     { "id": "3", "x": 500, "y": 200, "width": 30, "height": 30 },
     { "id": "4", "x": 100, "y": 300, "width": 30, "height": 30 },
-    { "id": "5", "x": 500, "y": 300, "width": 30, "height": 30 }
+    { "id": "5", "x": 500, "y": 300, "width": 30, "height": 30 },
+    { "id": "6", "x": 100, "y": 400, "width": 30, "height": 30 },
+    { "id": "7", "x": 500, "y": 400, "width": 30, "height": 30 }
   ],
   "links": [
     {
@@ -30,6 +32,16 @@
       "targetMarkerShape": "triangle",
       "type": "quadratic",
       "bends": [[300, 300]]
+    },
+    {
+      "source": "6",
+      "target": "7",
+      "type": "curve"
+    },
+    {
+      "source": "7",
+      "target": "6",
+      "type": "curve"
     }
   ]
 }

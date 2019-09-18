@@ -228,14 +228,17 @@ class EgRendererElement extends window.HTMLElement {
       },
       margin: 10,
       layoutTime: 0,
-      ease: d3EaseCubic
+      ease: d3EaseCubic,
+      stop: false
     }
 
     p.renderer = new Renderer(canvas, p.layout, p.transform)
     p.zoom = zoom(this, p)
     privates.set(this, p)
 
-    d3Select(p.canvas).call(p.zoom)
+    d3Select(p.canvas)
+      .call(p.zoom)
+      .on('dblclick.zoom', null)
 
     p.canvas.addEventListener('mousemove', (event) => {
       if (event.region) {
@@ -291,26 +294,22 @@ class EgRendererElement extends window.HTMLElement {
       }
     })
 
-    p.canvas.addEventListener('click', (event) => {
-      if (event.region) {
-        const obj = JSON.parse(event.region)
-        if (obj.id) {
-          const { id } = obj
+    const events = ['click', 'dblclick', 'contextmenu']
+    for (const name of events) {
+      p.canvas.addEventListener(name, (event) => {
+        const id = this.findNode(event.offsetX, event.offsetY)
+        if (id) {
+          if (name === 'contextmenu') {
+            event.preventDefault()
+          }
           this.dispatchEvent(
-            new window.CustomEvent('nodeclick', {
+            new window.CustomEvent(`node${name}`, {
               detail: { id }
             })
           )
-        } else if (obj.source && obj.target) {
-          const { source, target } = obj
-          this.dispatchEvent(
-            new window.CustomEvent('linkclick', {
-              detail: { source, target }
-            })
-          )
         }
-      }
-    })
+      })
+    }
   }
 
   connectedCallback() {
@@ -318,6 +317,9 @@ class EgRendererElement extends window.HTMLElement {
     this.appendChild(p.canvas)
 
     const render = () => {
+      if (p.stop) {
+        return
+      }
       if (p.invalidate && p.originalData) {
         this.update(!p.invalidatePositions)
       }
@@ -337,6 +339,11 @@ class EgRendererElement extends window.HTMLElement {
       window.requestAnimationFrame(render)
     }
     render()
+  }
+
+  disconnectedCallback() {
+    const p = privates.get(this)
+    p.stop = true
   }
 
   attributeChangedCallback(attr, oldValue, newValue) {
