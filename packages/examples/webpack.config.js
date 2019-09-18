@@ -5,8 +5,7 @@ const options = {
     rules: [
       {
         test: /\.js$/,
-        include: [
-        ],
+        include: [],
         use: [
           {
             loader: 'babel-loader',
@@ -26,8 +25,7 @@ const options = {
     path: path.resolve(__dirname, 'public'),
     filename: '[name].js'
   },
-  plugins: [
-  ],
+  plugins: [],
   devServer: {
     contentBase: path.join(__dirname, 'public'),
     historyApiFallback: true,

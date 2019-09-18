@@ -1,33 +1,33 @@
 <!DOCTYPE html>
 <html>
-<head>
-<meta charset="utf-8"/>
-<title>JavaScript API Demo | EgRenderer Example</title>
-<base href="/"/>
-<script src="/eg-renderer.js"></script>
-</head>
-<body>
-<div>
-<a href="../../">back</a>
-<h1>JavaScript API Demo</h1>
-</div>
-<div>
-<h2>Result</h2>
-<eg-renderer width="600" height="400"></eg-renderer>
-<script>
-customElements.whenDefined('eg-renderer').then(() => {
-  fetch('/demos/js-demo/data.json')
-    .then((response) => response.json())
-    .then((data) => {
-      const renderer = document.querySelector('eg-renderer')
-      renderer.load(data)
-    })
-})
-</script>
-</div>
-<div>
-<h2>Code</h2>
-<pre>
+  <head>
+    <meta charset="utf-8" />
+    <title>JavaScript API Demo | EgRenderer Example</title>
+    <base href="/" />
+    <script src="/eg-renderer.js"></script>
+  </head>
+  <body>
+    <div>
+      <a href="../../">back</a>
+      <h1>JavaScript API Demo</h1>
+    </div>
+    <div>
+      <h2>Result</h2>
+      <eg-renderer width="600" height="400"></eg-renderer>
+      <script>
+        customElements.whenDefined('eg-renderer').then(() => {
+          fetch('/demos/js-demo/data.json')
+            .then((response) => response.json())
+            .then((data) => {
+              const renderer = document.querySelector('eg-renderer')
+              renderer.load(data)
+            })
+        })
+      </script>
+    </div>
+    <div>
+      <h2>Code</h2>
+      <pre>
 <code>
 &lt;!DOCTYPE html&gt;
 &lt;html&gt;
@@ -48,6 +48,6 @@ fetch('/demos/js-demo/data.json')
 &lt;/html&gt;
 </code>
 </pre>
-</div>
-</body>
+    </div>
+  </body>
 </html>

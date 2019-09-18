@@ -1,46 +1,54 @@
 <!DOCTYPE html>
 <html>
-<head>
-<meta charset="utf-8"/>
-<title>email-Eu-core temporal | EgRenderer Example</title>
-<base href="/"/>
-<script async src="/eg-renderer.js"></script>
-<script async src="/eg-renderer-ogdf.js"></script>
-<style>
-eg-renderer-ogdf {
-  display: block;
-  border: solid 1px;
-  width: 960px;
-  height: 600px;
-}
-</style>
-<base href="/" />
-</head>
-<body>
-<div>
-<a href="../../">back</a>
-<h1>email-Eu-core temporal network</h1>
-<p>Obtained from <a href="https://snap.stanford.edu/data/email-Eu-core-temporal.html">SNAP</a>
-</div>
-<div>
-<h2>Result</h2>
-<eg-renderer-ogdf
-  width="960"
-  height="600"
-  default-node-type="circle"
-  default-node-width="1"
-  default-node-height="1"
-  default-node-stroke-color="#999"
-  default-node-stroke-width="0.1"
-  default-link-stroke-color="#999"
-  default-link-stroke-width="0.1"
-  default-link-stroke-opacity="0.3"
-  transition-duration="1000"
-  src="/demos/email/email.json">
-</eg-renderer-ogdf>
-</div>
-<h2>Code</h2>
-<pre>
+  <head>
+    <meta charset="utf-8" />
+    <title>email-Eu-core temporal | EgRenderer Example</title>
+    <base href="/" />
+    <script async src="/eg-renderer.js"></script>
+    <script async src="/eg-renderer-ogdf.js"></script>
+    <style>
+      eg-renderer-ogdf {
+        display: block;
+        border: solid 1px;
+        width: 960px;
+        height: 600px;
+      }
+    </style>
+    <base href="/" />
+  </head>
+  <body>
+    <div>
+      <a href="../../">back</a>
+      <h1>email-Eu-core temporal network</h1>
+      <p>
+        Obtained from
+        <a href="https://snap.stanford.edu/data/email-Eu-core-temporal.html"
+          >SNAP</a
+        >
+      </p>
+    </div>
+
+    <div>
+      <h2>Result</h2>
+      <eg-renderer-ogdf
+        width="960"
+        height="600"
+        default-node-type="circle"
+        default-node-width="1"
+        default-node-height="1"
+        default-node-stroke-color="#999"
+        default-node-stroke-width="0.1"
+        default-link-stroke-color="#999"
+        default-link-stroke-width="0.1"
+        default-link-stroke-opacity="0.3"
+        transition-duration="1000"
+        src="/demos/email/email.json"
+      >
+      </eg-renderer-ogdf>
+    </div>
+    <div>
+      <h2>Code</h2>
+      <pre>
 <code>
 &lt;!DOCTYPE html&gt;
 &lt;html&gt;
@@ -66,6 +74,6 @@ eg-renderer-ogdf {
 &lt;/html&gt;
 </code>
 </pre>
-</div>
-</body>
+    </div>
+  </body>
 </html>

@@ -34,16 +34,16 @@ export const layout = (element, graphData) => {
     indexToEdge.set(u, new Map())
   }
   for (const [u, v] of graphData.edgeIds) {
-    indexToEdge.get(u).set(v, graph.newEdge(indexToNode.get(u), indexToNode.get(v)))
+    indexToEdge
+      .get(u)
+      .set(v, graph.newEdge(indexToNode.get(u), indexToNode.get(v)))
   }
 
-  const {
-    nodeGraphics,
-    edgeGraphics,
-    nodeStyle,
-    edgeStyle
-  } = GraphAttributes
-  const attributes = new GraphAttributes(graph, nodeGraphics | edgeGraphics | nodeStyle | edgeStyle)
+  const { nodeGraphics, edgeGraphics, nodeStyle, edgeStyle } = GraphAttributes
+  const attributes = new GraphAttributes(
+    graph,
+    nodeGraphics | edgeGraphics | nodeStyle | edgeStyle
+  )
   const nodes = new NodeList()
   graph.allNodes(nodes)
   for (const u of graphData.vertexIds) {

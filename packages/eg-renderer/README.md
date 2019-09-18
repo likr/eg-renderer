@@ -317,15 +317,11 @@ $('eg-renderer')
 import React from 'react'
 
 export class Renderer extends React.Component {
-  render () {
+  render() {
     const width = 960
     const height = 600
     const src = 'data.json'
-    return <eg-renderer
-      width={width}
-      height={height}
-      src={src}
-    />
+    return <eg-renderer width={width} height={height} src={src} />
   }
 }
 ```

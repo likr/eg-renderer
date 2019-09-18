@@ -1,50 +1,49 @@
 <!DOCTYPE html>
 <html>
-<head>
-<meta charset="utf-8"/>
-<title>Links Demo | EgRenderer Example</title>
-<base href="/"/>
-<script async src="/eg-renderer.js"></script>
-</head>
-<body>
-<div>
-<a href="../../">back</a>
-<h1>Links Demo</h1>
-</div>
-<div>
-  <button id="shuffle">shuffle</button>
-</div>
-<div>
-<eg-renderer
-  transition-duration="1000"
-  width="600"
-  height="600"
-  src="/demos/links/data.json"
-  no-auto-centering
->
-</eg-renderer>
-</div>
-<script>
-customElements.whenDefined('eg-renderer').then(() => {
-  const renderer = document.querySelector('eg-renderer')
+  <head>
+    <meta charset="utf-8" />
+    <title>Links Demo | EgRenderer Example</title>
+    <base href="/" />
+    <script async src="/eg-renderer.js"></script>
+  </head>
+  <body>
+    <div>
+      <a href="../../">back</a>
+      <h1>Links Demo</h1>
+    </div>
+    <div>
+      <button id="shuffle">shuffle</button>
+    </div>
+    <div>
+      <eg-renderer
+        transition-duration="1000"
+        width="600"
+        height="600"
+        src="/demos/links/data.json"
+        no-auto-centering
+      >
+      </eg-renderer>
+    </div>
+    <script>
+      customElements.whenDefined('eg-renderer').then(() => {
+        const renderer = document.querySelector('eg-renderer')
 
-  document.querySelector('#shuffle').addEventListener('click', () => {
-    for (const node of renderer.data.nodes) {
-      node.x = Math.random() * 400 + 100
-      node.y = Math.random() * 200 + 100
-    }
-    for (const link of renderer.data.links) {
-      if (link.bends) {
-        for (const p of link.bends) {
-          p[0] = Math.random() * 400 + 100
-          p[1] = Math.random() * 200 + 100
-        }
-      }
-    }
-    renderer.update()
-  })
-})
-</script>
-</body>
+        document.querySelector('#shuffle').addEventListener('click', () => {
+          for (const node of renderer.data.nodes) {
+            node.x = Math.random() * 400 + 100
+            node.y = Math.random() * 200 + 100
+          }
+          for (const link of renderer.data.links) {
+            if (link.bends) {
+              for (const p of link.bends) {
+                p[0] = Math.random() * 400 + 100
+                p[1] = Math.random() * 200 + 100
+              }
+            }
+          }
+          renderer.update()
+        })
+      })
+    </script>
+  </body>
 </html>
-
