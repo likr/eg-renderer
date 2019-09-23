@@ -113,12 +113,22 @@ impl Renderer {
                 );
             }
             gl.bind_vertex_array(Some(geometry.vao()));
-            gl.draw_elements_with_i32(
-                geometry.mode(),
-                geometry.size(),
-                WebGl2RenderingContext::UNSIGNED_INT,
-                0,
-            );
+            if let Some(instance_count) = geometry.instance_count() {
+                gl.draw_elements_instanced_with_i32(
+                    geometry.mode(),
+                    geometry.size(),
+                    WebGl2RenderingContext::UNSIGNED_INT,
+                    0,
+                    instance_count,
+                );
+            } else {
+                gl.draw_elements_with_i32(
+                    geometry.mode(),
+                    geometry.size(),
+                    WebGl2RenderingContext::UNSIGNED_INT,
+                    0,
+                );
+            }
             gl.bind_vertex_array(None);
         }
         Ok(())

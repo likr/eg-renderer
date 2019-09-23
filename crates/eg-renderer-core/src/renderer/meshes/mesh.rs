@@ -90,7 +90,14 @@ pub trait MeshGeometry {
     fn program(&self) -> &WebGlProgram;
     fn vao(&self) -> &WebGlVertexArrayObject;
     fn size(&self) -> i32;
-    fn texture(&self) -> Option<&WebGlTexture>;
+
+    fn texture(&self) -> Option<&WebGlTexture> {
+        None
+    }
+
+    fn instance_count(&self) -> Option<i32> {
+        None
+    }
 }
 
 pub trait Mesh {

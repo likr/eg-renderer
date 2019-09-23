@@ -14,7 +14,7 @@ const getRenderer = (type) => {
       return import('eg-renderer-core').then(({ Renderer }) => Renderer)
     case 'js-webgl':
       return import('./renderer/webgl').then(
-        ({ WebGlRenderer }) => WebGlRenderer
+        ({ WebGLRenderer }) => WebGLRenderer
       )
     case 'js-canvas':
     default:
@@ -355,8 +355,10 @@ class EgRendererElement extends window.HTMLElement {
       window.requestAnimationFrame(render)
     }
 
-    getRenderer('js-canvas').then((Renderer) => {
+    getRenderer('wasm-webgl').then((Renderer) => {
       p.renderer = new Renderer(p.canvas, p.layout, p.transform)
+      this.invalidate()
+      p.renderer.resize(p.canvas.width, p.canvas.height)
       render()
     })
   }
