@@ -1,6 +1,6 @@
 use super::meshes::{
-    LabelMesh, LayoutData, LinkCircleMarkerMesh, LinkMesh, LinkType, Mesh, MeshGeometry, NodeMesh,
-    NodeType,
+    LabelMesh, LayoutData, LinkCircleMarkerMesh, LinkMesh, LinkTriangleMarkerMesh, LinkType, Mesh,
+    MeshGeometry, NodeMesh, NodeType,
 };
 use cgmatrix::{identity, matmul, orthogonal_matrix, scale, translate, viewing_matrix, Matrix44};
 use std::collections::HashMap;
@@ -28,6 +28,7 @@ impl Context {
     fn new(gl: &WebGl2RenderingContext) -> Result<Context, JsValue> {
         let line_links = LinkMesh::new(gl, LinkType::Line)?;
         let link_circle_markers = LinkCircleMarkerMesh::new(gl)?;
+        let link_triangle_markers = LinkTriangleMarkerMesh::new(gl)?;
         let circle_nodes = NodeMesh::new(gl, NodeType::Circle)?;
         let rectangle_nodes = NodeMesh::new(gl, NodeType::Rectangle)?;
         let node_labels = LabelMesh::new(gl)?;
@@ -39,6 +40,7 @@ impl Context {
             objects: vec![
                 Box::new(line_links),
                 Box::new(link_circle_markers),
+                Box::new(link_triangle_markers),
                 Box::new(circle_nodes),
                 Box::new(rectangle_nodes),
                 Box::new(node_labels),

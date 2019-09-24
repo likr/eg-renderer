@@ -1,14 +1,16 @@
 mod label_mesh;
-mod link_marker_mesh;
+mod link_circle_marker_mesh;
 mod link_mesh;
+mod link_triangle_marker_mesh;
 mod mesh;
 mod node_mesh;
 mod program;
 mod shaders;
 
 pub use label_mesh::*;
-pub use link_marker_mesh::*;
+pub use link_circle_marker_mesh::*;
 pub use link_mesh::*;
+pub use link_triangle_marker_mesh::*;
 pub use mesh::*;
 pub use node_mesh::*;
 

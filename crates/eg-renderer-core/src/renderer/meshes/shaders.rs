@@ -188,3 +188,47 @@ void main() {
     }
 }
 "#;
+
+pub const LINK_TRIANGLE_MARKER_VERTEX_SHADER_SOURCE: &str = r#"#version 300 es
+layout(location = 0) in vec2 aPosition;
+layout(location = 1) in vec2 aCenterPosition0;
+layout(location = 2) in vec2 aCenterPosition1;
+layout(location = 3) in vec2 aFromPosition0;
+layout(location = 4) in vec2 aFromPosition1;
+layout(location = 5) in float aRadius0;
+layout(location = 6) in float aRadius1;
+layout(location = 7) in float aAlpha0;
+layout(location = 8) in float aAlpha1;
+layout(location = 9) in vec4 aColor0;
+layout(location = 10) in vec4 aColor1;
+uniform mat4 uMVMatrix;
+uniform mat4 uPMatrix;
+uniform float r;
+out vec4 vColor;
+
+void main() {
+    vec2 centerPosition = mix(aCenterPosition0, aCenterPosition1, r);
+    vec2 fromPosition = mix(aFromPosition0, aFromPosition1, r);
+    vec2 diff = centerPosition - fromPosition;
+    float t = atan(diff.y, diff.x);
+
+    float radius = mix(aRadius0, aRadius1, r);
+    vec2 pos = aPosition * radius;
+    float x = pos.x * cos(t) - pos.y * sin(t) + centerPosition.x;
+    float y = pos.x * sin(t) + pos.y * cos(t) + centerPosition.y;
+    gl_Position = uPMatrix * uMVMatrix * vec4(x, y, 1.0, 1.0);
+
+    float alpha = mix(aAlpha0, aAlpha1, r);
+    vColor = mix(aColor0, aColor1, r);
+    vColor.a *= alpha;
+}
+"#;
+
+pub const LINK_TRIANGLE_MARKER_FRAGMENT_SHADER_SOURCE: &str = r#"#version 300 es
+precision mediump float;
+in vec4 vColor;
+out vec4 oFragColor;
+void main() {
+    oFragColor = vColor;
+}
+"#;
