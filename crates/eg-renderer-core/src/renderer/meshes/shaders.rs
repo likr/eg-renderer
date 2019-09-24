@@ -228,7 +228,42 @@ pub const LINK_TRIANGLE_MARKER_FRAGMENT_SHADER_SOURCE: &str = r#"#version 300 es
 precision mediump float;
 in vec4 vColor;
 out vec4 oFragColor;
+
 void main() {
     oFragColor = vColor;
+}
+"#;
+
+pub const LABEL_VERTEX_SHADER_SOURCE: &str = r#"#version 300 es
+layout(location = 0) in vec2 aTextureCoord;
+layout(location = 1) in vec2 aPosition0;
+layout(location = 2) in vec2 aPosition1;
+layout(location = 3) in float aAlpha0;
+layout(location = 4) in float aAlpha1;
+uniform mat4 uMVMatrix;
+uniform mat4 uPMatrix;
+uniform float r;
+out vec2 vTextureCoord;
+out float vAlpha;
+
+void main() {
+    vTextureCoord = aTextureCoord;
+    vAlpha = mix(aAlpha0, aAlpha1, r);
+    vec2 pos = mix(aPosition0, aPosition1, r);
+    gl_Position = uPMatrix * uMVMatrix * vec4(pos, 0.0, 1.0);
+}
+"#;
+
+pub const LABEL_FRAGMENT_SHADER_SOURCE: &str = r#"#version 300 es
+precision mediump float;
+uniform sampler2D image;
+in vec2 vTextureCoord;
+in float vAlpha;
+out vec4 oFragColor;
+
+void main() {
+    vec4 smpColor = texture(image, vTextureCoord);
+    oFragColor = smpColor;
+    oFragColor.a *= vAlpha;
 }
 "#;

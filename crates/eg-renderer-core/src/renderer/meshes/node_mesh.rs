@@ -3,7 +3,7 @@ use super::shaders::{
     CIRCLE_NODE_FRAGMENT_SHADER_SOURCE, NODE_VERTEX_SHADER_SOURCE,
     RECTANGLE_NODE_FRAGMENT_SHADER_SOURCE,
 };
-use super::{init_vertex_array, LayoutData, Mesh, MeshGeometry, VertexData};
+use super::{init_vertex_array_with_instances, LayoutData, Mesh, MeshGeometry, VertexData};
 use wasm_bindgen::prelude::*;
 use web_sys::{WebGl2RenderingContext as GL, WebGlProgram, WebGlVertexArrayObject};
 
@@ -122,7 +122,7 @@ impl NodeMeshGeometry {
         let stroke_width0_location = gl.get_attrib_location(program, "aStrokeWidth0") as u32;
         let stroke_width1_location = gl.get_attrib_location(program, "aStrokeWidth1") as u32;
 
-        let vao = init_vertex_array(
+        let vao = init_vertex_array_with_instances(
             gl,
             &vertex_data,
             &instance_data,

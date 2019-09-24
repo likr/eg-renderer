@@ -1,6 +1,6 @@
 use super::program::{init_fragment_shader, init_program, init_vertex_shader};
 use super::shaders::{LINK_FRAGMENT_SHADER_SOURCE, LINK_VERTEX_SHADER_SOURCE};
-use super::{init_vertex_array, EdgeData, LayoutData, Mesh, MeshGeometry};
+use super::{init_vertex_array_with_instances, EdgeData, LayoutData, Mesh, MeshGeometry};
 use wasm_bindgen::prelude::*;
 use web_sys::{WebGl2RenderingContext as GL, WebGlProgram, WebGlVertexArrayObject};
 
@@ -142,7 +142,7 @@ impl LinkMeshGeometry {
         let color0_location = gl.get_attrib_location(program, "aColor0") as u32;
         let color1_location = gl.get_attrib_location(program, "aColor1") as u32;
 
-        let vao = init_vertex_array(
+        let vao = init_vertex_array_with_instances(
             gl,
             &vertex_data,
             &instance_data,

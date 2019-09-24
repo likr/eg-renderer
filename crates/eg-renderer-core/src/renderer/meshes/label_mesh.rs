@@ -1,36 +1,12 @@
 use super::program::{init_fragment_shader, init_program, init_vertex_shader};
-use super::{ColorData, LayoutData, Mesh, MeshGeometry, VertexData};
+use super::shaders::{LABEL_FRAGMENT_SHADER_SOURCE, LABEL_VERTEX_SHADER_SOURCE};
+use super::{init_vertex_array, ColorData, LayoutData, Mesh, MeshGeometry, VertexData};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::{
-    CanvasRenderingContext2d, HtmlCanvasElement, WebGl2RenderingContext, WebGlBuffer, WebGlProgram,
+    CanvasRenderingContext2d, HtmlCanvasElement, WebGl2RenderingContext, WebGlProgram,
     WebGlTexture, WebGlVertexArrayObject,
 };
-
-const LABEL_VERTEX_SHADER_SOURCE: &str = r#"#version 300 es
-layout(location = 0) in vec2 aPosition0;
-layout(location = 1) in vec2 aPosition1;
-layout(location = 2) in vec2 aTextureCoord;
-uniform mat4 uMVMatrix;
-uniform mat4 uPMatrix;
-uniform float r;
-out vec2 vTextureCoord;
-void main() {
-  vTextureCoord = aTextureCoord;
-  gl_Position = uPMatrix * uMVMatrix * vec4(r * aPosition1 + (1.0 - r) * aPosition0, 0.0, 1.0);
-}
-"#;
-
-const LABEL_FRAGMENT_SHADER_SOURCE: &str = r#"#version 300 es
-precision mediump float;
-uniform sampler2D image;
-in vec2 vTextureCoord;
-out vec4 oFragColor;
-void main() {
-  vec4 smpColor = texture(image, vTextureCoord);
-  oFragColor = smpColor;
-}
-"#;
 
 fn create_text_image(
     text: &String,
@@ -122,118 +98,53 @@ fn create_texture(
     Ok(texture)
 }
 
-fn init_vertex_array(
-    gl: &WebGl2RenderingContext,
-    program: &WebGlProgram,
-    vertex_buffer: &WebGlBuffer,
-    element_buffer: &WebGlBuffer,
-) -> Result<WebGlVertexArrayObject, JsValue> {
-    let position0_location = gl.get_attrib_location(program, "aPosition0");
-    let position1_location = gl.get_attrib_location(program, "aPosition1");
-    let texture_coord_location = gl.get_attrib_location(program, "aTextureCoord");
-    let array = gl
-        .create_vertex_array()
-        .ok_or("failed to create vertex array")?;
-    gl.bind_vertex_array(Some(&array));
-    gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&vertex_buffer));
-    gl.bind_buffer(
-        WebGl2RenderingContext::ELEMENT_ARRAY_BUFFER,
-        Some(&element_buffer),
-    );
-    gl.enable_vertex_attrib_array(position0_location as u32);
-    gl.enable_vertex_attrib_array(position1_location as u32);
-    gl.enable_vertex_attrib_array(texture_coord_location as u32);
-    gl.vertex_attrib_pointer_with_i32(
-        position0_location as u32,
-        2,
-        WebGl2RenderingContext::FLOAT,
-        false,
-        24,
-        0,
-    );
-    gl.vertex_attrib_pointer_with_i32(
-        position1_location as u32,
-        2,
-        WebGl2RenderingContext::FLOAT,
-        false,
-        24,
-        8,
-    );
-    gl.vertex_attrib_pointer_with_i32(
-        texture_coord_location as u32,
-        2,
-        WebGl2RenderingContext::FLOAT,
-        false,
-        24,
-        16,
-    );
-    Ok(array)
-}
-
-struct VertexBuffer {
-    buffer: WebGlBuffer,
-    data: Vec<f32>,
-}
-
-impl VertexBuffer {
-    fn new(
-        gl: &WebGl2RenderingContext,
-        current: &VertexData,
-        next: &VertexData,
-        canvas: &HtmlCanvasElement,
-        scale: f64,
-    ) -> Result<VertexBuffer, JsValue> {
-        let width = canvas.width() as f64 / scale;
-        let height = canvas.height() as f64 / scale;
-        let buffer = gl.create_buffer().ok_or("failed to create buffer")?;
-        let data = vec![
-            (current.x - width / 2.) as f32,
-            (current.y + height / 2.) as f32,
-            (next.x - width / 2.) as f32,
-            (next.y + height / 2.) as f32,
-            0.0,
-            1.0,
-            (current.x + width / 2.) as f32,
-            (current.y + height / 2.) as f32,
-            (next.x + width / 2.) as f32,
-            (next.y + height / 2.) as f32,
-            1.0,
-            1.0,
-            (current.x - width / 2.) as f32,
-            (current.y - height / 2.) as f32,
-            (next.x - width / 2.) as f32,
-            (next.y - height / 2.) as f32,
-            0.0,
-            0.0,
-            (current.x + width / 2.) as f32,
-            (current.y - height / 2.) as f32,
-            (next.x + width / 2.) as f32,
-            (next.y - height / 2.) as f32,
-            1.0,
-            0.0,
-        ];
-        let obj = VertexBuffer { buffer, data };
-        Ok(obj)
-    }
-}
-
-struct ElementBuffer {
-    buffer: WebGlBuffer,
-    data: Vec<u32>,
-}
-
-impl ElementBuffer {
-    fn new(gl: &WebGl2RenderingContext) -> Result<ElementBuffer, JsValue> {
-        let buffer = gl.create_buffer().ok_or("failed to create buffer")?;
-        let data = vec![0 as u32, 1 as u32, 2 as u32, 3 as u32, 2 as u32, 1 as u32];
-        let obj = ElementBuffer { buffer, data };
-        Ok(obj)
-    }
+fn create_vertex_data(
+    current: &VertexData,
+    next: &VertexData,
+    canvas: &HtmlCanvasElement,
+    scale: f64,
+    a0: f32,
+    a1: f32,
+) -> Vec<f32> {
+    let width = canvas.width() as f64 / scale;
+    let height = canvas.height() as f64 / scale;
+    vec![
+        0.0,
+        1.0,
+        (current.x - width / 2.) as f32,
+        (current.y + height / 2.) as f32,
+        (next.x - width / 2.) as f32,
+        (next.y + height / 2.) as f32,
+        a0,
+        a1,
+        1.0,
+        1.0,
+        (current.x + width / 2.) as f32,
+        (current.y + height / 2.) as f32,
+        (next.x + width / 2.) as f32,
+        (next.y + height / 2.) as f32,
+        a0,
+        a1,
+        0.0,
+        0.0,
+        (current.x - width / 2.) as f32,
+        (current.y - height / 2.) as f32,
+        (next.x - width / 2.) as f32,
+        (next.y - height / 2.) as f32,
+        a0,
+        a1,
+        1.0,
+        0.0,
+        (current.x + width / 2.) as f32,
+        (current.y - height / 2.) as f32,
+        (next.x + width / 2.) as f32,
+        (next.y - height / 2.) as f32,
+        a0,
+        a1,
+    ]
 }
 
 pub struct LabelMeshGeometry {
-    _vertices: VertexBuffer,
-    elements: ElementBuffer,
     vao: WebGlVertexArrayObject,
     program: WebGlProgram,
     texture: WebGlTexture,
@@ -242,11 +153,13 @@ pub struct LabelMeshGeometry {
 impl LabelMeshGeometry {
     fn new(
         gl: &WebGl2RenderingContext,
-        program: WebGlProgram,
+        program: &WebGlProgram,
         current: &VertexData,
         next: &VertexData,
+        a0: f32,
+        a1: f32,
     ) -> Result<LabelMeshGeometry, JsValue> {
-        let scale = 10.0;
+        let scale = 2.0;
         let canvas = create_text_image(
             &next.label,
             scale,
@@ -258,41 +171,31 @@ impl LabelMeshGeometry {
             next.label_stroke_width,
         )?;
         let texture = create_texture(gl, &canvas)?;
-        let vertices = VertexBuffer::new(gl, current, next, &canvas, scale)?;
-        let elements = ElementBuffer::new(gl)?;
-        let vao = init_vertex_array(gl, &program, &vertices.buffer, &elements.buffer)?;
-        gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&vertices.buffer));
-        let bytes = unsafe {
-            std::slice::from_raw_parts(
-                vertices.data.as_ptr() as *const u8,
-                vertices.data.len() * std::mem::size_of::<f32>(),
-            )
-        };
-        gl.buffer_data_with_u8_array(
-            WebGl2RenderingContext::ARRAY_BUFFER,
-            bytes,
-            WebGl2RenderingContext::STATIC_DRAW,
-        );
-        gl.bind_buffer(
-            WebGl2RenderingContext::ELEMENT_ARRAY_BUFFER,
-            Some(&elements.buffer),
-        );
-        let bytes = unsafe {
-            std::slice::from_raw_parts(
-                elements.data.as_ptr() as *const u8,
-                elements.data.len() * std::mem::size_of::<u32>(),
-            )
-        };
-        gl.buffer_data_with_u8_array(
-            WebGl2RenderingContext::ELEMENT_ARRAY_BUFFER,
-            bytes,
-            WebGl2RenderingContext::STATIC_DRAW,
-        );
+
+        let vertex_data = create_vertex_data(current, next, &canvas, scale, a0, a1);
+        let element_data = vec![0, 1, 2, 3];
+
+        let texture_coord_location = gl.get_attrib_location(program, "aTextureCoord") as u32;
+        let position0_location = gl.get_attrib_location(program, "aPosition0") as u32;
+        let position1_location = gl.get_attrib_location(program, "aPosition1") as u32;
+        let alpha0_location = gl.get_attrib_location(program, "aAlpha0") as u32;
+        let alpha1_location = gl.get_attrib_location(program, "aAlpha1") as u32;
+
+        let vao = init_vertex_array(
+            gl,
+            &vertex_data,
+            &element_data,
+            &[
+                (texture_coord_location, 2),
+                (position0_location, 2),
+                (position1_location, 2),
+                (alpha0_location, 1),
+                (alpha1_location, 1),
+            ],
+        )?;
         Ok(LabelMeshGeometry {
-            _vertices: vertices,
-            elements,
             vao,
-            program,
+            program: program.clone(),
             texture,
         })
     }
@@ -300,7 +203,7 @@ impl LabelMeshGeometry {
 
 impl MeshGeometry for LabelMeshGeometry {
     fn mode(&self) -> u32 {
-        WebGl2RenderingContext::TRIANGLES
+        WebGl2RenderingContext::TRIANGLE_STRIP
     }
 
     fn program(&self) -> &WebGlProgram {
@@ -312,7 +215,7 @@ impl MeshGeometry for LabelMeshGeometry {
     }
 
     fn size(&self) -> i32 {
-        self.elements.data.len() as i32
+        4
     }
 
     fn texture(&self) -> Option<&WebGlTexture> {
@@ -340,20 +243,20 @@ impl Mesh for LabelMesh {
     ) -> Result<(), JsValue> {
         for node in &layout.enter.vertices {
             if node.label.len() > 0 {
-                let geometry = LabelMeshGeometry::new(gl, self.program.clone(), &node, &node)?;
+                let geometry = LabelMeshGeometry::new(gl, &self.program, &node, &node, 0.0, 1.0)?;
                 geometries.push(Box::new(geometry));
             }
         }
         for node in &layout.update.vertices {
             if node.next.label.len() > 0 {
                 let geometry =
-                    LabelMeshGeometry::new(gl, self.program.clone(), &node.current, &node.next)?;
+                    LabelMeshGeometry::new(gl, &self.program, &node.current, &node.next, 1.0, 1.0)?;
                 geometries.push(Box::new(geometry));
             }
         }
         for node in &layout.exit.vertices {
             if node.label.len() > 0 {
-                let geometry = LabelMeshGeometry::new(gl, self.program.clone(), &node, &node)?;
+                let geometry = LabelMeshGeometry::new(gl, &self.program, &node, &node, 1.0, 0.0)?;
                 geometries.push(Box::new(geometry));
             }
         }
