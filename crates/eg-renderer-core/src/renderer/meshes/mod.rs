@@ -4,6 +4,7 @@ mod link_mesh;
 mod mesh;
 mod node_mesh;
 mod program;
+mod shaders;
 
 pub use label_mesh::*;
 pub use link_marker_mesh::*;
@@ -12,7 +13,7 @@ pub use mesh::*;
 pub use node_mesh::*;
 
 use wasm_bindgen::prelude::*;
-use web_sys::{WebGl2RenderingContext as GL, WebGlBuffer};
+use web_sys::{WebGl2RenderingContext as GL, WebGlVertexArrayObject};
 
 pub fn register_vertex_attributes(gl: &GL, attributes: &[(u32, i32)]) {
     let stride = attributes.iter().map(|&(_, size)| 4 * size).sum();
@@ -35,14 +36,52 @@ pub fn register_vertex_attributes_with_divisor(gl: &GL, attributes: &[(u32, i32)
     }
 }
 
-pub struct Buffer<T> {
-    pub buffer: WebGlBuffer,
-    pub data: Vec<T>,
-}
+pub fn init_vertex_array(
+    gl: &GL,
+    vertex_data: &Vec<f32>,
+    instance_data: &Vec<f32>,
+    element_data: &Vec<u32>,
+    vertex_attributes: &[(u32, i32)],
+    instance_attributes: &[(u32, i32)],
+) -> Result<WebGlVertexArrayObject, JsValue> {
+    let array = gl
+        .create_vertex_array()
+        .ok_or("failed to create vertex array")?;
+    gl.bind_vertex_array(Some(&array));
 
-impl<T> Buffer<T> {
-    pub fn new(gl: &GL, data: Vec<T>) -> Result<Buffer<T>, JsValue> {
-        let buffer = gl.create_buffer().ok_or("failed to create buffer")?;
-        Ok(Buffer { buffer, data })
-    }
+    let vertex_buffer = gl.create_buffer().ok_or("failed to create buffer")?;
+    gl.bind_buffer(GL::ARRAY_BUFFER, Some(&vertex_buffer));
+    register_vertex_attributes(gl, vertex_attributes);
+    let bytes = unsafe {
+        std::slice::from_raw_parts(
+            vertex_data.as_ptr() as *const u8,
+            vertex_data.len() * std::mem::size_of::<f32>(),
+        )
+    };
+    gl.buffer_data_with_u8_array(GL::ARRAY_BUFFER, bytes, GL::STATIC_DRAW);
+
+    let instance_buffer = gl.create_buffer().ok_or("failed to create buffer")?;
+    gl.bind_buffer(GL::ARRAY_BUFFER, Some(&instance_buffer));
+    register_vertex_attributes_with_divisor(gl, instance_attributes);
+    let bytes = unsafe {
+        std::slice::from_raw_parts(
+            instance_data.as_ptr() as *const u8,
+            instance_data.len() * std::mem::size_of::<f32>(),
+        )
+    };
+    gl.buffer_data_with_u8_array(GL::ARRAY_BUFFER, bytes, GL::STATIC_DRAW);
+
+    let element_buffer = gl.create_buffer().ok_or("failed to create buffer")?;
+    gl.bind_buffer(GL::ELEMENT_ARRAY_BUFFER, Some(&element_buffer));
+    let bytes = unsafe {
+        std::slice::from_raw_parts(
+            element_data.as_ptr() as *const u8,
+            element_data.len() * std::mem::size_of::<u32>(),
+        )
+    };
+    gl.buffer_data_with_u8_array(GL::ELEMENT_ARRAY_BUFFER, bytes, GL::STATIC_DRAW);
+
+    gl.bind_vertex_array(None);
+
+    Ok(array)
 }
