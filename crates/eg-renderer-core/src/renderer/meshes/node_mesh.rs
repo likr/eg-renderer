@@ -1,5 +1,8 @@
 use super::program::{init_fragment_shader, init_program, init_vertex_shader};
-use super::{LayoutData, Mesh, MeshGeometry, VertexData};
+use super::{
+    register_vertex_attributes, register_vertex_attributes_with_divisor, Buffer, LayoutData, Mesh,
+    MeshGeometry, VertexData,
+};
 use wasm_bindgen::prelude::*;
 use web_sys::{WebGl2RenderingContext as GL, WebGlBuffer, WebGlProgram, WebGlVertexArrayObject};
 
@@ -121,7 +124,7 @@ fn init_vertex_array(
     program: &WebGlProgram,
     vertex_buffer: &WebGlBuffer,
     element_buffer: &WebGlBuffer,
-    instance_data_buffer: &WebGlBuffer,
+    instances_buffer: &WebGlBuffer,
 ) -> Result<WebGlVertexArrayObject, JsValue> {
     let position_location = gl.get_attrib_location(program, "aPosition") as u32;
     let alpha0_location = gl.get_attrib_location(program, "aAlpha0") as u32;
@@ -143,36 +146,26 @@ fn init_vertex_array(
     gl.bind_vertex_array(Some(&array));
 
     gl.bind_buffer(GL::ARRAY_BUFFER, Some(&vertex_buffer));
-    let attrs = [(position_location, 2)];
-    let mut offset = 0;
-    for &(loc, size) in &attrs {
-        gl.enable_vertex_attrib_array(loc);
-        gl.vertex_attrib_pointer_with_i32(loc, size, GL::FLOAT, false, 8, offset);
-        offset += 4 * size;
-    }
+    register_vertex_attributes(gl, &[(position_location, 2)]);
 
-    gl.bind_buffer(GL::ARRAY_BUFFER, Some(&instance_data_buffer));
-    let attrs = [
-        (alpha0_location, 1),
-        (alpha1_location, 1),
-        (color0_location, 4),
-        (color1_location, 4),
-        (center_position0_location, 2),
-        (center_position1_location, 2),
-        (size0_location, 2),
-        (size1_location, 2),
-        (stroke_color0_location, 4),
-        (stroke_color1_location, 4),
-        (stroke_width0_location, 1),
-        (stroke_width1_location, 1),
-    ];
-    let mut offset = 0;
-    for &(loc, size) in &attrs {
-        gl.enable_vertex_attrib_array(loc);
-        gl.vertex_attrib_pointer_with_i32(loc, size, GL::FLOAT, false, 112, offset);
-        gl.vertex_attrib_divisor(loc, 1);
-        offset += 4 * size;
-    }
+    gl.bind_buffer(GL::ARRAY_BUFFER, Some(&instances_buffer));
+    register_vertex_attributes_with_divisor(
+        gl,
+        &[
+            (alpha0_location, 1),
+            (alpha1_location, 1),
+            (color0_location, 4),
+            (color1_location, 4),
+            (center_position0_location, 2),
+            (center_position1_location, 2),
+            (size0_location, 2),
+            (size1_location, 2),
+            (stroke_color0_location, 4),
+            (stroke_color1_location, 4),
+            (stroke_width0_location, 1),
+            (stroke_width1_location, 1),
+        ],
+    );
 
     gl.bind_buffer(GL::ELEMENT_ARRAY_BUFFER, Some(&element_buffer));
 
@@ -181,52 +174,10 @@ fn init_vertex_array(
     Ok(array)
 }
 
-struct VertexBuffer {
-    buffer: WebGlBuffer,
-    data: Vec<f32>,
-}
-
-impl VertexBuffer {
-    fn new(gl: &GL) -> Result<VertexBuffer, JsValue> {
-        let buffer = gl.create_buffer().ok_or("failed to create buffer")?;
-        let data = vec![-0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5];
-        let obj = VertexBuffer { buffer, data };
-        Ok(obj)
-    }
-}
-
-struct ElementBuffer {
-    buffer: WebGlBuffer,
-    data: Vec<u32>,
-}
-
-impl ElementBuffer {
-    fn new(gl: &GL) -> Result<ElementBuffer, JsValue> {
-        let buffer = gl.create_buffer().ok_or("failed to create buffer")?;
-        let data = vec![0, 1, 2, 3];
-        let obj = ElementBuffer { buffer, data };
-        Ok(obj)
-    }
-}
-
-struct InstanceDataBuffer {
-    buffer: WebGlBuffer,
-    data: Vec<f32>,
-}
-
-impl InstanceDataBuffer {
-    fn new(gl: &GL) -> Result<InstanceDataBuffer, JsValue> {
-        let buffer = gl.create_buffer().ok_or("failed to create buffer")?;
-        let data = vec![];
-        let obj = InstanceDataBuffer { buffer, data };
-        Ok(obj)
-    }
-}
-
 pub struct NodeMeshGeometry {
-    vertices: VertexBuffer,
-    elements: ElementBuffer,
-    instance_data: InstanceDataBuffer,
+    vertices: Buffer<f32>,
+    elements: Buffer<u32>,
+    instances: Buffer<f32>,
     vao: WebGlVertexArrayObject,
     program: WebGlProgram,
     node_type: NodeType,
@@ -238,35 +189,29 @@ impl NodeMeshGeometry {
         program: WebGlProgram,
         node_type: NodeType,
     ) -> Result<NodeMeshGeometry, JsValue> {
-        let vertices = VertexBuffer::new(gl)?;
-        let elements = ElementBuffer::new(gl)?;
-        let instance_data = InstanceDataBuffer::new(gl)?;
+        let vertices = Buffer::new(gl, vec![-0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5])?;
+        let elements = Buffer::new(gl, vec![0, 1, 2, 3])?;
+        let instances = Buffer::new(gl, vec![])?;
         let vao = init_vertex_array(
             gl,
             &program,
             &vertices.buffer,
             &elements.buffer,
-            &instance_data.buffer,
+            &instances.buffer,
         )?;
         Ok(NodeMeshGeometry {
             vertices,
             elements,
-            instance_data,
+            instances,
             vao,
             program,
             node_type,
         })
     }
 
-    pub fn resize(&mut self, n: usize) {
-        self.instance_data
-            .data
-            .resize(NODE_INSTANCE_ATTRIBUTES * n, 0.0);
-    }
-
     fn set_value(&mut self, index: usize, value: f32, offset: usize) -> Result<(), JsValue> {
         let e = self
-            .instance_data
+            .instances
             .data
             .get_mut(NODE_INSTANCE_ATTRIBUTES * index + offset)
             .ok_or(format!("Index out of bounds: ({}, {})", index, offset))?;
@@ -449,7 +394,7 @@ impl NodeMeshGeometry {
                 n += 1;
             }
         }
-        self.resize(n);
+        self.instances.data.resize(NODE_INSTANCE_ATTRIBUTES * n, 0.);
 
         let mut offset = 0;
         for node in &layout.enter.vertices {
@@ -480,11 +425,11 @@ impl NodeMeshGeometry {
         };
         gl.buffer_data_with_u8_array(GL::ARRAY_BUFFER, bytes, GL::STATIC_DRAW);
 
-        gl.bind_buffer(GL::ARRAY_BUFFER, Some(&self.instance_data.buffer));
+        gl.bind_buffer(GL::ARRAY_BUFFER, Some(&self.instances.buffer));
         let bytes = unsafe {
             std::slice::from_raw_parts(
-                self.instance_data.data.as_ptr() as *const u8,
-                self.instance_data.data.len() * std::mem::size_of::<f32>(),
+                self.instances.data.as_ptr() as *const u8,
+                self.instances.data.len() * std::mem::size_of::<f32>(),
             )
         };
         gl.buffer_data_with_u8_array(GL::ARRAY_BUFFER, bytes, GL::STATIC_DRAW);
@@ -520,7 +465,7 @@ impl MeshGeometry for NodeMeshGeometry {
     }
 
     fn instance_count(&self) -> Option<i32> {
-        Some((self.instance_data.data.len() / NODE_INSTANCE_ATTRIBUTES) as i32)
+        Some((self.instances.data.len() / NODE_INSTANCE_ATTRIBUTES) as i32)
     }
 }
 

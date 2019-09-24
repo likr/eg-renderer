@@ -1,35 +1,53 @@
 use super::program::{init_fragment_shader, init_program, init_vertex_shader};
-use super::{EdgeData, LayoutData, Mesh, MeshGeometry};
-use wasm_bindgen::prelude::*;
-use web_sys::{
-    WebGl2RenderingContext, WebGlBuffer, WebGlProgram, WebGlTexture, WebGlVertexArrayObject,
+use super::{
+    register_vertex_attributes, register_vertex_attributes_with_divisor, Buffer, EdgeData,
+    LayoutData, Mesh, MeshGeometry,
 };
+use wasm_bindgen::prelude::*;
+use web_sys::{WebGl2RenderingContext as GL, WebGlBuffer, WebGlProgram, WebGlVertexArrayObject};
 
 #[derive(Clone)]
 pub enum LinkType {
     Line,
 }
 
-const LINK_ATTRIBUTES: usize = 14;
+const LINK_INSTANCE_ATTRIBUTES: usize = 20;
 
 const LINK_VERTEX_SHADER_SOURCE: &str = r#"#version 300 es
-
-layout(location = 0) in float aAlpha0;
-layout(location = 1) in float aAlpha1;
-layout(location = 2) in vec2 aPosition0;
-layout(location = 3) in vec2 aPosition1;
-layout(location = 4) in vec4 aColor0;
-layout(location = 5) in vec4 aColor1;
+layout(location = 0) in vec2 aPosition;
+layout(location = 1) in vec2 aPosition10;
+layout(location = 2) in vec2 aPosition11;
+layout(location = 3) in vec2 aPosition20;
+layout(location = 4) in vec2 aPosition21;
+layout(location = 5) in float aStrokeWidth0;
+layout(location = 6) in float aStrokeWidth1;
+layout(location = 7) in float aAlpha0;
+layout(location = 8) in float aAlpha1;
+layout(location = 9) in vec4 aColor0;
+layout(location = 10) in vec4 aColor1;
 uniform mat4 uMVMatrix;
 uniform mat4 uPMatrix;
 uniform float r;
 out vec4 vColor;
 
 void main() {
-    float alpha = r * aAlpha1 + (1.0 - r) * aAlpha0;
-    vColor = r * aColor1 + (1.0 - r) * aColor0;
+    vec2 position1 = mix(aPosition10, aPosition11, r);
+    vec2 position2 = mix(aPosition20, aPosition21, r);
+    vec2 centerPosition = (position1 + position2) / 2.0;
+    vec2 diff = position2 - position1;
+    float t = atan(diff.y, diff.x);
+
+    float strokeWidth = mix(aStrokeWidth0, aStrokeWidth1, r);
+    vec2 size = vec2(strokeWidth);
+    size.x += length(diff);
+    vec2 pos = aPosition * size;
+    float x = pos.x * cos(t) - pos.y * sin(t) + centerPosition.x;
+    float y = pos.x * sin(t) + pos.y * cos(t) + centerPosition.y;
+    gl_Position = uPMatrix * uMVMatrix * vec4(x, y, 1.0, 1.0);
+
+    float alpha = mix(aAlpha0, aAlpha1, r);
+    vColor = mix(aColor0, aColor1, r);
     vColor.a *= alpha;
-    gl_Position = uPMatrix * uMVMatrix * vec4(r * aPosition1 + (1.0 - r) * aPosition0, 1.0, 1.0);
 }
 "#;
 
@@ -42,184 +60,67 @@ void main() {
 }
 "#;
 
-fn create_link_shader_program(gl: &WebGl2RenderingContext) -> Result<WebGlProgram, JsValue> {
+fn create_link_shader_program(gl: &GL) -> Result<WebGlProgram, JsValue> {
     let vertex_shader = init_vertex_shader(gl, LINK_VERTEX_SHADER_SOURCE)?;
     let fragment_shader = init_fragment_shader(gl, LINK_FRAGMENT_SHADER_SOURCE)?;
     init_program(gl, vertex_shader, fragment_shader)
 }
 
 fn init_vertex_array(
-    gl: &WebGl2RenderingContext,
+    gl: &GL,
     program: &WebGlProgram,
     vertex_buffer: &WebGlBuffer,
     element_buffer: &WebGlBuffer,
+    instance_buffer: &WebGlBuffer,
 ) -> Result<WebGlVertexArrayObject, JsValue> {
-    let alpha0_location = gl.get_attrib_location(program, "aAlpha0");
-    let alpha1_location = gl.get_attrib_location(program, "aAlpha1");
-    let position0_location = gl.get_attrib_location(program, "aPosition0");
-    let position1_location = gl.get_attrib_location(program, "aPosition1");
-    let color0_location = gl.get_attrib_location(program, "aColor0");
-    let color1_location = gl.get_attrib_location(program, "aColor1");
+    let position_location = gl.get_attrib_location(program, "aPosition") as u32;
+    let position10_location = gl.get_attrib_location(program, "aPosition10") as u32;
+    let position11_location = gl.get_attrib_location(program, "aPosition11") as u32;
+    let position20_location = gl.get_attrib_location(program, "aPosition20") as u32;
+    let position21_location = gl.get_attrib_location(program, "aPosition21") as u32;
+    let stroke_width0_location = gl.get_attrib_location(program, "aStrokeWidth0") as u32;
+    let stroke_width1_location = gl.get_attrib_location(program, "aStrokeWidth1") as u32;
+    let alpha0_location = gl.get_attrib_location(program, "aAlpha0") as u32;
+    let alpha1_location = gl.get_attrib_location(program, "aAlpha1") as u32;
+    let color0_location = gl.get_attrib_location(program, "aColor0") as u32;
+    let color1_location = gl.get_attrib_location(program, "aColor1") as u32;
+
     let array = gl
         .create_vertex_array()
         .ok_or("failed to create vertex array")?;
     gl.bind_vertex_array(Some(&array));
-    gl.bind_buffer(WebGl2RenderingContext::ARRAY_BUFFER, Some(&vertex_buffer));
-    gl.bind_buffer(
-        WebGl2RenderingContext::ELEMENT_ARRAY_BUFFER,
-        Some(&element_buffer),
+
+    gl.bind_buffer(GL::ARRAY_BUFFER, Some(&vertex_buffer));
+    register_vertex_attributes(gl, &[(position_location, 2)]);
+
+    gl.bind_buffer(GL::ARRAY_BUFFER, Some(&instance_buffer));
+    register_vertex_attributes_with_divisor(
+        gl,
+        &[
+            (position10_location, 2),
+            (position11_location, 2),
+            (position20_location, 2),
+            (position21_location, 2),
+            (stroke_width0_location, 1),
+            (stroke_width1_location, 1),
+            (alpha0_location, 1),
+            (alpha1_location, 1),
+            (color0_location, 4),
+            (color1_location, 4),
+        ],
     );
-    gl.enable_vertex_attrib_array(alpha0_location as u32);
-    gl.enable_vertex_attrib_array(alpha1_location as u32);
-    gl.enable_vertex_attrib_array(position0_location as u32);
-    gl.enable_vertex_attrib_array(position1_location as u32);
-    gl.enable_vertex_attrib_array(color0_location as u32);
-    gl.enable_vertex_attrib_array(color1_location as u32);
-    gl.vertex_attrib_pointer_with_i32(
-        alpha0_location as u32,
-        1,
-        WebGl2RenderingContext::FLOAT,
-        false,
-        56,
-        0,
-    );
-    gl.vertex_attrib_pointer_with_i32(
-        alpha1_location as u32,
-        1,
-        WebGl2RenderingContext::FLOAT,
-        false,
-        56,
-        4,
-    );
-    gl.vertex_attrib_pointer_with_i32(
-        position0_location as u32,
-        2,
-        WebGl2RenderingContext::FLOAT,
-        false,
-        56,
-        8,
-    );
-    gl.vertex_attrib_pointer_with_i32(
-        position1_location as u32,
-        2,
-        WebGl2RenderingContext::FLOAT,
-        false,
-        56,
-        16,
-    );
-    gl.vertex_attrib_pointer_with_i32(
-        color0_location as u32,
-        4,
-        WebGl2RenderingContext::FLOAT,
-        false,
-        56,
-        24,
-    );
-    gl.vertex_attrib_pointer_with_i32(
-        color1_location as u32,
-        4,
-        WebGl2RenderingContext::FLOAT,
-        false,
-        56,
-        40,
-    );
+
+    gl.bind_buffer(GL::ELEMENT_ARRAY_BUFFER, Some(&element_buffer));
+
+    gl.bind_vertex_array(None);
+
     Ok(array)
 }
 
-struct VertexBuffer {
-    buffer: WebGlBuffer,
-    data: Vec<f32>,
-}
-
-impl VertexBuffer {
-    fn new(gl: &WebGl2RenderingContext) -> Result<VertexBuffer, JsValue> {
-        let buffer = gl.create_buffer().ok_or("failed to create buffer")?;
-        let data = Vec::new();
-        let obj = VertexBuffer { buffer, data };
-        Ok(obj)
-    }
-}
-
-struct ElementBuffer {
-    buffer: WebGlBuffer,
-    data: Vec<u32>,
-}
-
-impl ElementBuffer {
-    fn new(gl: &WebGl2RenderingContext) -> Result<ElementBuffer, JsValue> {
-        let buffer = gl.create_buffer().ok_or("failed to create buffer")?;
-        let data = Vec::new();
-        let obj = ElementBuffer { buffer, data };
-        Ok(obj)
-    }
-}
-
-fn line_geometry(points: &Vec<[f64; 2]>, width: f64) -> Vec<[f32; 2]> {
-    let pi = std::f32::consts::PI;
-    let sqrt2 = (2.0 as f32).sqrt();
-    let mut result = Vec::with_capacity(points.len() * 2);
-    {
-        let p1x = points[0][0] as f32;
-        let p1y = points[0][1] as f32;
-        let p2x = points[1][0] as f32;
-        let p2y = points[1][1] as f32;
-        let theta1 = (p2y - p1y).atan2(p2x - p1x);
-        result.push([
-            (width as f32) / sqrt2 * (theta1 + 3. * pi / 4.).cos() + p1x,
-            (width as f32) / sqrt2 * (theta1 + 3. * pi / 4.).sin() + p1y,
-        ]);
-        result.push([
-            (width as f32) / sqrt2 * (theta1 - 3. * pi / 4.).cos() + p1x,
-            (width as f32) / sqrt2 * (theta1 - 3. * pi / 4.).sin() + p1y,
-        ]);
-    }
-    for j in 1..(points.len() - 1) {
-        let p1x = points[j - 1][0] as f32;
-        let p1y = points[j - 1][1] as f32;
-        let p2x = points[j][0] as f32;
-        let p2y = points[j][1] as f32;
-        let p3x = points[j + 1][0] as f32;
-        let p3y = points[j + 1][1] as f32;
-        let theta1 = (p2y - p1y).atan2(p2x - p1x);
-        let theta2 = (p3y - p2y).atan2(p3x - p2x);
-        result.push([
-            (width as f32) / ((theta1 - theta2) / 2.).cos() / 2.
-                * ((theta1 + theta2 + pi) / 2.).cos()
-                + p2x,
-            (width as f32) / ((theta1 - theta2) / 2.).cos() / 2.
-                * ((theta1 + theta2 + pi) / 2.).sin()
-                + p2y,
-        ]);
-        result.push([
-            (width as f32) / ((theta1 - theta2) / 2.).cos() / 2.
-                * ((theta1 + theta2 - pi) / 2.).cos()
-                + p2x,
-            (width as f32) / ((theta1 - theta2) / 2.).cos() / 2.
-                * ((theta1 + theta2 - pi) / 2.).sin()
-                + p2y,
-        ]);
-    }
-    {
-        let p2x = points[points.len() - 2][0] as f32;
-        let p2y = points[points.len() - 2][1] as f32;
-        let p3x = points[points.len() - 1][0] as f32;
-        let p3y = points[points.len() - 1][1] as f32;
-        let theta2 = (p3y - p2y).atan2(p3x - p2x);
-        result.push([
-            (width as f32) / sqrt2 * (theta2 + pi / 4.).cos() + p3x,
-            (width as f32) / sqrt2 * (theta2 + pi / 4.).sin() + p3y,
-        ]);
-        result.push([
-            (width as f32) / sqrt2 * (theta2 - pi / 4.).cos() + p3x,
-            (width as f32) / sqrt2 * (theta2 - pi / 4.).sin() + p3y,
-        ]);
-    }
-    result
-}
-
 pub struct LinkMeshGeometry {
-    vertices: VertexBuffer,
-    elements: ElementBuffer,
+    vertices: Buffer<f32>,
+    elements: Buffer<u32>,
+    instances: Buffer<f32>,
     vao: WebGlVertexArrayObject,
     program: WebGlProgram,
     link_type: LinkType,
@@ -227,16 +128,24 @@ pub struct LinkMeshGeometry {
 
 impl LinkMeshGeometry {
     fn new(
-        gl: &WebGl2RenderingContext,
+        gl: &GL,
         program: WebGlProgram,
         link_type: LinkType,
     ) -> Result<LinkMeshGeometry, JsValue> {
-        let vertices = VertexBuffer::new(gl)?;
-        let elements = ElementBuffer::new(gl)?;
-        let vao = init_vertex_array(gl, &program, &vertices.buffer, &elements.buffer)?;
+        let vertices = Buffer::new(gl, vec![-0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5])?;
+        let elements = Buffer::new(gl, vec![0, 1, 2, 3])?;
+        let instances = Buffer::new(gl, vec![])?;
+        let vao = init_vertex_array(
+            gl,
+            &program,
+            &vertices.buffer,
+            &elements.buffer,
+            &instances.buffer,
+        )?;
         Ok(LinkMeshGeometry {
             vertices,
             elements,
+            instances,
             vao,
             program,
             link_type,
@@ -245,153 +154,127 @@ impl LinkMeshGeometry {
 
     fn set_value(&mut self, index: usize, value: f32, offset: usize) -> Result<(), JsValue> {
         let e = self
-            .vertices
+            .instances
             .data
-            .get_mut(LINK_ATTRIBUTES * index + offset)
+            .get_mut(LINK_INSTANCE_ATTRIBUTES * index + offset)
             .ok_or(format!("Index out of bounds: ({}, {})", index, offset))?;
         *e = value;
         Ok(())
     }
 
-    fn set_current_alpha(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
+    fn set_current_x1(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 0)
     }
 
-    fn set_next_alpha(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
+    fn set_current_y1(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 1)
     }
 
-    fn set_current_x(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
+    fn set_next_x1(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 2)
     }
 
-    fn set_current_y(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
+    fn set_next_y1(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 3)
     }
 
-    fn set_next_x(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
+    fn set_current_x2(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 4)
     }
 
-    fn set_next_y(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
+    fn set_current_y2(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 5)
     }
 
-    fn set_current_stroke_r(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
+    fn set_next_x2(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 6)
     }
 
-    fn set_current_stroke_g(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
+    fn set_next_y2(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 7)
     }
 
-    fn set_current_stroke_b(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
+    fn set_current_stroke_width(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 8)
     }
 
-    fn set_current_stroke_alpha(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
+    fn set_next_stroke_width(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 9)
     }
 
-    fn set_next_stroke_r(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
+    fn set_current_alpha(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 10)
     }
 
-    fn set_next_stroke_g(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
+    fn set_next_alpha(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 11)
     }
 
-    fn set_next_stroke_b(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
+    fn set_current_stroke_r(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 12)
     }
 
-    fn set_next_stroke_alpha(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
+    fn set_current_stroke_g(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
         self.set_value(index, value, 13)
+    }
+
+    fn set_current_stroke_b(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
+        self.set_value(index, value, 14)
+    }
+
+    fn set_current_stroke_alpha(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
+        self.set_value(index, value, 15)
+    }
+
+    fn set_next_stroke_r(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
+        self.set_value(index, value, 16)
+    }
+
+    fn set_next_stroke_g(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
+        self.set_value(index, value, 17)
+    }
+
+    fn set_next_stroke_b(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
+        self.set_value(index, value, 18)
+    }
+
+    fn set_next_stroke_alpha(&mut self, index: usize, value: f32) -> Result<(), JsValue> {
+        self.set_value(index, value, 19)
     }
 
     fn set_item(
         &mut self,
-        vertex_offset_ref: &mut usize,
-        element_offset_ref: &mut usize,
+        index: usize,
         current: &EdgeData,
         next: &EdgeData,
+        current_p1: &[f64; 2],
+        current_p2: &[f64; 2],
+        next_p1: &[f64; 2],
+        next_p2: &[f64; 2],
         a0: f32,
         a1: f32,
-    ) -> Result<usize, JsValue> {
-        let vertex_offset = *vertex_offset_ref;
-        let element_offset = *element_offset_ref;
-        let current_points = line_geometry(&current.points, current.stroke_width);
-        let next_points = line_geometry(&next.points, next.stroke_width);
-        let n = current_points.len();
-        for i in 0..n {
-            self.set_current_alpha(vertex_offset + i, a0)?;
-            self.set_next_alpha(vertex_offset + i, a1)?;
-            self.set_current_x(vertex_offset + i, current_points[i][0])?;
-            self.set_current_y(vertex_offset + i, current_points[i][1])?;
-            self.set_next_x(vertex_offset + i, next_points[i][0])?;
-            self.set_next_y(vertex_offset + i, next_points[i][1])?;
-            self.set_current_stroke_r(vertex_offset + i, (current.stroke_color.r / 255.) as f32)?;
-            self.set_current_stroke_g(vertex_offset + i, (current.stroke_color.g / 255.) as f32)?;
-            self.set_current_stroke_b(vertex_offset + i, (current.stroke_color.b / 255.) as f32)?;
-            self.set_current_stroke_alpha(vertex_offset + i, current.stroke_color.opacity as f32)?;
-            self.set_next_stroke_r(vertex_offset + i, (next.stroke_color.r / 255.) as f32)?;
-            self.set_next_stroke_g(vertex_offset + i, (next.stroke_color.g / 255.) as f32)?;
-            self.set_next_stroke_b(vertex_offset + i, (next.stroke_color.b / 255.) as f32)?;
-            self.set_next_stroke_alpha(vertex_offset + i, next.stroke_color.opacity as f32)?;
-        }
-        for i in 0..(next.points.len() - 1) {
-            *(self
-                .elements
-                .data
-                .get_mut((element_offset + i) * 6)
-                .ok_or(format!(
-                    "Element index out of bounds: {}",
-                    element_offset + i
-                ))?) = (i * 2 + vertex_offset) as u32;
-            *(self
-                .elements
-                .data
-                .get_mut((element_offset + i) * 6 + 1)
-                .ok_or(format!(
-                    "Element index out of bounds: {}",
-                    element_offset + i
-                ))?) = (i * 2 + vertex_offset + 1) as u32;
-            *(self
-                .elements
-                .data
-                .get_mut((element_offset + i) * 6 + 2)
-                .ok_or(format!(
-                    "Element index out of bounds: {}",
-                    element_offset + i
-                ))?) = (i * 2 + vertex_offset + 2) as u32;
-            *(self
-                .elements
-                .data
-                .get_mut((element_offset + i) * 6 + 3)
-                .ok_or(format!(
-                    "Element index out of bounds: {}",
-                    element_offset + i
-                ))?) = (i * 2 + vertex_offset + 1) as u32;
-            *(self
-                .elements
-                .data
-                .get_mut((element_offset + i) * 6 + 4)
-                .ok_or(format!(
-                    "Element index out of bounds: {}",
-                    element_offset + i
-                ))?) = (i * 2 + vertex_offset + 2) as u32;
-            *(self
-                .elements
-                .data
-                .get_mut((element_offset + i) * 6 + 5)
-                .ok_or(format!(
-                    "Element index out of bounds: {}",
-                    element_offset + i
-                ))?) = (i * 2 + vertex_offset + 3) as u32;
-        }
-        *vertex_offset_ref += n;
-        *element_offset_ref += next.points.len() - 1;
-        Ok(n)
+    ) -> Result<(), JsValue> {
+        self.set_current_x1(index, current_p1[0] as f32)?;
+        self.set_current_y1(index, current_p1[1] as f32)?;
+        self.set_next_x1(index, next_p1[0] as f32)?;
+        self.set_next_y1(index, next_p1[1] as f32)?;
+        self.set_current_x2(index, current_p2[0] as f32)?;
+        self.set_current_y2(index, current_p2[1] as f32)?;
+        self.set_next_x2(index, next_p2[0] as f32)?;
+        self.set_next_y2(index, next_p2[1] as f32)?;
+        self.set_current_stroke_width(index, current.stroke_width as f32)?;
+        self.set_next_stroke_width(index, next.stroke_width as f32)?;
+        self.set_current_alpha(index, a0)?;
+        self.set_next_alpha(index, a1)?;
+        self.set_current_stroke_r(index, (current.stroke_color.r / 255.) as f32)?;
+        self.set_current_stroke_g(index, (current.stroke_color.g / 255.) as f32)?;
+        self.set_current_stroke_b(index, (current.stroke_color.b / 255.) as f32)?;
+        self.set_current_stroke_alpha(index, current.stroke_color.opacity as f32)?;
+        self.set_next_stroke_r(index, (next.stroke_color.r / 255.) as f32)?;
+        self.set_next_stroke_g(index, (next.stroke_color.g / 255.) as f32)?;
+        self.set_next_stroke_b(index, (next.stroke_color.b / 255.) as f32)?;
+        self.set_next_stroke_alpha(index, next.stroke_color.opacity as f32)?;
+        Ok(())
     }
 
     fn is_same_link_type(&self, s: &String) -> bool {
@@ -400,87 +283,107 @@ impl LinkMeshGeometry {
         }
     }
 
-    fn update(&mut self, gl: &WebGl2RenderingContext, layout: &LayoutData) -> Result<(), JsValue> {
-        let mut vertex_count = 0;
-        let mut element_count = 0;
+    fn update(&mut self, gl: &GL, layout: &LayoutData) -> Result<(), JsValue> {
+        let mut n = 0;
         for link in &layout.enter.edges {
             if self.is_same_link_type(&link.shape) {
-                vertex_count += link.points.len() * 2;
-                element_count += (link.points.len() - 1) * 6
+                n += link.points.len() - 1
             }
         }
         for link in &layout.update.edges {
             if self.is_same_link_type(&link.next.shape) {
-                vertex_count += link.next.points.len() * 2;
-                element_count += (link.next.points.len() - 1) * 6
+                n += link.next.points.len() - 1
             }
         }
         for link in &layout.exit.edges {
             if self.is_same_link_type(&link.shape) {
-                vertex_count += link.points.len() * 2;
-                element_count += (link.points.len() - 1) * 6
+                n += link.points.len() - 1
             }
         }
-        self.vertices
-            .data
-            .resize(vertex_count * LINK_ATTRIBUTES, 0.);
-        self.elements.data.resize(element_count, 0);
+        self.instances.data.resize(n * LINK_INSTANCE_ATTRIBUTES, 0.);
 
-        let mut vertex_offset = 0;
-        let mut element_offset = 0;
+        let mut offset = 0;
         for link in &layout.enter.edges {
             if self.is_same_link_type(&link.shape) {
-                self.set_item(&mut vertex_offset, &mut element_offset, link, link, 0., 1.)?;
+                for i in 1..link.points.len() {
+                    self.set_item(
+                        offset,
+                        link,
+                        link,
+                        &link.points[i - 1],
+                        &link.points[i],
+                        &link.points[i - 1],
+                        &link.points[i],
+                        0.,
+                        1.,
+                    )?;
+                    offset += 1;
+                }
             }
         }
         for link in &layout.update.edges {
             if self.is_same_link_type(&link.next.shape) {
-                self.set_item(
-                    &mut vertex_offset,
-                    &mut element_offset,
-                    &link.current,
-                    &link.next,
-                    1.,
-                    1.,
-                )?;
+                for i in 1..link.next.points.len() {
+                    self.set_item(
+                        offset,
+                        &link.current,
+                        &link.next,
+                        &link.current.points[i - 1],
+                        &link.current.points[i],
+                        &link.next.points[i - 1],
+                        &link.next.points[i],
+                        1.,
+                        1.,
+                    )?;
+                    offset += 1;
+                }
             }
         }
         for link in &layout.exit.edges {
             if self.is_same_link_type(&link.shape) {
-                self.set_item(&mut vertex_offset, &mut element_offset, link, link, 1., 0.)?;
+                for i in 1..link.points.len() {
+                    self.set_item(
+                        offset,
+                        link,
+                        link,
+                        &link.points[i - 1],
+                        &link.points[i],
+                        &link.points[i - 1],
+                        &link.points[i],
+                        1.,
+                        0.,
+                    )?;
+                    offset += 1;
+                }
             }
         }
 
-        gl.bind_buffer(
-            WebGl2RenderingContext::ARRAY_BUFFER,
-            Some(&self.vertices.buffer),
-        );
+        gl.bind_buffer(GL::ARRAY_BUFFER, Some(&self.vertices.buffer));
         let bytes = unsafe {
             std::slice::from_raw_parts(
                 self.vertices.data.as_ptr() as *const u8,
                 self.vertices.data.len() * std::mem::size_of::<f32>(),
             )
         };
-        gl.buffer_data_with_u8_array(
-            WebGl2RenderingContext::ARRAY_BUFFER,
-            bytes,
-            WebGl2RenderingContext::STATIC_DRAW,
-        );
-        gl.bind_buffer(
-            WebGl2RenderingContext::ELEMENT_ARRAY_BUFFER,
-            Some(&self.elements.buffer),
-        );
+        gl.buffer_data_with_u8_array(GL::ARRAY_BUFFER, bytes, GL::STATIC_DRAW);
+
+        gl.bind_buffer(GL::ARRAY_BUFFER, Some(&self.instances.buffer));
+        let bytes = unsafe {
+            std::slice::from_raw_parts(
+                self.instances.data.as_ptr() as *const u8,
+                self.instances.data.len() * std::mem::size_of::<f32>(),
+            )
+        };
+        gl.buffer_data_with_u8_array(GL::ARRAY_BUFFER, bytes, GL::STATIC_DRAW);
+
+        gl.bind_buffer(GL::ELEMENT_ARRAY_BUFFER, Some(&self.elements.buffer));
         let bytes = unsafe {
             std::slice::from_raw_parts(
                 self.elements.data.as_ptr() as *const u8,
                 self.elements.data.len() * std::mem::size_of::<u32>(),
             )
         };
-        gl.buffer_data_with_u8_array(
-            WebGl2RenderingContext::ELEMENT_ARRAY_BUFFER,
-            bytes,
-            WebGl2RenderingContext::STATIC_DRAW,
-        );
+        gl.buffer_data_with_u8_array(GL::ELEMENT_ARRAY_BUFFER, bytes, GL::STATIC_DRAW);
 
         Ok(())
     }
@@ -488,7 +391,7 @@ impl LinkMeshGeometry {
 
 impl MeshGeometry for LinkMeshGeometry {
     fn mode(&self) -> u32 {
-        WebGl2RenderingContext::TRIANGLES
+        GL::TRIANGLE_STRIP
     }
 
     fn program(&self) -> &WebGlProgram {
@@ -500,11 +403,11 @@ impl MeshGeometry for LinkMeshGeometry {
     }
 
     fn size(&self) -> i32 {
-        self.elements.data.len() as i32
+        4
     }
 
-    fn texture(&self) -> Option<&WebGlTexture> {
-        None
+    fn instance_count(&self) -> Option<i32> {
+        Some((self.instances.data.len() / LINK_INSTANCE_ATTRIBUTES) as i32)
     }
 }
 
@@ -514,7 +417,7 @@ pub struct LinkMesh {
 }
 
 impl LinkMesh {
-    pub fn new(gl: &WebGl2RenderingContext, link_type: LinkType) -> Result<LinkMesh, JsValue> {
+    pub fn new(gl: &GL, link_type: LinkType) -> Result<LinkMesh, JsValue> {
         let program = create_link_shader_program(gl)?;
         Ok(LinkMesh { program, link_type })
     }
@@ -523,7 +426,7 @@ impl LinkMesh {
 impl Mesh for LinkMesh {
     fn update(
         &self,
-        gl: &WebGl2RenderingContext,
+        gl: &GL,
         layout: &LayoutData,
         geometries: &mut Vec<Box<MeshGeometry>>,
     ) -> Result<(), JsValue> {
