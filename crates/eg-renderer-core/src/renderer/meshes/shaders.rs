@@ -117,8 +117,7 @@ void main() {
     float t = atan(diff.y, diff.x);
 
     float strokeWidth = mix(aStrokeWidth0, aStrokeWidth1, r);
-    vec2 size = vec2(strokeWidth);
-    size.x += length(diff);
+    vec2 size = vec2(length(diff), strokeWidth);
     vec2 pos = aPosition * size;
     float x = pos.x * cos(t) - pos.y * sin(t) + centerPosition.x;
     float y = pos.x * sin(t) + pos.y * cos(t) + centerPosition.y;
