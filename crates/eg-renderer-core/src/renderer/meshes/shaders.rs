@@ -1,4 +1,4 @@
-pub const NODE_VERTEX_SHADER_SOURCE: &str = r#"#version 300 es
+pub const SHAPE_VERTEX_SHADER_SOURCE: &str = r#"#version 300 es
 layout(location = 0) in vec2 aPosition;
 layout(location = 1) in float aAlpha0;
 layout(location = 2) in float aAlpha1;
@@ -38,7 +38,7 @@ void main() {
 }
 "#;
 
-pub const CIRCLE_NODE_FRAGMENT_SHADER_SOURCE: &str = r#"#version 300 es
+pub const CIRCLE_SHAPE_FRAGMENT_SHADER_SOURCE: &str = r#"#version 300 es
 precision mediump float;
 in vec2 vPosition;
 in vec4 vColor;
@@ -73,7 +73,7 @@ void main() {
 }
 "#;
 
-pub const RECTANGLE_NODE_FRAGMENT_SHADER_SOURCE: &str = r#"#version 300 es
+pub const RECTANGLE_SHAPE_FRAGMENT_SHADER_SOURCE: &str = r#"#version 300 es
 precision mediump float;
 in vec2 vPosition;
 in vec4 vColor;

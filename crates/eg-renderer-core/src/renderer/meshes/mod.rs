@@ -1,3 +1,4 @@
+mod group_mesh;
 mod label_mesh;
 mod link_circle_marker_mesh;
 mod link_mesh;
@@ -6,13 +7,16 @@ mod mesh;
 mod node_mesh;
 mod program;
 mod shaders;
+mod shape_mesh;
 
+pub use group_mesh::*;
 pub use label_mesh::*;
 pub use link_circle_marker_mesh::*;
 pub use link_mesh::*;
 pub use link_triangle_marker_mesh::*;
 pub use mesh::*;
 pub use node_mesh::*;
+pub use shape_mesh::ShapeType;
 
 use wasm_bindgen::prelude::*;
 use web_sys::{WebGl2RenderingContext as GL, WebGlVertexArrayObject};

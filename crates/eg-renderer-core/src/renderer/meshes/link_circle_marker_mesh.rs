@@ -196,7 +196,7 @@ impl Mesh for LinkCircleMarkerMesh {
         &self,
         gl: &GL,
         layout: &LayoutData,
-        geometries: &mut Vec<Box<MeshGeometry>>,
+        geometries: &mut Vec<Box<dyn MeshGeometry>>,
     ) -> Result<(), JsValue> {
         let geometry = LinkCircleMarkerMeshGeometry::new(gl, &self.program, layout)?;
         geometries.push(Box::new(geometry));

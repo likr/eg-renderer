@@ -1,6 +1,6 @@
 use super::meshes::{
-    LabelMesh, LayoutData, LinkCircleMarkerMesh, LinkMesh, LinkTriangleMarkerMesh, LinkType, Mesh,
-    MeshGeometry, NodeMesh, NodeType,
+    GroupMesh, LabelMesh, LayoutData, LinkCircleMarkerMesh, LinkMesh, LinkTriangleMarkerMesh,
+    LinkType, Mesh, MeshGeometry, NodeMesh, ShapeType,
 };
 use cgmatrix::{identity, matmul, orthogonal_matrix, scale, translate, viewing_matrix, Matrix44};
 use std::collections::HashMap;
@@ -20,17 +20,19 @@ struct Context {
     height: i32,
     mv_matrix: Matrix44,
     p_matrix: Matrix44,
-    objects: Vec<Box<Mesh>>,
-    geometries: Vec<Box<MeshGeometry>>,
+    objects: Vec<Box<dyn Mesh>>,
+    geometries: Vec<Box<dyn MeshGeometry>>,
 }
 
 impl Context {
     fn new(gl: &WebGl2RenderingContext) -> Result<Context, JsValue> {
+        let circle_groups = GroupMesh::new(gl, ShapeType::Circle)?;
+        let rectangle_groups = GroupMesh::new(gl, ShapeType::Rectangle)?;
         let line_links = LinkMesh::new(gl, LinkType::Line)?;
         let link_circle_markers = LinkCircleMarkerMesh::new(gl)?;
         let link_triangle_markers = LinkTriangleMarkerMesh::new(gl)?;
-        let circle_nodes = NodeMesh::new(gl, NodeType::Circle)?;
-        let rectangle_nodes = NodeMesh::new(gl, NodeType::Rectangle)?;
+        let circle_nodes = NodeMesh::new(gl, ShapeType::Circle)?;
+        let rectangle_nodes = NodeMesh::new(gl, ShapeType::Rectangle)?;
         let node_labels = LabelMesh::new(gl)?;
         Ok(Context {
             width: 0,
@@ -38,6 +40,8 @@ impl Context {
             mv_matrix: translate(0., 0., 0.),
             p_matrix: identity(),
             objects: vec![
+                Box::new(circle_groups),
+                Box::new(rectangle_groups),
                 Box::new(line_links),
                 Box::new(link_circle_markers),
                 Box::new(link_triangle_markers),

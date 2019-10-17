@@ -27,10 +27,10 @@ fn insert_instance_item(
     data: &mut Vec<f32>,
     current: &EdgeData,
     next: &EdgeData,
-    current_p1: &[f64; 2],
-    current_p2: &[f64; 2],
-    next_p1: &[f64; 2],
-    next_p2: &[f64; 2],
+    current_p1: &[f32; 2],
+    current_p2: &[f32; 2],
+    next_p1: &[f32; 2],
+    next_p2: &[f32; 2],
     a0: f32,
     a1: f32,
 ) {
@@ -208,7 +208,7 @@ impl Mesh for LinkMesh {
         &self,
         gl: &GL,
         layout: &LayoutData,
-        geometries: &mut Vec<Box<MeshGeometry>>,
+        geometries: &mut Vec<Box<dyn MeshGeometry>>,
     ) -> Result<(), JsValue> {
         let geometry = LinkMeshGeometry::new(gl, &self.program, &self.link_type, layout)?;
         geometries.push(Box::new(geometry));

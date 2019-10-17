@@ -1,6 +1,6 @@
 use super::program::{init_fragment_shader, init_program, init_vertex_shader};
 use super::shaders::{LABEL_FRAGMENT_SHADER_SOURCE, LABEL_VERTEX_SHADER_SOURCE};
-use super::{init_vertex_array, ColorData, LayoutData, Mesh, MeshGeometry, VertexData};
+use super::{init_vertex_array, ColorData, LayoutData, Mesh, MeshGeometry, NodeData};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::{
@@ -10,13 +10,13 @@ use web_sys::{
 
 fn create_text_image(
     text: &String,
-    scale: f64,
-    margin: f64,
-    label_font_size: f64,
+    scale: f32,
+    margin: f32,
+    label_font_size: f32,
     label_font_family: &String,
     label_fill_color: &ColorData,
     label_stroke_color: &ColorData,
-    label_stroke_width: f64,
+    label_stroke_width: f32,
 ) -> Result<HtmlCanvasElement, JsValue> {
     let window = web_sys::window().unwrap();
     let document = window.document().unwrap();
@@ -36,10 +36,10 @@ fn create_text_image(
     ));
     ctx.set_text_align("center");
     ctx.set_text_baseline("middle");
-    ctx.set_line_width(label_stroke_width * scale);
+    ctx.set_line_width((label_stroke_width * scale) as f64);
     let bbox = ctx.measure_text(&text)?;
 
-    canvas.set_width(((bbox.width() + margin) * scale) as u32);
+    canvas.set_width(((bbox.width() as f32 + margin) * scale) as u32);
     canvas.set_height(((label_font_size + margin) * scale) as u32);
 
     ctx.set_font(&format!(
@@ -49,7 +49,7 @@ fn create_text_image(
     ));
     ctx.set_text_align("center");
     ctx.set_text_baseline("middle");
-    ctx.set_line_width(label_stroke_width * scale);
+    ctx.set_line_width((label_stroke_width * scale) as f64);
     ctx.set_fill_style(
         &format!(
             "rgb({},{},{})",
@@ -99,15 +99,15 @@ fn create_texture(
 }
 
 fn create_vertex_data(
-    current: &VertexData,
-    next: &VertexData,
+    current: &NodeData,
+    next: &NodeData,
     canvas: &HtmlCanvasElement,
-    scale: f64,
+    scale: f32,
     a0: f32,
     a1: f32,
 ) -> Vec<f32> {
-    let width = canvas.width() as f64 / scale;
-    let height = canvas.height() as f64 / scale;
+    let width = canvas.width() as f32 / scale;
+    let height = canvas.height() as f32 / scale;
     vec![
         0.0,
         1.0,
@@ -154,8 +154,8 @@ impl LabelMeshGeometry {
     fn new(
         gl: &WebGl2RenderingContext,
         program: &WebGlProgram,
-        current: &VertexData,
-        next: &VertexData,
+        current: &NodeData,
+        next: &NodeData,
         a0: f32,
         a1: f32,
     ) -> Result<LabelMeshGeometry, JsValue> {
@@ -239,7 +239,7 @@ impl Mesh for LabelMesh {
         &self,
         gl: &WebGl2RenderingContext,
         layout: &LayoutData,
-        geometries: &mut Vec<Box<MeshGeometry>>,
+        geometries: &mut Vec<Box<dyn MeshGeometry>>,
     ) -> Result<(), JsValue> {
         for node in &layout.enter.vertices {
             if node.label.len() > 0 {

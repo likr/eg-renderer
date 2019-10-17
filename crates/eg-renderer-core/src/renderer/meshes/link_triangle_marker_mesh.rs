@@ -217,7 +217,7 @@ impl Mesh for LinkTriangleMarkerMesh {
         &self,
         gl: &GL,
         layout: &LayoutData,
-        geometries: &mut Vec<Box<MeshGeometry>>,
+        geometries: &mut Vec<Box<dyn MeshGeometry>>,
     ) -> Result<(), JsValue> {
         let geometry = LinkTriangleMarkerMeshGeometry::new(gl, &self.program, layout)?;
         geometries.push(Box::new(geometry));
