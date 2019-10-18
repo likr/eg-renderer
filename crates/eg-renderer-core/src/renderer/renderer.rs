@@ -28,6 +28,7 @@ impl Context {
     fn new(gl: &WebGl2RenderingContext) -> Result<Context, JsValue> {
         let circle_groups = GroupMesh::new(gl, ShapeType::Circle)?;
         let rectangle_groups = GroupMesh::new(gl, ShapeType::Rectangle)?;
+        let arc_links = LinkMesh::new(gl, LinkType::Arc)?;
         let line_links = LinkMesh::new(gl, LinkType::Line)?;
         let link_circle_markers = LinkCircleMarkerMesh::new(gl)?;
         let link_triangle_markers = LinkTriangleMarkerMesh::new(gl)?;
@@ -42,6 +43,7 @@ impl Context {
             objects: vec![
                 Box::new(circle_groups),
                 Box::new(rectangle_groups),
+                Box::new(arc_links),
                 Box::new(line_links),
                 Box::new(link_circle_markers),
                 Box::new(link_triangle_markers),

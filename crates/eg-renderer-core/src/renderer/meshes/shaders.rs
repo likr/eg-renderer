@@ -92,7 +92,7 @@ void main() {
 }
 "#;
 
-pub const LINK_VERTEX_SHADER_SOURCE: &str = r#"#version 300 es
+pub const STRAIGHT_LINK_VERTEX_SHADER_SOURCE: &str = r#"#version 300 es
 layout(location = 0) in vec2 aPosition;
 layout(location = 1) in vec2 aPosition10;
 layout(location = 2) in vec2 aPosition11;
@@ -119,6 +119,43 @@ void main() {
     float strokeWidth = mix(aStrokeWidth0, aStrokeWidth1, r);
     vec2 size = vec2(length(diff), strokeWidth);
     vec2 pos = aPosition * size;
+    float x = pos.x * cos(t) - pos.y * sin(t) + centerPosition.x;
+    float y = pos.x * sin(t) + pos.y * cos(t) + centerPosition.y;
+    gl_Position = uPMatrix * uMVMatrix * vec4(x, y, 1.0, 1.0);
+
+    float alpha = mix(aAlpha0, aAlpha1, r);
+    vColor = mix(aColor0, aColor1, r);
+    vColor.a *= alpha;
+}
+"#;
+
+pub const ARC_LINK_VERTEX_SHADER_SOURCE: &str = r#"#version 300 es
+layout(location = 0) in vec2 aPosition;
+layout(location = 1) in vec2 aPosition10;
+layout(location = 2) in vec2 aPosition11;
+layout(location = 3) in vec2 aPosition20;
+layout(location = 4) in vec2 aPosition21;
+layout(location = 5) in float aStrokeWidth0;
+layout(location = 6) in float aStrokeWidth1;
+layout(location = 7) in float aAlpha0;
+layout(location = 8) in float aAlpha1;
+layout(location = 9) in vec4 aColor0;
+layout(location = 10) in vec4 aColor1;
+uniform mat4 uMVMatrix;
+uniform mat4 uPMatrix;
+uniform float r;
+out vec4 vColor;
+
+void main() {
+    vec2 position1 = mix(aPosition10, aPosition11, r);
+    vec2 position2 = mix(aPosition20, aPosition21, r);
+    vec2 centerPosition = (position1 + position2) / 2.0;
+    vec2 diff = position2 - position1;
+    float t = atan(diff.y, diff.x);
+
+    float strokeWidth = mix(aStrokeWidth0, aStrokeWidth1, r);
+    float radius = (length(diff) + (gl_VertexID % 2 == 0 ? strokeWidth : -strokeWidth)) / 2.0;
+    vec2 pos = aPosition * radius;
     float x = pos.x * cos(t) - pos.y * sin(t) + centerPosition.x;
     float y = pos.x * sin(t) + pos.y * cos(t) + centerPosition.y;
     gl_Position = uPMatrix * uMVMatrix * vec4(x, y, 1.0, 1.0);
