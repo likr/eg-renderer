@@ -2,7 +2,7 @@ use super::program::{init_fragment_shader, init_program, init_vertex_shader};
 use super::shaders::{
     LINK_TRIANGLE_MARKER_FRAGMENT_SHADER_SOURCE, LINK_TRIANGLE_MARKER_VERTEX_SHADER_SOURCE,
 };
-use super::{init_vertex_array_with_instances, EdgeData, LayoutData, Mesh, MeshGeometry};
+use super::{init_vertex_array_with_instances, LayoutData, LinkData, Mesh, MeshGeometry};
 use wasm_bindgen::prelude::*;
 use web_sys::{WebGl2RenderingContext as GL, WebGlProgram, WebGlVertexArrayObject};
 
@@ -20,8 +20,8 @@ pub struct LinkTriangleMarkerMeshGeometry {
 
 fn add_marker(
     data: &mut Vec<f32>,
-    current: &EdgeData,
-    next: &EdgeData,
+    current: &LinkData,
+    next: &LinkData,
     a0: f32,
     a1: f32,
     marker_x0: f32,
@@ -57,7 +57,7 @@ fn add_marker(
     data.push(next.stroke_color.opacity as f32);
 }
 
-fn add_source_marker(data: &mut Vec<f32>, current: &EdgeData, next: &EdgeData, a0: f32, a1: f32) {
+fn add_source_marker(data: &mut Vec<f32>, current: &LinkData, next: &LinkData, a0: f32, a1: f32) {
     add_marker(
         data,
         current,
@@ -77,7 +77,7 @@ fn add_source_marker(data: &mut Vec<f32>, current: &EdgeData, next: &EdgeData, a
     );
 }
 
-fn add_target_marker(data: &mut Vec<f32>, current: &EdgeData, next: &EdgeData, a0: f32, a1: f32) {
+fn add_target_marker(data: &mut Vec<f32>, current: &LinkData, next: &LinkData, a0: f32, a1: f32) {
     add_marker(
         data,
         current,
@@ -99,7 +99,7 @@ fn add_target_marker(data: &mut Vec<f32>, current: &EdgeData, next: &EdgeData, a
 
 fn create_instance_data(layout: &LayoutData) -> Vec<f32> {
     let mut data = vec![];
-    for edge in &layout.enter.edges {
+    for edge in &layout.enter.links {
         if edge.source_marker_shape == "triangle" {
             add_source_marker(&mut data, edge, edge, 0.0, 1.0);
         }
@@ -107,7 +107,7 @@ fn create_instance_data(layout: &LayoutData) -> Vec<f32> {
             add_target_marker(&mut data, edge, edge, 0.0, 1.0);
         }
     }
-    for update in &layout.update.edges {
+    for update in &layout.update.links {
         let current = &update.current;
         let next = &update.next;
         if next.source_marker_shape == "triangle" {
@@ -117,7 +117,7 @@ fn create_instance_data(layout: &LayoutData) -> Vec<f32> {
             add_target_marker(&mut data, &current, &next, 1.0, 1.0);
         }
     }
-    for edge in &layout.exit.edges {
+    for edge in &layout.exit.links {
         if edge.source_marker_shape == "triangle" {
             add_source_marker(&mut data, edge, edge, 1.0, 0.0);
         }

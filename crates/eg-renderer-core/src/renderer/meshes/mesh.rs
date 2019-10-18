@@ -34,7 +34,7 @@ pub struct NodeData {
 #[allow(non_snake_case)]
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct EdgeData {
+pub struct LinkData {
     pub u: String,
     pub v: String,
     pub points: Vec<[f32; 2]>,
@@ -83,22 +83,28 @@ pub struct UpdateItem<T> {
 
 #[derive(Serialize, Deserialize)]
 pub struct UpdateData {
-    pub vertices: Vec<UpdateItem<NodeData>>,
-    pub edges: Vec<UpdateItem<EdgeData>>,
+    #[serde(rename = "vertices")]
+    pub nodes: Vec<UpdateItem<NodeData>>,
+    #[serde(rename = "edges")]
+    pub links: Vec<UpdateItem<LinkData>>,
     pub groups: Vec<UpdateItem<GroupData>>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct EnterData {
-    pub vertices: Vec<NodeData>,
-    pub edges: Vec<EdgeData>,
+    #[serde(rename = "vertices")]
+    pub nodes: Vec<NodeData>,
+    #[serde(rename = "edges")]
+    pub links: Vec<LinkData>,
     pub groups: Vec<GroupData>,
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct ExitData {
-    pub vertices: Vec<NodeData>,
-    pub edges: Vec<EdgeData>,
+    #[serde(rename = "vertices")]
+    pub nodes: Vec<NodeData>,
+    #[serde(rename = "edges")]
+    pub links: Vec<LinkData>,
     pub groups: Vec<GroupData>,
 }
 
@@ -206,6 +212,158 @@ impl ShapeData for GroupData {
     }
     fn stroke_width(&self) -> f32 {
         self.stroke_width
+    }
+}
+
+pub trait LabelData {
+    fn text(&self) -> &String;
+    fn fill_color_r(&self) -> f32;
+    fn fill_color_g(&self) -> f32;
+    fn fill_color_b(&self) -> f32;
+    fn fill_color_opacity(&self) -> f32;
+    fn stroke_color_r(&self) -> f32;
+    fn stroke_color_g(&self) -> f32;
+    fn stroke_color_b(&self) -> f32;
+    fn stroke_color_opacity(&self) -> f32;
+    fn stroke_width(&self) -> f32;
+    fn font_size(&self) -> f32;
+    fn font_family(&self) -> &String;
+    fn x(&self) -> f32;
+    fn y(&self) -> f32;
+}
+
+impl LabelData for NodeData {
+    fn text(&self) -> &String {
+        &self.label
+    }
+    fn fill_color_r(&self) -> f32 {
+        self.label_fill_color.r / 255.
+    }
+    fn fill_color_g(&self) -> f32 {
+        self.label_fill_color.g / 255.
+    }
+    fn fill_color_b(&self) -> f32 {
+        self.label_fill_color.b / 255.
+    }
+    fn fill_color_opacity(&self) -> f32 {
+        self.label_fill_color.opacity
+    }
+    fn stroke_color_r(&self) -> f32 {
+        self.label_stroke_color.r / 255.
+    }
+    fn stroke_color_g(&self) -> f32 {
+        self.label_stroke_color.g / 255.
+    }
+    fn stroke_color_b(&self) -> f32 {
+        self.label_stroke_color.b / 255.
+    }
+    fn stroke_color_opacity(&self) -> f32 {
+        self.label_stroke_color.opacity
+    }
+    fn stroke_width(&self) -> f32 {
+        self.label_stroke_width
+    }
+    fn font_size(&self) -> f32 {
+        self.label_font_size
+    }
+    fn font_family(&self) -> &String {
+        &self.label_font_family
+    }
+    fn x(&self) -> f32 {
+        self.x
+    }
+    fn y(&self) -> f32 {
+        self.y
+    }
+}
+
+impl LabelData for LinkData {
+    fn text(&self) -> &String {
+        &self.label
+    }
+    fn fill_color_r(&self) -> f32 {
+        self.label_fill_color.r / 255.
+    }
+    fn fill_color_g(&self) -> f32 {
+        self.label_fill_color.g / 255.
+    }
+    fn fill_color_b(&self) -> f32 {
+        self.label_fill_color.b / 255.
+    }
+    fn fill_color_opacity(&self) -> f32 {
+        self.label_fill_color.opacity
+    }
+    fn stroke_color_r(&self) -> f32 {
+        self.label_stroke_color.r / 255.
+    }
+    fn stroke_color_g(&self) -> f32 {
+        self.label_stroke_color.g / 255.
+    }
+    fn stroke_color_b(&self) -> f32 {
+        self.label_stroke_color.b / 255.
+    }
+    fn stroke_color_opacity(&self) -> f32 {
+        self.label_stroke_color.opacity
+    }
+    fn stroke_width(&self) -> f32 {
+        self.label_stroke_width
+    }
+    fn font_size(&self) -> f32 {
+        self.label_font_size
+    }
+    fn font_family(&self) -> &String {
+        &self.label_font_family
+    }
+    fn x(&self) -> f32 {
+        (self.points[0][0] + self.points[self.points.len() - 1][0]) / 2.
+    }
+    fn y(&self) -> f32 {
+        (self.points[0][1] + self.points[self.points.len() - 1][1]) / 2.
+    }
+}
+
+impl LabelData for GroupData {
+    fn text(&self) -> &String {
+        &self.label
+    }
+    fn fill_color_r(&self) -> f32 {
+        self.label_fill_color.r / 255.
+    }
+    fn fill_color_g(&self) -> f32 {
+        self.label_fill_color.g / 255.
+    }
+    fn fill_color_b(&self) -> f32 {
+        self.label_fill_color.b / 255.
+    }
+    fn fill_color_opacity(&self) -> f32 {
+        self.label_fill_color.opacity
+    }
+    fn stroke_color_r(&self) -> f32 {
+        self.label_stroke_color.r / 255.
+    }
+    fn stroke_color_g(&self) -> f32 {
+        self.label_stroke_color.g / 255.
+    }
+    fn stroke_color_b(&self) -> f32 {
+        self.label_stroke_color.b / 255.
+    }
+    fn stroke_color_opacity(&self) -> f32 {
+        self.label_stroke_color.opacity
+    }
+    fn stroke_width(&self) -> f32 {
+        self.label_stroke_width
+    }
+    fn font_size(&self) -> f32 {
+        self.label_font_size
+    }
+    fn font_family(&self) -> &String {
+        &self.label_font_family
+    }
+    fn x(&self) -> f32 {
+        self.x
+    }
+    fn y(&self) -> f32 {
+        self.y
     }
 }
 

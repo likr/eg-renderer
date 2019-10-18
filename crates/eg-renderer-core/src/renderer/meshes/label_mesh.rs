@@ -1,6 +1,6 @@
 use super::program::{init_fragment_shader, init_program, init_vertex_shader};
 use super::shaders::{LABEL_FRAGMENT_SHADER_SOURCE, LABEL_VERTEX_SHADER_SOURCE};
-use super::{init_vertex_array, ColorData, LayoutData, Mesh, MeshGeometry, NodeData};
+use super::{init_vertex_array, LabelData, LayoutData, Mesh, MeshGeometry};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::{
@@ -14,8 +14,12 @@ fn create_text_image(
     margin: f32,
     label_font_size: f32,
     label_font_family: &String,
-    label_fill_color: &ColorData,
-    label_stroke_color: &ColorData,
+    label_fill_color_r: f32,
+    label_fill_color_g: f32,
+    label_fill_color_b: f32,
+    label_stroke_color_r: f32,
+    label_stroke_color_g: f32,
+    label_stroke_color_b: f32,
     label_stroke_width: f32,
 ) -> Result<HtmlCanvasElement, JsValue> {
     let window = web_sys::window().unwrap();
@@ -53,14 +57,14 @@ fn create_text_image(
     ctx.set_fill_style(
         &format!(
             "rgb({},{},{})",
-            label_fill_color.r, label_fill_color.g, label_fill_color.b
+            label_fill_color_r, label_fill_color_g, label_fill_color_b
         )
         .into(),
     );
     ctx.set_stroke_style(
         &format!(
             "rgb({},{},{})",
-            label_stroke_color.r, label_stroke_color.g, label_stroke_color.b
+            label_stroke_color_r, label_stroke_color_g, label_stroke_color_b
         )
         .into(),
     );
@@ -98,9 +102,9 @@ fn create_texture(
     Ok(texture)
 }
 
-fn create_vertex_data(
-    current: &NodeData,
-    next: &NodeData,
+fn create_vertex_data<T: LabelData>(
+    current: &T,
+    next: &T,
     canvas: &HtmlCanvasElement,
     scale: f32,
     a0: f32,
@@ -111,34 +115,34 @@ fn create_vertex_data(
     vec![
         0.0,
         1.0,
-        (current.x - width / 2.) as f32,
-        (current.y + height / 2.) as f32,
-        (next.x - width / 2.) as f32,
-        (next.y + height / 2.) as f32,
+        (current.x() - width / 2.) as f32,
+        (current.y() + height / 2.) as f32,
+        (next.x() - width / 2.) as f32,
+        (next.y() + height / 2.) as f32,
         a0,
         a1,
         1.0,
         1.0,
-        (current.x + width / 2.) as f32,
-        (current.y + height / 2.) as f32,
-        (next.x + width / 2.) as f32,
-        (next.y + height / 2.) as f32,
+        (current.x() + width / 2.) as f32,
+        (current.y() + height / 2.) as f32,
+        (next.x() + width / 2.) as f32,
+        (next.y() + height / 2.) as f32,
         a0,
         a1,
         0.0,
         0.0,
-        (current.x - width / 2.) as f32,
-        (current.y - height / 2.) as f32,
-        (next.x - width / 2.) as f32,
-        (next.y - height / 2.) as f32,
+        (current.x() - width / 2.) as f32,
+        (current.y() - height / 2.) as f32,
+        (next.x() - width / 2.) as f32,
+        (next.y() - height / 2.) as f32,
         a0,
         a1,
         1.0,
         0.0,
-        (current.x + width / 2.) as f32,
-        (current.y - height / 2.) as f32,
-        (next.x + width / 2.) as f32,
-        (next.y - height / 2.) as f32,
+        (current.x() + width / 2.) as f32,
+        (current.y() - height / 2.) as f32,
+        (next.x() + width / 2.) as f32,
+        (next.y() - height / 2.) as f32,
         a0,
         a1,
     ]
@@ -151,24 +155,28 @@ pub struct LabelMeshGeometry {
 }
 
 impl LabelMeshGeometry {
-    fn new(
+    fn new<T: LabelData>(
         gl: &WebGl2RenderingContext,
         program: &WebGlProgram,
-        current: &NodeData,
-        next: &NodeData,
+        current: &T,
+        next: &T,
         a0: f32,
         a1: f32,
     ) -> Result<LabelMeshGeometry, JsValue> {
         let scale = 2.0;
         let canvas = create_text_image(
-            &next.label,
+            &next.text(),
             scale,
             1.0,
-            next.label_font_size,
-            &next.label_font_family,
-            &next.label_fill_color,
-            &next.label_stroke_color,
-            next.label_stroke_width,
+            next.font_size(),
+            &next.font_family(),
+            next.fill_color_r(),
+            next.fill_color_g(),
+            next.fill_color_b(),
+            next.stroke_color_r(),
+            next.stroke_color_g(),
+            next.stroke_color_b(),
+            next.stroke_width(),
         )?;
         let texture = create_texture(gl, &canvas)?;
 
@@ -241,22 +249,66 @@ impl Mesh for LabelMesh {
         layout: &LayoutData,
         geometries: &mut Vec<Box<dyn MeshGeometry>>,
     ) -> Result<(), JsValue> {
-        for node in &layout.enter.vertices {
+        for node in &layout.enter.nodes {
             if node.label.len() > 0 {
-                let geometry = LabelMeshGeometry::new(gl, &self.program, &node, &node, 0.0, 1.0)?;
+                let geometry = LabelMeshGeometry::new(gl, &self.program, node, node, 0.0, 1.0)?;
                 geometries.push(Box::new(geometry));
             }
         }
-        for node in &layout.update.vertices {
+        for link in &layout.enter.links {
+            if link.label.len() > 0 {
+                let geometry = LabelMeshGeometry::new(gl, &self.program, link, link, 0.0, 1.0)?;
+                geometries.push(Box::new(geometry));
+            }
+        }
+        for group in &layout.enter.groups {
+            if group.label.len() > 0 {
+                let geometry = LabelMeshGeometry::new(gl, &self.program, group, group, 0.0, 1.0)?;
+                geometries.push(Box::new(geometry));
+            }
+        }
+        for node in &layout.update.nodes {
             if node.next.label.len() > 0 {
                 let geometry =
                     LabelMeshGeometry::new(gl, &self.program, &node.current, &node.next, 1.0, 1.0)?;
                 geometries.push(Box::new(geometry));
             }
         }
-        for node in &layout.exit.vertices {
+        for link in &layout.update.links {
+            if link.next.label.len() > 0 {
+                let geometry =
+                    LabelMeshGeometry::new(gl, &self.program, &link.current, &link.next, 1.0, 1.0)?;
+                geometries.push(Box::new(geometry));
+            }
+        }
+        for group in &layout.update.groups {
+            if group.next.label.len() > 0 {
+                let geometry = LabelMeshGeometry::new(
+                    gl,
+                    &self.program,
+                    &group.current,
+                    &group.next,
+                    1.0,
+                    1.0,
+                )?;
+                geometries.push(Box::new(geometry));
+            }
+        }
+        for node in &layout.exit.nodes {
             if node.label.len() > 0 {
-                let geometry = LabelMeshGeometry::new(gl, &self.program, &node, &node, 1.0, 0.0)?;
+                let geometry = LabelMeshGeometry::new(gl, &self.program, node, node, 1.0, 0.0)?;
+                geometries.push(Box::new(geometry));
+            }
+        }
+        for link in &layout.exit.links {
+            if link.label.len() > 0 {
+                let geometry = LabelMeshGeometry::new(gl, &self.program, link, link, 1.0, 0.0)?;
+                geometries.push(Box::new(geometry));
+            }
+        }
+        for group in &layout.exit.groups {
+            if group.label.len() > 0 {
+                let geometry = LabelMeshGeometry::new(gl, &self.program, group, group, 1.0, 0.0)?;
                 geometries.push(Box::new(geometry));
             }
         }

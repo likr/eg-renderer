@@ -2,7 +2,7 @@ use super::program::{init_fragment_shader, init_program, init_vertex_shader};
 use super::shaders::{
     ARC_LINK_VERTEX_SHADER_SOURCE, LINK_FRAGMENT_SHADER_SOURCE, STRAIGHT_LINK_VERTEX_SHADER_SOURCE,
 };
-use super::{init_vertex_array_with_instances, EdgeData, LayoutData, Mesh, MeshGeometry};
+use super::{init_vertex_array_with_instances, LayoutData, LinkData, Mesh, MeshGeometry};
 use wasm_bindgen::prelude::*;
 use web_sys::{WebGl2RenderingContext as GL, WebGlProgram, WebGlVertexArrayObject};
 
@@ -37,8 +37,8 @@ fn create_link_shader_program(gl: &GL, link_type: &LinkType) -> Result<WebGlProg
 
 fn insert_instance_item(
     data: &mut Vec<f32>,
-    current: &EdgeData,
-    next: &EdgeData,
+    current: &LinkData,
+    next: &LinkData,
     current_p1: &[f32; 2],
     current_p2: &[f32; 2],
     next_p1: &[f32; 2],
@@ -113,7 +113,7 @@ fn create_instance_data(layout: &LayoutData, link_type: &LinkType) -> (usize, Ve
     let target_link_type = link_type.to_string();
     let mut data = vec![];
     let mut count = 0;
-    for link in &layout.enter.edges {
+    for link in &layout.enter.links {
         if link.shape == target_link_type {
             let points_raw;
             let points = match link_type {
@@ -146,7 +146,7 @@ fn create_instance_data(layout: &LayoutData, link_type: &LinkType) -> (usize, Ve
             }
         }
     }
-    for link in &layout.update.edges {
+    for link in &layout.update.links {
         if link.next.shape == target_link_type {
             let current_points_raw;
             let current_points = match link_type {
@@ -195,7 +195,7 @@ fn create_instance_data(layout: &LayoutData, link_type: &LinkType) -> (usize, Ve
             }
         }
     }
-    for link in &layout.exit.edges {
+    for link in &layout.exit.links {
         if link.shape == target_link_type {
             let points_raw;
             let points = match link_type {
