@@ -1,7 +1,4 @@
 {
-  "packages": [
-    "crates/eg-renderer-core",
-    "packages/*"
-  ],
+  "packages": ["packages/*", "crates/eg-renderer-core"],
   "version": "1.5.0-alpha.0"
 }
