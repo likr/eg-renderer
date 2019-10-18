@@ -21,6 +21,8 @@ fn create_text_image(
     label_stroke_color_g: f32,
     label_stroke_color_b: f32,
     label_stroke_width: f32,
+    label_text_align: &String,
+    label_text_baseline: &String,
 ) -> Result<HtmlCanvasElement, JsValue> {
     let window = web_sys::window().unwrap();
     let document = window.document().unwrap();
@@ -38,8 +40,8 @@ fn create_text_image(
         label_font_size * scale,
         label_font_family
     ));
-    ctx.set_text_align("center");
-    ctx.set_text_baseline("middle");
+    ctx.set_text_align(label_text_align);
+    ctx.set_text_baseline(label_text_baseline);
     ctx.set_line_width((label_stroke_width * scale) as f64);
     let bbox = ctx.measure_text(&text)?;
 
@@ -51,8 +53,8 @@ fn create_text_image(
         label_font_size * scale,
         label_font_family
     ));
-    ctx.set_text_align("center");
-    ctx.set_text_baseline("middle");
+    ctx.set_text_align(label_text_align);
+    ctx.set_text_baseline(label_text_baseline);
     ctx.set_line_width((label_stroke_width * scale) as f64);
     ctx.set_fill_style(
         &format!(
@@ -177,6 +179,8 @@ impl LabelMeshGeometry {
             next.stroke_color_g(),
             next.stroke_color_b(),
             next.stroke_width(),
+            next.text_align(),
+            next.text_baseline(),
         )?;
         let texture = create_texture(gl, &canvas)?;
 

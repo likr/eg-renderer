@@ -24,11 +24,15 @@ pub struct NodeData {
     pub stroke_color: ColorData,
     pub stroke_width: f32,
     pub label: String,
+    pub label_dx: f32,
+    pub label_dy: f32,
     pub label_fill_color: ColorData,
     pub label_stroke_color: ColorData,
     pub label_stroke_width: f32,
     pub label_font_size: f32,
     pub label_font_family: String,
+    pub label_text_align: String,
+    pub label_text_baseline: String,
 }
 
 #[allow(non_snake_case)]
@@ -47,11 +51,15 @@ pub struct LinkData {
     pub target_marker_shape: String,
     pub target_marker_size: f32,
     pub label: String,
+    pub label_dx: f32,
+    pub label_dy: f32,
     pub label_fill_color: ColorData,
     pub label_stroke_color: ColorData,
     pub label_stroke_width: f32,
     pub label_font_size: f32,
     pub label_font_family: String,
+    pub label_text_align: String,
+    pub label_text_baseline: String,
 }
 
 #[allow(non_snake_case)]
@@ -68,11 +76,15 @@ pub struct GroupData {
     pub stroke_color: ColorData,
     pub stroke_width: f32,
     pub label: String,
+    pub label_dx: f32,
+    pub label_dy: f32,
     pub label_fill_color: ColorData,
     pub label_stroke_color: ColorData,
     pub label_stroke_width: f32,
     pub label_font_size: f32,
     pub label_font_family: String,
+    pub label_text_align: String,
+    pub label_text_baseline: String,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -228,6 +240,8 @@ pub trait LabelData {
     fn stroke_width(&self) -> f32;
     fn font_size(&self) -> f32;
     fn font_family(&self) -> &String;
+    fn text_align(&self) -> &String;
+    fn text_baseline(&self) -> &String;
     fn x(&self) -> f32;
     fn y(&self) -> f32;
 }
@@ -269,11 +283,17 @@ impl LabelData for NodeData {
     fn font_family(&self) -> &String {
         &self.label_font_family
     }
+    fn text_align(&self) -> &String {
+        &self.label_text_align
+    }
+    fn text_baseline(&self) -> &String {
+        &self.label_text_baseline
+    }
     fn x(&self) -> f32 {
-        self.x
+        self.x + self.label_dx
     }
     fn y(&self) -> f32 {
-        self.y
+        self.y + self.label_dy
     }
 }
 
@@ -314,11 +334,21 @@ impl LabelData for LinkData {
     fn font_family(&self) -> &String {
         &self.label_font_family
     }
+    fn text_align(&self) -> &String {
+        &self.label_text_align
+    }
+    fn text_baseline(&self) -> &String {
+        &self.label_text_baseline
+    }
     fn x(&self) -> f32 {
-        (self.points[0][0] + self.points[self.points.len() - 1][0]) / 2.
+        let p1 = self.points[0];
+        let p2 = self.points[self.points.len() - 1];
+        (p1[0] + p2[0]) / 2. + self.label_dx
     }
     fn y(&self) -> f32 {
-        (self.points[0][1] + self.points[self.points.len() - 1][1]) / 2.
+        let p1 = self.points[0];
+        let p2 = self.points[self.points.len() - 1];
+        (p1[1] + p2[1]) / 2. + self.label_dy
     }
 }
 
@@ -359,11 +389,17 @@ impl LabelData for GroupData {
     fn font_family(&self) -> &String {
         &self.label_font_family
     }
+    fn text_align(&self) -> &String {
+        &self.label_text_align
+    }
+    fn text_baseline(&self) -> &String {
+        &self.label_text_baseline
+    }
     fn x(&self) -> f32 {
-        self.x
+        self.x + self.label_dx
     }
     fn y(&self) -> f32 {
-        self.y
+        self.y + self.label_dy
     }
 }
 

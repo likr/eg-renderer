@@ -103,6 +103,8 @@ class EgRendererElement extends window.HTMLElement {
       'group-stroke-opacity-property',
       'group-stroke-width-property',
       'group-label-property',
+      'group-label-dx-property',
+      'group-label-dy-property',
       'group-label-fill-color-property',
       'group-label-fill-opacity-property',
       'group-label-stroke-color-property',
@@ -110,6 +112,8 @@ class EgRendererElement extends window.HTMLElement {
       'group-label-stroke-width-property',
       'group-label-font-size-property',
       'group-label-font-family-property',
+      'group-label-text-align-property',
+      'group-label-text-baseline-property',
       'node-id-property',
       'node-x-property',
       'node-y-property',
@@ -123,6 +127,8 @@ class EgRendererElement extends window.HTMLElement {
       'node-stroke-opacity-property',
       'node-stroke-width-property',
       'node-label-property',
+      'node-label-dx-property',
+      'node-label-dy-property',
       'node-label-fill-color-property',
       'node-label-fill-opacity-property',
       'node-label-stroke-color-property',
@@ -130,6 +136,8 @@ class EgRendererElement extends window.HTMLElement {
       'node-label-stroke-width-property',
       'node-label-font-size-property',
       'node-label-font-family-property',
+      'node-label-text-align-property',
+      'node-label-text-baseline-property',
       'link-source-property',
       'link-target-property',
       'link-stroke-color-property',
@@ -141,6 +149,8 @@ class EgRendererElement extends window.HTMLElement {
       'link-target-marker-shape-property',
       'link-target-marker-size-property',
       'link-label-property',
+      'link-label-dx-property',
+      'link-label-dy-property',
       'link-label-fill-color-property',
       'link-label-fill-opacity-property',
       'link-label-stroke-color-property',
@@ -148,6 +158,8 @@ class EgRendererElement extends window.HTMLElement {
       'link-label-stroke-width-property',
       'link-label-font-size-property',
       'link-label-font-family-property',
+      'link-label-text-align-property',
+      'link-label-text-baseline-property',
       'default-group-x',
       'default-group-y',
       'default-group-width',
@@ -159,6 +171,9 @@ class EgRendererElement extends window.HTMLElement {
       'default-group-stroke-color',
       'default-group-stroke-opacity',
       'default-group-stroke-width',
+      'default-group-label',
+      'default-group-label-dx',
+      'default-group-label-dy',
       'default-group-label-fill-color',
       'default-group-label-fill-opacity',
       'default-group-label-stroke-color',
@@ -166,6 +181,8 @@ class EgRendererElement extends window.HTMLElement {
       'default-group-label-stroke-width',
       'default-group-label-font-size',
       'default-group-label-font-family',
+      'default-group-label-text-align',
+      'default-group-label-text-baseline',
       'default-node-x',
       'default-node-y',
       'default-node-width',
@@ -178,6 +195,8 @@ class EgRendererElement extends window.HTMLElement {
       'default-node-stroke-opacity',
       'default-node-stroke-width',
       'default-node-label',
+      'default-node-label-dx',
+      'default-node-label-dy',
       'default-node-label-fill-color',
       'default-node-label-fill-opacity',
       'default-node-label-stroke-color',
@@ -185,6 +204,8 @@ class EgRendererElement extends window.HTMLElement {
       'default-node-label-stroke-width',
       'default-node-label-font-size',
       'default-node-label-font-family',
+      'default-node-label-text-align',
+      'default-node-label-text-baseline',
       'default-link-stroke-color',
       'default-link-stroke-opacity',
       'default-link-stroke-width',
@@ -194,13 +215,17 @@ class EgRendererElement extends window.HTMLElement {
       'default-link-target-marker-shape',
       'default-link-target-marker-size',
       'default-link-label',
+      'default-link-label-dx',
+      'default-link-label-dy',
       'default-link-label-fill-color',
       'default-link-label-fill-opacity',
       'default-link-label-stroke-color',
       'default-link-label-stroke-opacity',
       'default-link-label-stroke-width',
       'default-link-label-font-size',
-      'default-link-label-font-family'
+      'default-link-label-font-family',
+      'default-link-label-text-align',
+      'default-link-label-text-baseline'
     ]
   }
 
@@ -535,6 +560,16 @@ class EgRendererElement extends window.HTMLElement {
             this.defaultGroupStrokeWidth
           ),
           label: get(group, this.groupLabelProperty, this.defaultGroupLabel),
+          labelDx: get(
+            group,
+            this.groupLabelDxProperty,
+            this.defaultGroupLabelDx
+          ),
+          labelDy: get(
+            group,
+            this.groupLabelDyProperty,
+            this.defaultGroupLabelDy
+          ),
           labelFillColor,
           labelStrokeColor,
           labelStrokeWidth: +get(
@@ -551,6 +586,16 @@ class EgRendererElement extends window.HTMLElement {
             group,
             this.groupLabelFontFamilyProperty,
             this.defaultGroupLabelFontFamily
+          ),
+          labelTextAlign: get(
+            group,
+            this.groupLabelTextAlignProperty,
+            this.defaultGroupLabelTextAlign
+          ),
+          labelTextBaseline: get(
+            group,
+            this.groupLabelTextBaselineProperty,
+            this.defaultGroupLabelTextBaseline
           ),
           d: group
         }
@@ -625,6 +670,8 @@ class EgRendererElement extends window.HTMLElement {
             this.defaultNodeStrokeWidth
           ),
           label: get(node, this.nodeLabelProperty, this.defaultNodeLabel),
+          labelDx: get(node, this.nodeLabelDxProperty, this.defaultNodeLabelDx),
+          labelDy: get(node, this.nodeLabelDyProperty, this.defaultNodeLabelDy),
           labelFillColor,
           labelStrokeColor,
           labelStrokeWidth: +get(
@@ -641,6 +688,16 @@ class EgRendererElement extends window.HTMLElement {
             node,
             this.nodeLabelFontFamilyProperty,
             this.defaultNodeLabelFontFamily
+          ),
+          labelTextAlign: get(
+            node,
+            this.nodeLabelTextAlignProperty,
+            this.defaultNodeLabelTextAlign
+          ),
+          labelTextBaseline: get(
+            node,
+            this.nodeLabelTextBaselineProperty,
+            this.defaultNodeLabelTextBaseline
           ),
           inEdges: [],
           outEdges: [],
@@ -737,6 +794,8 @@ class EgRendererElement extends window.HTMLElement {
             this.defaultLinkTargetMarkerSize
           ),
           label: get(link, this.linkLabelProperty, this.defaultLinkLabel),
+          labelDx: get(link, this.linkLabelDxProperty, this.defaultLinkLabelDx),
+          labelDy: get(link, this.linkLabelDyProperty, this.defaultLinkLabelDy),
           labelFillColor,
           labelStrokeColor,
           labelStrokeWidth: +get(
@@ -753,6 +812,16 @@ class EgRendererElement extends window.HTMLElement {
             link,
             this.linkLabelFontFamilyProperty,
             this.defaultLinkLabelFontFamily
+          ),
+          labelTextAlign: get(
+            link,
+            this.linkLabelTextAlignProperty,
+            this.defaultLinkLabelTextAlign
+          ),
+          labelTextBaseline: get(
+            link,
+            this.linkLabelTextBaselineProperty,
+            this.defaultLinkLabelTextBaseline
           ),
           d: link
         }
@@ -1050,6 +1119,22 @@ class EgRendererElement extends window.HTMLElement {
     this.setAttribute('group-label-property', value)
   }
 
+  get groupLabelDxProperty() {
+    return getter(this, 'group-label-dx-property', 'labelDx')
+  }
+
+  set groupLabelDxProperty(value) {
+    this.setAttribute('group-label-dx-property', value)
+  }
+
+  get groupLabelDyProperty() {
+    return getter(this, 'group-label-dy-property', 'labelDx')
+  }
+
+  set groupLabelDyProperty(value) {
+    this.setAttribute('group-label-dy-property', value)
+  }
+
   get groupLabelFillColorProperty() {
     return getter(this, 'group-label-fill-color-property', 'labelFillColor')
   }
@@ -1108,6 +1193,26 @@ class EgRendererElement extends window.HTMLElement {
 
   set groupLabelFontFamilyProperty(value) {
     this.setAttribute('group-label-font-family-property', value)
+  }
+
+  get groupLabelTextAlignProperty() {
+    return getter(this, 'group-label-text-align-property', 'labelTextAlign')
+  }
+
+  set groupLabelTextAlignProperty(value) {
+    this.setAttribute('group-label-text-align-property', value)
+  }
+
+  get groupLabelTextBaselineProperty() {
+    return getter(
+      this,
+      'group-label-text-baseline-property',
+      'labelTextBaseline'
+    )
+  }
+
+  set groupLabelTextBaselineProperty(value) {
+    this.setAttribute('group-label-text-baseline-property', value)
   }
 
   get nodeIdProperty() {
@@ -1214,6 +1319,22 @@ class EgRendererElement extends window.HTMLElement {
     this.setAttribute('node-label-property', value)
   }
 
+  get nodeLabelDxProperty() {
+    return getter(this, 'node-label-dx-property', 'labelDx')
+  }
+
+  set nodeLabelDxProperty(value) {
+    this.setAttribute('node-label-dx-property', value)
+  }
+
+  get nodeLabelDyProperty() {
+    return getter(this, 'node-label-dy-property', 'labelDx')
+  }
+
+  set nodeLabelDyProperty(value) {
+    this.setAttribute('node-label-dy-property', value)
+  }
+
   get nodeLabelFillColorProperty() {
     return getter(this, 'node-label-fill-color-property', 'labelFillColor')
   }
@@ -1272,6 +1393,26 @@ class EgRendererElement extends window.HTMLElement {
 
   set nodeLabelFontFamilyProperty(value) {
     this.setAttribute('node-label-font-family-property', value)
+  }
+
+  get nodeLabelTextAlignProperty() {
+    return getter(this, 'node-label-text-align-property', 'labelTextAlign')
+  }
+
+  set nodeLabelTextAlignProperty(value) {
+    this.setAttribute('node-label-text-align-property', value)
+  }
+
+  get nodeLabelTextBaselineProperty() {
+    return getter(
+      this,
+      'node-label-text-baseline-property',
+      'labelTextBaseline'
+    )
+  }
+
+  set nodeLabelTextBaselineProperty(value) {
+    this.setAttribute('node-label-text-baseline-property', value)
   }
 
   get linkSourceProperty() {
@@ -1386,6 +1527,22 @@ class EgRendererElement extends window.HTMLElement {
     this.setAttribute('link-label-property', value)
   }
 
+  get linkLabelDxProperty() {
+    return getter(this, 'link-label-dx-property', 'labelDx')
+  }
+
+  set linkLabelDxProperty(value) {
+    this.setAttribute('link-label-dx-property', value)
+  }
+
+  get linkLabelDyProperty() {
+    return getter(this, 'link-label-dy-property', 'labelDx')
+  }
+
+  set linkLabelDyProperty(value) {
+    this.setAttribute('link-label-dy-property', value)
+  }
+
   get linkLabelFillColorProperty() {
     return getter(this, 'link-label-fill-color-property', 'labelFillColor')
   }
@@ -1444,6 +1601,26 @@ class EgRendererElement extends window.HTMLElement {
 
   set linkLabelFontFamilyProperty(value) {
     this.setAttribute('link-label-font-family-property', value)
+  }
+
+  get linkLabelTextAlignProperty() {
+    return getter(this, 'link-label-text-align-property', 'labelTextAlign')
+  }
+
+  set linkLabelTextAlignProperty(value) {
+    this.setAttribute('link-label-text-align-property', value)
+  }
+
+  get linkLabelTextBaselineProperty() {
+    return getter(
+      this,
+      'link-label-text-baseline-property',
+      'labelTextBaseline'
+    )
+  }
+
+  set linkLabelTextBaselineProperty(value) {
+    this.setAttribute('link-label-text-baseline-property', value)
   }
 
   get defaultGroupX() {
@@ -1542,6 +1719,22 @@ class EgRendererElement extends window.HTMLElement {
     this.setAttribute('default-group-label', value)
   }
 
+  get defaultGroupLabelDx() {
+    return getter(this, 'default-group-label-dx', 0)
+  }
+
+  set defaultGroupLabelDx(value) {
+    this.setAttribute('default-group-label-dx', value)
+  }
+
+  get defaultGroupLabelDy() {
+    return getter(this, 'default-group-label-dy', 0)
+  }
+
+  set defaultGroupLabelDy(value) {
+    this.setAttribute('default-group-label-dy', value)
+  }
+
   get defaultGroupLabelFillColor() {
     return getter(this, 'default-group-label-fill-color', '#000')
   }
@@ -1596,6 +1789,22 @@ class EgRendererElement extends window.HTMLElement {
 
   set defaultGroupLabelFontFamily(value) {
     this.setAttribute('default-group-label-font-family', value)
+  }
+
+  get defaultGroupLabelTextAlign() {
+    return getter(this, 'default-group-label-text-baseline', 'center')
+  }
+
+  set defaultGroupLabelTextBaseline(value) {
+    this.setAttribute('default-group-label-text-align', value)
+  }
+
+  get defaultGroupLabelTextBaseline() {
+    return getter(this, 'default-group-label-text-baseline', 'middle')
+  }
+
+  set defaultGroupLabelTextBaseline(value) {
+    this.setAttribute('default-group-label-text-baseline', value)
   }
 
   get defaultNodeX() {
@@ -1694,6 +1903,22 @@ class EgRendererElement extends window.HTMLElement {
     this.setAttribute('default-node-label', value)
   }
 
+  get defaultNodeLabelDx() {
+    return getter(this, 'default-node-label-dx', 0)
+  }
+
+  set defaultNodeLabelDx(value) {
+    this.setAttribute('default-node-label-dx', value)
+  }
+
+  get defaultNodeLabelDy() {
+    return getter(this, 'default-node-label-dy', 0)
+  }
+
+  set defaultNodeLabelDy(value) {
+    this.setAttribute('default-node-label-dy', value)
+  }
+
   get defaultNodeLabelFillColor() {
     return getter(this, 'default-node-label-fill-color', '#000')
   }
@@ -1748,6 +1973,22 @@ class EgRendererElement extends window.HTMLElement {
 
   set defaultNodeLabelFontFamily(value) {
     this.setAttribute('default-node-label-font-family', value)
+  }
+
+  get defaultNodeLabelTextAlign() {
+    return getter(this, 'default-node-label-text-baseline', 'center')
+  }
+
+  set defaultNodeLabelTextBaseline(value) {
+    this.setAttribute('default-node-label-text-align', value)
+  }
+
+  get defaultNodeLabelTextBaseline() {
+    return getter(this, 'default-node-label-text-baseline', 'middle')
+  }
+
+  set defaultNodeLabelTextBaseline(value) {
+    this.setAttribute('default-node-label-text-baseline', value)
   }
 
   get defaultLinkStrokeColor() {
@@ -1830,6 +2071,22 @@ class EgRendererElement extends window.HTMLElement {
     this.setAttribute('default-link-label', value)
   }
 
+  get defaultLinkLabelDx() {
+    return getter(this, 'default-link-label-dx', 0)
+  }
+
+  set defaultLinkLabelDx(value) {
+    this.setAttribute('default-link-label-dx', value)
+  }
+
+  get defaultLinkLabelDy() {
+    return getter(this, 'default-link-label-dy', 0)
+  }
+
+  set defaultLinkLabelDy(value) {
+    this.setAttribute('default-link-label-dy', value)
+  }
+
   get defaultLinkLabelFillColor() {
     return getter(this, 'default-link-label-fill-color', '#000')
   }
@@ -1884,6 +2141,22 @@ class EgRendererElement extends window.HTMLElement {
 
   set defaultLinkLabelFontFamily(value) {
     this.setAttribute('default-link-label-font-family', value)
+  }
+
+  get defaultLinkLabelTextAlign() {
+    return getter(this, 'default-link-label-text-baseline', 'center')
+  }
+
+  set defaultLinkLabelTextBaseline(value) {
+    this.setAttribute('default-link-label-text-align', value)
+  }
+
+  get defaultLinkLabelTextBaseline() {
+    return getter(this, 'default-link-label-text-baseline', 'middle')
+  }
+
+  set defaultLinkLabelTextBaseline(value) {
+    this.setAttribute('default-link-label-text-baseline', value)
   }
 
   get data() {
