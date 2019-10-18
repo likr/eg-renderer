@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "bootstrap": "lerna bootstrap",
-    "build:wasm": "wasm-pack build crates/eg-renderer-core",
+    "build:wasm": "npx lerna exec --scope eg-renderer-core -- npm run build",
     "deploy": "npx lerna exec --scope examples -- npm run deploy",
     "start": "npx lerna exec --scope examples -- npm start"
   },
@@ -21,7 +21,7 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-react": "^7.14.3",
     "eslint-plugin-standard": "^4.0.1",
-    "lerna": "^3.16.4",
+    "lerna": "^3.18.1",
     "prettier": "^1.18.2"
   },
   "private": true

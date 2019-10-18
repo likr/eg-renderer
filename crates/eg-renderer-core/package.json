@@ -1,0 +1,23 @@
+{
+  "name": "eg-renderer-core",
+  "collaborators": [
+    "Yosuke Onoue <onoue@likr-lab.com>"
+  ],
+  "version": "1.4.0",
+  "files": [
+    "dist/bundler/eg_renderer_core_bg.wasm",
+    "dist/bundler/eg_renderer_core.js",
+    "dist/bundler/eg_renderer_core.d.ts",
+    "dist/web/eg_renderer_core_bg.wasm",
+    "dist/web/eg_renderer_core.js",
+    "dist/web/eg_renderer_core.d.ts"
+  ],
+  "module": "dist/bundler/eg_renderer_core.js",
+  "types": "dist/bundler/eg_renderer_core.d.ts",
+  "sideEffects": "false",
+  "scripts": {
+    "build:bundler": "wasm-pack build --target bundler -d dist/bundler",
+    "build:web": "wasm-pack build --target web -d dist/web",
+    "build": "npm run build:bundler && npm run build:web"
+  }
+}

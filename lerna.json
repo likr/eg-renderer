@@ -1,4 +1,4 @@
 {
-  "packages": ["crates/*/pkg", "packages/*"],
+  "packages": ["packages/*", "crates/eg-renderer-core"],
   "version": "1.4.0"
 }

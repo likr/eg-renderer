@@ -2,9 +2,15 @@
   "name": "eg-renderer",
   "version": "1.4.0",
   "main": "src/index.js",
+  "module": "src/index.js",
+  "unpkg": "umd/eg-renderer.js",
   "files": [
-    "src"
+    "src",
+    "umd"
   ],
+  "scripts": {
+    "prepublish": "rollup -c && cp node_modules/eg-renderer-core/dist/web/eg_renderer_core_bg.wasm umd/eg_renderer_core_bg.wasm"
+  },
   "description": "Easy Graph Renderer for the Web",
   "keywords": [
     "Network Visualization"
@@ -20,7 +26,11 @@
     "d3-ease": "^1.0.5",
     "d3-selection": "^1.4.0",
     "d3-zoom": "^1.8.3",
-    "eg-renderer-core": "^0.1.0"
+    "eg-renderer-core": "^1.4.0"
   },
-  "gitHead": "2f560e640150ede9617842ac8e55c81ac8b0ffb5"
+  "gitHead": "2f560e640150ede9617842ac8e55c81ac8b0ffb5",
+  "devDependencies": {
+    "rollup": "^1.25.0",
+    "rollup-plugin-node-resolve": "^5.2.0"
+  }
 }
