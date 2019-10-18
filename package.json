@@ -3,8 +3,10 @@
   "author": "Yosuke Onoue <onoue@likr-lab.com>",
   "license": "MIT",
   "scripts": {
-    "start": "npx lerna exec --scope examples -- npm start",
-    "deploy": "npx lerna exec --scope examples -- npm run deploy"
+    "bootstrap": "lerna bootstrap",
+    "build:wasm": "wasm-pack build crates/eg-renderer-core",
+    "deploy": "npx lerna exec --scope examples -- npm run deploy",
+    "start": "npx lerna exec --scope examples -- npm start"
   },
   "devDependencies": {
     "babel-eslint": "^10.0.3",

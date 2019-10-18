@@ -117,6 +117,10 @@
             status.textContent = `nodecontextmenu ${event.detail.id}`
           })
         })
+
+        renderer.addEventListener('updateend', (event) => {
+          renderer.center()
+        })
       })
     </script>
   </body>

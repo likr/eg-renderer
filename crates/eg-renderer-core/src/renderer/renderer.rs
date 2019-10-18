@@ -29,7 +29,9 @@ impl Context {
         let circle_groups = GroupMesh::new(gl, ShapeType::Circle)?;
         let rectangle_groups = GroupMesh::new(gl, ShapeType::Rectangle)?;
         let arc_links = LinkMesh::new(gl, LinkType::Arc)?;
+        let curve_links = LinkMesh::new(gl, LinkType::Curve)?;
         let line_links = LinkMesh::new(gl, LinkType::Line)?;
+        let quadratic_links = LinkMesh::new(gl, LinkType::Quadratic)?;
         let link_circle_markers = LinkCircleMarkerMesh::new(gl)?;
         let link_triangle_markers = LinkTriangleMarkerMesh::new(gl)?;
         let circle_nodes = NodeMesh::new(gl, ShapeType::Circle)?;
@@ -44,7 +46,9 @@ impl Context {
                 Box::new(circle_groups),
                 Box::new(rectangle_groups),
                 Box::new(arc_links),
+                Box::new(curve_links),
                 Box::new(line_links),
+                Box::new(quadratic_links),
                 Box::new(link_circle_markers),
                 Box::new(link_triangle_markers),
                 Box::new(circle_nodes),

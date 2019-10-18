@@ -9,14 +9,18 @@ use web_sys::{WebGl2RenderingContext as GL, WebGlProgram, WebGlVertexArrayObject
 #[derive(Clone)]
 pub enum LinkType {
     Arc,
+    Curve,
     Line,
+    Quadratic,
 }
 
 impl ToString for LinkType {
     fn to_string(&self) -> String {
         match self {
             LinkType::Arc => "arc".into(),
+            LinkType::Curve => "curve".into(),
             LinkType::Line => "line".into(),
+            LinkType::Quadratic => "quadratic".into(),
         }
     }
 }
@@ -24,7 +28,7 @@ impl ToString for LinkType {
 fn create_link_shader_program(gl: &GL, link_type: &LinkType) -> Result<WebGlProgram, JsValue> {
     let vertex_shader_source = match link_type {
         LinkType::Arc => ARC_LINK_VERTEX_SHADER_SOURCE,
-        LinkType::Line => STRAIGHT_LINK_VERTEX_SHADER_SOURCE,
+        _ => STRAIGHT_LINK_VERTEX_SHADER_SOURCE,
     };
     let vertex_shader = init_vertex_shader(gl, vertex_shader_source)?;
     let fragment_shader = init_fragment_shader(gl, LINK_FRAGMENT_SHADER_SOURCE)?;
@@ -42,44 +46,100 @@ fn insert_instance_item(
     a0: f32,
     a1: f32,
 ) {
-    data.push(current_p1[0] as f32);
-    data.push(current_p1[1] as f32);
-    data.push(next_p1[0] as f32);
-    data.push(next_p1[1] as f32);
-    data.push(current_p2[0] as f32);
-    data.push(current_p2[1] as f32);
-    data.push(next_p2[0] as f32);
-    data.push(next_p2[1] as f32);
-    data.push(current.stroke_width as f32);
-    data.push(next.stroke_width as f32);
+    data.push(current_p1[0]);
+    data.push(current_p1[1]);
+    data.push(next_p1[0]);
+    data.push(next_p1[1]);
+    data.push(current_p2[0]);
+    data.push(current_p2[1]);
+    data.push(next_p2[0]);
+    data.push(next_p2[1]);
+    data.push(current.stroke_width);
+    data.push(next.stroke_width);
     data.push(a0);
     data.push(a1);
-    data.push((current.stroke_color.r / 255.) as f32);
-    data.push((current.stroke_color.g / 255.) as f32);
-    data.push((current.stroke_color.b / 255.) as f32);
-    data.push(current.stroke_color.opacity as f32);
-    data.push((next.stroke_color.r / 255.) as f32);
-    data.push((next.stroke_color.g / 255.) as f32);
-    data.push((next.stroke_color.b / 255.) as f32);
-    data.push(next.stroke_color.opacity as f32);
+    data.push(current.stroke_color.r / 255.);
+    data.push(current.stroke_color.g / 255.);
+    data.push(current.stroke_color.b / 255.);
+    data.push(current.stroke_color.opacity);
+    data.push(next.stroke_color.r / 255.);
+    data.push(next.stroke_color.g / 255.);
+    data.push(next.stroke_color.b / 255.);
+    data.push(next.stroke_color.opacity);
 }
 
-fn create_instance_data(layout: &LayoutData, target_link_type: &LinkType) -> (usize, Vec<f32>) {
-    let target_link_type = target_link_type.to_string();
+fn quadratic_bezier_points(p1: &[f32; 2], p2: &[f32; 2], p3: &[f32; 2], n: usize) -> Vec<[f32; 2]> {
+    let mut points = vec![];
+    points.push(p1.clone());
+    let dt = 1.0 / n as f32;
+    for i in 1..n {
+        let t = dt * i as f32;
+        let q1x = (1. - t) * p1[0] + t * p2[0];
+        let q1y = (1. - t) * p1[1] + t * p2[1];
+        let q2x = (1. - t) * p2[0] + t * p3[0];
+        let q2y = (1. - t) * p2[1] + t * p3[1];
+        points.push([(1. - t) * q1x + t * q2x, (1. - t) * q1y + t * q2y])
+    }
+    points.push(p3.clone());
+    points
+}
+
+fn quadratic_bezier_curves(points: &Vec<[f32; 2]>, curve_points: usize) -> Vec<[f32; 2]> {
+    let mut result = vec![];
+    let n = points.len();
+    for i in (2..n).step_by(2) {
+        let segment =
+            quadratic_bezier_points(&points[i - 2], &points[i - 1], &points[i], curve_points);
+        for point in segment {
+            result.push(point)
+        }
+    }
+    result
+}
+
+fn curve_mid_point(p1: &[f32; 2], p3: &[f32; 2], curve_ratio: f32) -> [f32; 2] {
+    let cx = (p1[0] + p3[0]) / 2.0;
+    let cy = (p1[1] + p3[1]) / 2.0;
+    let dx = p3[0] - p1[0];
+    let dy = p3[1] - p1[1];
+    let t = (dy).atan2(dx) - std::f32::consts::PI / 2.;
+    let r = (dx * dx + dy * dy).sqrt() * curve_ratio;
+    [r * t.cos() + cx, r * t.sin() + cy]
+}
+
+fn create_instance_data(layout: &LayoutData, link_type: &LinkType) -> (usize, Vec<f32>) {
+    let curve_ratio = 0.25;
+    let curve_points = 32;
+    let target_link_type = link_type.to_string();
     let mut data = vec![];
     let mut count = 0;
     for link in &layout.enter.edges {
         if link.shape == target_link_type {
-            for i in 1..link.points.len() {
+            let points_raw;
+            let points = match link_type {
+                LinkType::Curve => {
+                    let p1 = link.points[0];
+                    let p3 = link.points[1];
+                    let p2 = curve_mid_point(&p1, &p3, curve_ratio);
+                    points_raw = quadratic_bezier_points(&p1, &p2, &p3, curve_points);
+                    &points_raw
+                }
+                LinkType::Quadratic => {
+                    points_raw = quadratic_bezier_curves(&link.points, curve_points);
+                    &points_raw
+                }
+                _ => &link.points,
+            };
+            for i in 1..points.len() {
                 count += 1;
                 insert_instance_item(
                     &mut data,
                     link,
                     link,
-                    &link.points[i - 1],
-                    &link.points[i],
-                    &link.points[i - 1],
-                    &link.points[i],
+                    &points[i - 1],
+                    &points[i],
+                    &points[i - 1],
+                    &points[i],
                     0.,
                     1.,
                 );
@@ -88,16 +148,47 @@ fn create_instance_data(layout: &LayoutData, target_link_type: &LinkType) -> (us
     }
     for link in &layout.update.edges {
         if link.next.shape == target_link_type {
-            for i in 1..link.next.points.len() {
+            let current_points_raw;
+            let current_points = match link_type {
+                LinkType::Curve => {
+                    let p1 = link.current.points[0];
+                    let p3 = link.current.points[1];
+                    let p2 = curve_mid_point(&p1, &p3, curve_ratio);
+                    current_points_raw = quadratic_bezier_points(&p1, &p2, &p3, curve_points);
+                    &current_points_raw
+                }
+                LinkType::Quadratic => {
+                    current_points_raw =
+                        quadratic_bezier_curves(&link.current.points, curve_points);
+                    &current_points_raw
+                }
+                _ => &link.current.points,
+            };
+            let next_points_raw;
+            let next_points = match link_type {
+                LinkType::Curve => {
+                    let p1 = link.next.points[0];
+                    let p3 = link.next.points[1];
+                    let p2 = curve_mid_point(&p1, &p3, curve_ratio);
+                    next_points_raw = quadratic_bezier_points(&p1, &p2, &p3, curve_points);
+                    &next_points_raw
+                }
+                LinkType::Quadratic => {
+                    next_points_raw = quadratic_bezier_curves(&link.next.points, curve_points);
+                    &next_points_raw
+                }
+                _ => &link.next.points,
+            };
+            for i in 1..next_points.len() {
                 count += 1;
                 insert_instance_item(
                     &mut data,
                     &link.current,
                     &link.next,
-                    &link.current.points[i - 1],
-                    &link.current.points[i],
-                    &link.next.points[i - 1],
-                    &link.next.points[i],
+                    &current_points[i - 1],
+                    &current_points[i],
+                    &next_points[i - 1],
+                    &next_points[i],
                     1.,
                     1.,
                 );
@@ -106,16 +197,31 @@ fn create_instance_data(layout: &LayoutData, target_link_type: &LinkType) -> (us
     }
     for link in &layout.exit.edges {
         if link.shape == target_link_type {
-            for i in 1..link.points.len() {
+            let points_raw;
+            let points = match link_type {
+                LinkType::Curve => {
+                    let p1 = link.points[0];
+                    let p3 = link.points[1];
+                    let p2 = curve_mid_point(&p1, &p3, curve_ratio);
+                    points_raw = quadratic_bezier_points(&p1, &p2, &p3, curve_points);
+                    &points_raw
+                }
+                LinkType::Quadratic => {
+                    points_raw = quadratic_bezier_curves(&link.points, curve_points);
+                    &points_raw
+                }
+                _ => &link.points,
+            };
+            for i in 1..points.len() {
                 count += 1;
                 insert_instance_item(
                     &mut data,
                     link,
                     link,
-                    &link.points[i - 1],
-                    &link.points[i],
-                    &link.points[i - 1],
-                    &link.points[i],
+                    &points[i - 1],
+                    &points[i],
+                    &points[i - 1],
+                    &points[i],
                     1.,
                     0.,
                 );
@@ -142,7 +248,7 @@ fn create_template_mesh(link_type: &LinkType) -> (Vec<f32>, Vec<u32>) {
             }
             (vertex_data, element_data)
         }
-        LinkType::Line => (
+        _ => (
             vec![-0.5, -0.5, -0.5, 0.5, 0.5, -0.5, 0.5, 0.5],
             vec![0, 1, 2, 3],
         ),
