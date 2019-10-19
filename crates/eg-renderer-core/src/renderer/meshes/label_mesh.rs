@@ -4,7 +4,7 @@ use super::{init_vertex_array, LabelData, LayoutData, Mesh, MeshGeometry};
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::{
-    CanvasRenderingContext2d, HtmlCanvasElement, WebGl2RenderingContext, WebGlProgram,
+    CanvasRenderingContext2d, HtmlCanvasElement, WebGl2RenderingContext as GL, WebGlProgram,
     WebGlTexture, WebGlVertexArrayObject,
 };
 
@@ -159,38 +159,38 @@ fn create_text_image(
     let mut offset = margin;
     for line in lines {
         let y = (offset + line_height / 2.0) as f64;
-        ctx.fill_text(&line, x, y)?;
         if label_stroke_width > 0. {
             ctx.stroke_text(&line, x, y)?;
         }
+        ctx.fill_text(&line, x, y)?;
         offset += line_height;
     }
 
     Ok(canvas)
 }
 
-fn create_label_shader_program(gl: &WebGl2RenderingContext) -> Result<WebGlProgram, JsValue> {
+fn create_label_shader_program(gl: &GL) -> Result<WebGlProgram, JsValue> {
     let vertex_shader = init_vertex_shader(gl, LABEL_VERTEX_SHADER_SOURCE)?;
     let fragment_shader = init_fragment_shader(gl, LABEL_FRAGMENT_SHADER_SOURCE)?;
     init_program(gl, vertex_shader, fragment_shader)
 }
 
-fn create_texture(
-    gl: &WebGl2RenderingContext,
-    canvas: &HtmlCanvasElement,
-) -> Result<WebGlTexture, JsValue> {
+fn create_texture(gl: &GL, canvas: &HtmlCanvasElement) -> Result<WebGlTexture, JsValue> {
     let texture = gl.create_texture().ok_or("failed")?;
-    gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, Some(&texture));
+    gl.bind_texture(GL::TEXTURE_2D, Some(&texture));
     gl.tex_image_2d_with_u32_and_u32_and_html_canvas_element(
-        WebGl2RenderingContext::TEXTURE_2D,
+        GL::TEXTURE_2D,
         0,
-        WebGl2RenderingContext::RGBA as i32,
-        WebGl2RenderingContext::RGBA,
-        WebGl2RenderingContext::UNSIGNED_BYTE,
+        GL::RGBA as i32,
+        GL::RGBA,
+        GL::UNSIGNED_BYTE,
         &canvas,
     )?;
-    gl.generate_mipmap(WebGl2RenderingContext::TEXTURE_2D);
-    gl.bind_texture(WebGl2RenderingContext::TEXTURE_2D, None);
+    gl.tex_parameteri(GL::TEXTURE_2D, GL::TEXTURE_WRAP_S, GL::CLAMP_TO_EDGE as i32);
+    gl.tex_parameteri(GL::TEXTURE_2D, GL::TEXTURE_WRAP_T, GL::CLAMP_TO_EDGE as i32);
+
+    gl.generate_mipmap(GL::TEXTURE_2D);
+    gl.bind_texture(GL::TEXTURE_2D, None);
     Ok(texture)
 }
 
@@ -259,15 +259,15 @@ pub struct LabelMeshGeometry {
 
 impl LabelMeshGeometry {
     fn new<T: LabelData>(
-        gl: &WebGl2RenderingContext,
+        gl: &GL,
         program: &WebGlProgram,
         current: &T,
         next: &T,
         a0: f32,
         a1: f32,
     ) -> Result<LabelMeshGeometry, JsValue> {
-        let scale = 2.;
-        let margin = 1.;
+        let scale = 16.;
+        let margin = 8.;
         let canvas = create_text_image(
             &next.text(),
             scale,
@@ -318,7 +318,7 @@ impl LabelMeshGeometry {
 
 impl MeshGeometry for LabelMeshGeometry {
     fn mode(&self) -> u32 {
-        WebGl2RenderingContext::TRIANGLE_STRIP
+        GL::TRIANGLE_STRIP
     }
 
     fn program(&self) -> &WebGlProgram {
@@ -343,7 +343,7 @@ pub struct LabelMesh {
 }
 
 impl LabelMesh {
-    pub fn new(gl: &WebGl2RenderingContext) -> Result<LabelMesh, JsValue> {
+    pub fn new(gl: &GL) -> Result<LabelMesh, JsValue> {
         let program = create_label_shader_program(gl)?;
         Ok(LabelMesh { program })
     }
@@ -352,7 +352,7 @@ impl LabelMesh {
 impl Mesh for LabelMesh {
     fn update(
         &self,
-        gl: &WebGl2RenderingContext,
+        gl: &GL,
         layout: &LayoutData,
         geometries: &mut Vec<Box<dyn MeshGeometry>>,
     ) -> Result<(), JsValue> {
