@@ -90,6 +90,8 @@ export default (Renderer) => {
         'group-label-property',
         'group-label-dx-property',
         'group-label-dy-property',
+        'group-label-dx-base-property',
+        'group-label-dy-base-property',
         'group-label-fill-color-property',
         'group-label-fill-opacity-property',
         'group-label-stroke-color-property',
@@ -98,7 +100,6 @@ export default (Renderer) => {
         'group-label-font-size-property',
         'group-label-font-family-property',
         'group-label-text-align-property',
-        'group-label-text-baseline-property',
         'node-id-property',
         'node-x-property',
         'node-y-property',
@@ -114,6 +115,8 @@ export default (Renderer) => {
         'node-label-property',
         'node-label-dx-property',
         'node-label-dy-property',
+        'node-label-dx-base-property',
+        'node-label-dy-base-property',
         'node-label-fill-color-property',
         'node-label-fill-opacity-property',
         'node-label-stroke-color-property',
@@ -122,7 +125,6 @@ export default (Renderer) => {
         'node-label-font-size-property',
         'node-label-font-family-property',
         'node-label-text-align-property',
-        'node-label-text-baseline-property',
         'link-source-property',
         'link-target-property',
         'link-stroke-color-property',
@@ -136,6 +138,8 @@ export default (Renderer) => {
         'link-label-property',
         'link-label-dx-property',
         'link-label-dy-property',
+        'link-label-dx-base-property',
+        'link-label-dy-base-property',
         'link-label-fill-color-property',
         'link-label-fill-opacity-property',
         'link-label-stroke-color-property',
@@ -144,7 +148,6 @@ export default (Renderer) => {
         'link-label-font-size-property',
         'link-label-font-family-property',
         'link-label-text-align-property',
-        'link-label-text-baseline-property',
         'default-group-x',
         'default-group-y',
         'default-group-width',
@@ -159,6 +162,8 @@ export default (Renderer) => {
         'default-group-label',
         'default-group-label-dx',
         'default-group-label-dy',
+        'default-group-label-dx-base',
+        'default-group-label-dy-base',
         'default-group-label-fill-color',
         'default-group-label-fill-opacity',
         'default-group-label-stroke-color',
@@ -167,7 +172,6 @@ export default (Renderer) => {
         'default-group-label-font-size',
         'default-group-label-font-family',
         'default-group-label-text-align',
-        'default-group-label-text-baseline',
         'default-node-x',
         'default-node-y',
         'default-node-width',
@@ -182,6 +186,8 @@ export default (Renderer) => {
         'default-node-label',
         'default-node-label-dx',
         'default-node-label-dy',
+        'default-node-label-dx-base',
+        'default-node-label-dy-base',
         'default-node-label-fill-color',
         'default-node-label-fill-opacity',
         'default-node-label-stroke-color',
@@ -190,7 +196,6 @@ export default (Renderer) => {
         'default-node-label-font-size',
         'default-node-label-font-family',
         'default-node-label-text-align',
-        'default-node-label-text-baseline',
         'default-link-stroke-color',
         'default-link-stroke-opacity',
         'default-link-stroke-width',
@@ -202,6 +207,8 @@ export default (Renderer) => {
         'default-link-label',
         'default-link-label-dx',
         'default-link-label-dy',
+        'default-link-label-dx-base',
+        'default-link-label-dy-base',
         'default-link-label-fill-color',
         'default-link-label-fill-opacity',
         'default-link-label-stroke-color',
@@ -209,8 +216,7 @@ export default (Renderer) => {
         'default-link-label-stroke-width',
         'default-link-label-font-size',
         'default-link-label-font-family',
-        'default-link-label-text-align',
-        'default-link-label-text-baseline'
+        'default-link-label-text-align'
       ]
     }
 
@@ -543,15 +549,25 @@ export default (Renderer) => {
               this.defaultGroupStrokeWidth
             ),
             label: get(group, this.groupLabelProperty, this.defaultGroupLabel),
-            labelDx: get(
+            labelDx: +get(
               group,
               this.groupLabelDxProperty,
               this.defaultGroupLabelDx
             ),
-            labelDy: get(
+            labelDy: +get(
               group,
               this.groupLabelDyProperty,
               this.defaultGroupLabelDy
+            ),
+            labelDxBase: get(
+              group,
+              this.groupLabelDxBaseProperty,
+              this.defaultGroupLabelDxBase
+            ),
+            labelDyBase: get(
+              group,
+              this.groupLabelDyBaseProperty,
+              this.defaultGroupLabelDyBase
             ),
             labelFillColor,
             labelStrokeColor,
@@ -574,11 +590,6 @@ export default (Renderer) => {
               group,
               this.groupLabelTextAlignProperty,
               this.defaultGroupLabelTextAlign
-            ),
-            labelTextBaseline: get(
-              group,
-              this.groupLabelTextBaselineProperty,
-              this.defaultGroupLabelTextBaseline
             ),
             d: group
           }
@@ -653,15 +664,25 @@ export default (Renderer) => {
               this.defaultNodeStrokeWidth
             ),
             label: get(node, this.nodeLabelProperty, this.defaultNodeLabel),
-            labelDx: get(
+            labelDx: +get(
               node,
               this.nodeLabelDxProperty,
               this.defaultNodeLabelDx
             ),
-            labelDy: get(
+            labelDy: +get(
               node,
               this.nodeLabelDyProperty,
               this.defaultNodeLabelDy
+            ),
+            labelDxBase: get(
+              node,
+              this.nodeLabelDxBaseProperty,
+              this.defaultNodeLabelDxBase
+            ),
+            labelDyBase: get(
+              node,
+              this.nodeLabelDyBaseProperty,
+              this.defaultNodeLabelDyBase
             ),
             labelFillColor,
             labelStrokeColor,
@@ -684,11 +705,6 @@ export default (Renderer) => {
               node,
               this.nodeLabelTextAlignProperty,
               this.defaultNodeLabelTextAlign
-            ),
-            labelTextBaseline: get(
-              node,
-              this.nodeLabelTextBaselineProperty,
-              this.defaultNodeLabelTextBaseline
             ),
             inEdges: [],
             outEdges: [],
@@ -785,15 +801,25 @@ export default (Renderer) => {
               this.defaultLinkTargetMarkerSize
             ),
             label: get(link, this.linkLabelProperty, this.defaultLinkLabel),
-            labelDx: get(
+            labelDx: +get(
               link,
               this.linkLabelDxProperty,
               this.defaultLinkLabelDx
             ),
-            labelDy: get(
+            labelDy: +get(
               link,
               this.linkLabelDyProperty,
               this.defaultLinkLabelDy
+            ),
+            labelDxBase: get(
+              link,
+              this.linkLabelDxBaseProperty,
+              this.defaultLinkLabelDxBase
+            ),
+            labelDyBase: get(
+              link,
+              this.linkLabelDyBaseProperty,
+              this.defaultLinkLabelDyBase
             ),
             labelFillColor,
             labelStrokeColor,
@@ -816,11 +842,6 @@ export default (Renderer) => {
               link,
               this.linkLabelTextAlignProperty,
               this.defaultLinkLabelTextAlign
-            ),
-            labelTextBaseline: get(
-              link,
-              this.linkLabelTextBaselineProperty,
-              this.defaultLinkLabelTextBaseline
             ),
             d: link
           }
@@ -1127,11 +1148,27 @@ export default (Renderer) => {
     }
 
     get groupLabelDyProperty() {
-      return getter(this, 'group-label-dy-property', 'labelDx')
+      return getter(this, 'group-label-dy-property', 'labelDy')
     }
 
     set groupLabelDyProperty(value) {
       this.setAttribute('group-label-dy-property', value)
+    }
+
+    get groupLabelDxBaseProperty() {
+      return getter(this, 'group-label-dx-base-property', 'labelDxBase')
+    }
+
+    set groupLabelDxBaseProperty(value) {
+      this.setAttribute('group-label-dx-base-property', value)
+    }
+
+    get groupLabelDyBaseProperty() {
+      return getter(this, 'group-label-dy-base-property', 'labelDyBase')
+    }
+
+    set groupLabelDyBaseProperty(value) {
+      this.setAttribute('group-label-dy-base-property', value)
     }
 
     get groupLabelFillColorProperty() {
@@ -1212,18 +1249,6 @@ export default (Renderer) => {
 
     set groupLabelTextAlignProperty(value) {
       this.setAttribute('group-label-text-align-property', value)
-    }
-
-    get groupLabelTextBaselineProperty() {
-      return getter(
-        this,
-        'group-label-text-baseline-property',
-        'labelTextBaseline'
-      )
-    }
-
-    set groupLabelTextBaselineProperty(value) {
-      this.setAttribute('group-label-text-baseline-property', value)
     }
 
     get nodeIdProperty() {
@@ -1339,11 +1364,27 @@ export default (Renderer) => {
     }
 
     get nodeLabelDyProperty() {
-      return getter(this, 'node-label-dy-property', 'labelDx')
+      return getter(this, 'node-label-dy-property', 'labelDy')
     }
 
     set nodeLabelDyProperty(value) {
       this.setAttribute('node-label-dy-property', value)
+    }
+
+    get nodeLabelDxBaseProperty() {
+      return getter(this, 'node-label-dx-base-property', 'labelDxBase')
+    }
+
+    set nodeLabelDxBaseProperty(value) {
+      this.setAttribute('node-label-dx-base-property', value)
+    }
+
+    get nodeLabelDyBaseProperty() {
+      return getter(this, 'node-label-dy-base-property', 'labelDyBase')
+    }
+
+    set nodeLabelDyBaseProperty(value) {
+      this.setAttribute('node-label-dy-base-property', value)
     }
 
     get nodeLabelFillColorProperty() {
@@ -1424,18 +1465,6 @@ export default (Renderer) => {
 
     set nodeLabelTextAlignProperty(value) {
       this.setAttribute('node-label-text-align-property', value)
-    }
-
-    get nodeLabelTextBaselineProperty() {
-      return getter(
-        this,
-        'node-label-text-baseline-property',
-        'labelTextBaseline'
-      )
-    }
-
-    set nodeLabelTextBaselineProperty(value) {
-      this.setAttribute('node-label-text-baseline-property', value)
     }
 
     get linkSourceProperty() {
@@ -1567,11 +1596,27 @@ export default (Renderer) => {
     }
 
     get linkLabelDyProperty() {
-      return getter(this, 'link-label-dy-property', 'labelDx')
+      return getter(this, 'link-label-dy-property', 'labelDy')
     }
 
     set linkLabelDyProperty(value) {
       this.setAttribute('link-label-dy-property', value)
+    }
+
+    get linkLabelDxBaseProperty() {
+      return getter(this, 'link-label-dx-base-property', 'labelDxBase')
+    }
+
+    set linkLabelDxBaseProperty(value) {
+      this.setAttribute('link-label-dx-base-property', value)
+    }
+
+    get linkLabelDyBaseProperty() {
+      return getter(this, 'link-label-dy-base-property', 'labelDyBase')
+    }
+
+    set linkLabelDyBaseProperty(value) {
+      this.setAttribute('link-label-dy-base-property', value)
     }
 
     get linkLabelFillColorProperty() {
@@ -1652,18 +1697,6 @@ export default (Renderer) => {
 
     set linkLabelTextAlignProperty(value) {
       this.setAttribute('link-label-text-align-property', value)
-    }
-
-    get linkLabelTextBaselineProperty() {
-      return getter(
-        this,
-        'link-label-text-baseline-property',
-        'labelTextBaseline'
-      )
-    }
-
-    set linkLabelTextBaselineProperty(value) {
-      this.setAttribute('link-label-text-baseline-property', value)
     }
 
     get defaultGroupX() {
@@ -1778,6 +1811,22 @@ export default (Renderer) => {
       this.setAttribute('default-group-label-dy', value)
     }
 
+    get defaultGroupLabelDxBase() {
+      return getter(this, 'default-group-label-dx-base', 'center')
+    }
+
+    set defaultGroupLabelDxBase(value) {
+      this.setAttribute('default-group-label-dx-base', value)
+    }
+
+    get defaultGroupLabelDyBase() {
+      return getter(this, 'default-group-label-dy-base', 'middle')
+    }
+
+    set defaultGroupLabelDyBase(value) {
+      this.setAttribute('default-group-label-dy-base', value)
+    }
+
     get defaultGroupLabelFillColor() {
       return getter(this, 'default-group-label-fill-color', '#000')
     }
@@ -1835,19 +1884,11 @@ export default (Renderer) => {
     }
 
     get defaultGroupLabelTextAlign() {
-      return getter(this, 'default-group-label-text-baseline', 'center')
+      return getter(this, 'default-group-label-text-align', 'center')
     }
 
     set defaultGroupLabelTextAlign(value) {
       this.setAttribute('default-group-label-text-align', value)
-    }
-
-    get defaultGroupLabelTextBaseline() {
-      return getter(this, 'default-group-label-text-baseline', 'middle')
-    }
-
-    set defaultGroupLabelTextBaseline(value) {
-      this.setAttribute('default-group-label-text-baseline', value)
     }
 
     get defaultNodeX() {
@@ -1962,6 +2003,22 @@ export default (Renderer) => {
       this.setAttribute('default-node-label-dy', value)
     }
 
+    get defaultNodeLabelDxBase() {
+      return getter(this, 'default-node-label-dx-base', 'center')
+    }
+
+    set defaultNodeLabelDxBase(value) {
+      this.setAttribute('default-node-label-dx-base', value)
+    }
+
+    get defaultNodeLabelDyBase() {
+      return getter(this, 'default-node-label-dy-base', 'middle')
+    }
+
+    set defaultNodeLabelDyBase(value) {
+      this.setAttribute('default-node-label-dy-base', value)
+    }
+
     get defaultNodeLabelFillColor() {
       return getter(this, 'default-node-label-fill-color', '#000')
     }
@@ -2019,19 +2076,11 @@ export default (Renderer) => {
     }
 
     get defaultNodeLabelTextAlign() {
-      return getter(this, 'default-node-label-text-baseline', 'center')
+      return getter(this, 'default-node-label-text-align', 'center')
     }
 
     set defaultNodeLabelTextAlign(value) {
       this.setAttribute('default-node-label-text-align', value)
-    }
-
-    get defaultNodeLabelTextBaseline() {
-      return getter(this, 'default-node-label-text-baseline', 'middle')
-    }
-
-    set defaultNodeLabelTextBaseline(value) {
-      this.setAttribute('default-node-label-text-baseline', value)
     }
 
     get defaultLinkStrokeColor() {
@@ -2130,6 +2179,22 @@ export default (Renderer) => {
       this.setAttribute('default-link-label-dy', value)
     }
 
+    get defaultLinkLabelDxBase() {
+      return getter(this, 'default-link-label-dx-base', 'center')
+    }
+
+    set defaultLinkLabelDxBase(value) {
+      this.setAttribute('default-link-label-dx-base', value)
+    }
+
+    get defaultLinkLabelDyBase() {
+      return getter(this, 'default-link-label-dy-base', 'middle')
+    }
+
+    set defaultLinkLabelDyBase(value) {
+      this.setAttribute('default-link-label-dy-base', value)
+    }
+
     get defaultLinkLabelFillColor() {
       return getter(this, 'default-link-label-fill-color', '#000')
     }
@@ -2187,19 +2252,11 @@ export default (Renderer) => {
     }
 
     get defaultLinkLabelTextAlign() {
-      return getter(this, 'default-link-label-text-baseline', 'center')
-    }
-
-    set defaultLinkLabelTextBaseline(value) {
-      this.setAttribute('default-link-label-text-align', value)
-    }
-
-    get defaultLinkLabelTextBaseline() {
-      return getter(this, 'default-link-label-text-baseline', 'middle')
+      return getter(this, 'default-link-label-text-align', 'center')
     }
 
     set defaultLinkLabelTextAlign(value) {
-      this.setAttribute('default-link-label-text-baseline', value)
+      this.setAttribute('default-link-label-text-align', value)
     }
 
     get data() {

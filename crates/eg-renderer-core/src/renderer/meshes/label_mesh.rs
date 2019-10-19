@@ -8,6 +8,66 @@ use web_sys::{
     WebGlTexture, WebGlVertexArrayObject,
 };
 
+enum TextAlign {
+    Left,
+    Right,
+    Center,
+}
+
+impl TextAlign {
+    fn new(name: &String) -> TextAlign {
+        if name == &String::from("left") {
+            return TextAlign::Left;
+        }
+        if name == &String::from("right") {
+            return TextAlign::Right;
+        }
+        if name == &String::from("start") {
+            return TextAlign::Left;
+        }
+        if name == &String::from("end") {
+            return TextAlign::Right;
+        }
+        TextAlign::Center
+    }
+}
+
+enum DxBase {
+    Left,
+    Right,
+    Center,
+}
+
+impl DxBase {
+    fn new(name: &String) -> DxBase {
+        if name == &String::from("left") {
+            return DxBase::Left;
+        }
+        if name == &String::from("right") {
+            return DxBase::Right;
+        }
+        DxBase::Center
+    }
+}
+
+enum DyBase {
+    Top,
+    Bottom,
+    Middle,
+}
+
+impl DyBase {
+    fn new(name: &String) -> DyBase {
+        if name == &String::from("top") {
+            return DyBase::Top;
+        }
+        if name == &String::from("bottom") {
+            return DyBase::Bottom;
+        }
+        DyBase::Middle
+    }
+}
+
 fn create_text_image(
     text: &String,
     scale: f32,
@@ -17,12 +77,13 @@ fn create_text_image(
     label_fill_color_r: f32,
     label_fill_color_g: f32,
     label_fill_color_b: f32,
+    label_fill_color_opacity: f32,
     label_stroke_color_r: f32,
     label_stroke_color_g: f32,
     label_stroke_color_b: f32,
+    label_stroke_color_opacity: f32,
     label_stroke_width: f32,
     label_text_align: &String,
-    label_text_baseline: &String,
 ) -> Result<HtmlCanvasElement, JsValue> {
     let window = web_sys::window().unwrap();
     let document = window.document().unwrap();
@@ -35,47 +96,76 @@ fn create_text_image(
         .unwrap()
         .dyn_into::<CanvasRenderingContext2d>()?;
 
+    let lines = text.split('\n').collect::<Vec<_>>();
+
+    let mut canvas_width = 0.;
+    for line in lines.iter() {
+        ctx.set_font(&format!(
+            "{}px {}",
+            label_font_size * scale,
+            label_font_family
+        ));
+        ctx.set_line_width((label_stroke_width * scale) as f64);
+        let bbox = ctx.measure_text(&line)?;
+        let w = bbox.width() as f32 + 2. * margin;
+        if w > canvas_width {
+            canvas_width = w;
+        }
+    }
+
+    let line_height = label_font_size * scale;
+    let canvas_width = canvas_width;
+    let canvas_height = line_height * lines.len() as f32 + 2. * margin;
+    canvas.set_width(canvas_width as u32);
+    canvas.set_height(canvas_height as u32);
+
+    let label_text_align = TextAlign::new(&label_text_align);
+
     ctx.set_font(&format!(
         "{}px {}",
         label_font_size * scale,
         label_font_family
     ));
-    ctx.set_text_align(label_text_align);
-    ctx.set_text_baseline(label_text_baseline);
-    ctx.set_line_width((label_stroke_width * scale) as f64);
-    let bbox = ctx.measure_text(&text)?;
-
-    canvas.set_width(((bbox.width() as f32 + margin) * scale) as u32);
-    canvas.set_height(((label_font_size + margin) * scale) as u32);
-
-    ctx.set_font(&format!(
-        "{}px {}",
-        label_font_size * scale,
-        label_font_family
-    ));
-    ctx.set_text_align(label_text_align);
-    ctx.set_text_baseline(label_text_baseline);
+    match label_text_align {
+        TextAlign::Left => ctx.set_text_align("left"),
+        TextAlign::Right => ctx.set_text_align("right"),
+        TextAlign::Center => ctx.set_text_align("center"),
+    };
+    ctx.set_text_baseline(&"middle");
     ctx.set_line_width((label_stroke_width * scale) as f64);
     ctx.set_fill_style(
         &format!(
-            "rgb({},{},{})",
-            label_fill_color_r, label_fill_color_g, label_fill_color_b
+            "rgba({},{},{},{})",
+            label_fill_color_r, label_fill_color_g, label_fill_color_b, label_fill_color_opacity
         )
         .into(),
     );
     ctx.set_stroke_style(
         &format!(
-            "rgb({},{},{})",
-            label_stroke_color_r, label_stroke_color_g, label_stroke_color_b
+            "rgba({},{},{},{})",
+            label_stroke_color_r,
+            label_stroke_color_g,
+            label_stroke_color_b,
+            label_stroke_color_opacity
         )
         .into(),
     );
 
-    ctx.fill_text(
-        &text,
-        (canvas.width() / 2) as f64,
-        (canvas.height() / 2) as f64,
-    )?;
+    let x = match label_text_align {
+        TextAlign::Left => margin,
+        TextAlign::Right => canvas_width - margin,
+        TextAlign::Center => canvas_width / 2.,
+    } as f64;
+    let mut offset = margin;
+    for line in lines {
+        let y = (offset + line_height / 2.0) as f64;
+        ctx.fill_text(&line, x, y)?;
+        if label_stroke_width > 0. {
+            ctx.stroke_text(&line, x, y)?;
+        }
+        offset += line_height;
+    }
+
     Ok(canvas)
 }
 
@@ -109,42 +199,53 @@ fn create_vertex_data<T: LabelData>(
     next: &T,
     canvas: &HtmlCanvasElement,
     scale: f32,
+    margin: f32,
     a0: f32,
     a1: f32,
 ) -> Vec<f32> {
-    let width = canvas.width() as f32 / scale;
-    let height = canvas.height() as f32 / scale;
+    let original_width = (canvas.width() as f32 - 2. * margin) / scale;
+    let original_height = (canvas.height() as f32 - 2. * margin) / scale;
+    let x_offset = match DxBase::new(&next.dx_base()) {
+        DxBase::Left => original_width / 2.,
+        DxBase::Right => -original_width / 2.,
+        DxBase::Center => 0.,
+    };
+    let y_offset = match DyBase::new(&next.dy_base()) {
+        DyBase::Top => original_height / 2.,
+        DyBase::Bottom => -original_height / 2.,
+        DyBase::Middle => 0.,
+    };
     vec![
         0.0,
         1.0,
-        (current.x() - width / 2.) as f32,
-        (current.y() + height / 2.) as f32,
-        (next.x() - width / 2.) as f32,
-        (next.y() + height / 2.) as f32,
+        (current.x() + x_offset - original_width / 2.) as f32,
+        (current.y() + y_offset + original_height / 2.) as f32,
+        (next.x() + x_offset - original_width / 2.) as f32,
+        (next.y() + y_offset + original_height / 2.) as f32,
         a0,
         a1,
         1.0,
         1.0,
-        (current.x() + width / 2.) as f32,
-        (current.y() + height / 2.) as f32,
-        (next.x() + width / 2.) as f32,
-        (next.y() + height / 2.) as f32,
+        (current.x() + x_offset + original_width / 2.) as f32,
+        (current.y() + y_offset + original_height / 2.) as f32,
+        (next.x() + x_offset + original_width / 2.) as f32,
+        (next.y() + y_offset + original_height / 2.) as f32,
         a0,
         a1,
         0.0,
         0.0,
-        (current.x() - width / 2.) as f32,
-        (current.y() - height / 2.) as f32,
-        (next.x() - width / 2.) as f32,
-        (next.y() - height / 2.) as f32,
+        (current.x() + x_offset - original_width / 2.) as f32,
+        (current.y() + y_offset - original_height / 2.) as f32,
+        (next.x() + x_offset - original_width / 2.) as f32,
+        (next.y() + y_offset - original_height / 2.) as f32,
         a0,
         a1,
         1.0,
         0.0,
-        (current.x() + width / 2.) as f32,
-        (current.y() - height / 2.) as f32,
-        (next.x() + width / 2.) as f32,
-        (next.y() - height / 2.) as f32,
+        (current.x() + x_offset + original_width / 2.) as f32,
+        (current.y() + y_offset - original_height / 2.) as f32,
+        (next.x() + x_offset + original_width / 2.) as f32,
+        (next.y() + y_offset - original_height / 2.) as f32,
         a0,
         a1,
     ]
@@ -165,26 +266,28 @@ impl LabelMeshGeometry {
         a0: f32,
         a1: f32,
     ) -> Result<LabelMeshGeometry, JsValue> {
-        let scale = 2.0;
+        let scale = 2.;
+        let margin = 1.;
         let canvas = create_text_image(
             &next.text(),
             scale,
-            1.0,
+            margin,
             next.font_size(),
             &next.font_family(),
             next.fill_color_r(),
             next.fill_color_g(),
             next.fill_color_b(),
+            next.fill_color_opacity(),
             next.stroke_color_r(),
             next.stroke_color_g(),
             next.stroke_color_b(),
+            next.stroke_color_opacity(),
             next.stroke_width(),
             next.text_align(),
-            next.text_baseline(),
         )?;
         let texture = create_texture(gl, &canvas)?;
 
-        let vertex_data = create_vertex_data(current, next, &canvas, scale, a0, a1);
+        let vertex_data = create_vertex_data(current, next, &canvas, scale, margin, a0, a1);
         let element_data = vec![0, 1, 2, 3];
 
         let texture_coord_location = gl.get_attrib_location(program, "aTextureCoord") as u32;
