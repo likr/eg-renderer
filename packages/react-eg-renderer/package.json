@@ -1,6 +1,6 @@
 {
   "name": "react-eg-renderer",
-  "version": "1.5.0-alpha.1",
+  "version": "1.5.0-alpha.2",
   "description": "> TODO: description",
   "author": "Yosuke Onoue <onoue@likr-lab.com>",
   "homepage": "https://github.com/likr/eg-renderer#readme",
@@ -21,7 +21,7 @@
     "url": "https://github.com/likr/eg-renderer/issues"
   },
   "dependencies": {
-    "eg-renderer": "^1.5.0-alpha.1"
+    "eg-renderer": "^1.5.0-alpha.2"
   },
   "devDependencies": {
     "@babel/core": "^7.6.4",
