@@ -1,6 +1,6 @@
 {
   "name": "examples-parcel",
-  "version": "1.5.0-alpha.0",
+  "version": "1.5.0-alpha.1",
   "private": true,
   "description": "> TODO: description",
   "author": "Yosuke Onoue <onoue@likr-lab.com>",
@@ -21,7 +21,7 @@
     "parcel-plugin-static-files-copy": "^2.2.1"
   },
   "dependencies": {
-    "eg-renderer": "^1.5.0-alpha.0"
+    "eg-renderer": "^1.5.0-alpha.1"
   },
   "staticFiles": {
     "staticPath": [

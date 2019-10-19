@@ -1,6 +1,6 @@
 {
   "name": "eg-renderer",
-  "version": "1.5.0-alpha.0",
+  "version": "1.5.0-alpha.1",
   "main": "src/index.js",
   "module": "src/index.js",
   "unpkg": "umd/eg-renderer.js",
@@ -26,7 +26,7 @@
     "d3-ease": "^1.0.5",
     "d3-selection": "^1.4.0",
     "d3-zoom": "^1.8.3",
-    "eg-renderer-core": "^1.5.0-alpha.0"
+    "eg-renderer-core": "^1.5.0-alpha.1"
   },
   "gitHead": "2f560e640150ede9617842ac8e55c81ac8b0ffb5",
   "devDependencies": {
