@@ -21,8 +21,22 @@
         group-label-property="name"
         default-link-stroke-color="gray"
         default-link-stroke-opacity="0.5"
+        default-group-label-dx-base="left"
+        default-group-label-dy-base="top"
       >
       </eg-renderer>
     </div>
+    <script>
+      document
+        .querySelector('eg-renderer')
+        .addEventListener('datafetchend', (event) => {
+          const data = event.detail
+          console.log(data)
+          for (const group of data.groups) {
+            group.labelDx = -group.width / 2 + 2
+            group.labelDy = -group.height / 2 + 2
+          }
+        })
+    </script>
   </body>
 </html>

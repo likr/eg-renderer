@@ -26,10 +26,17 @@ const completeGraph = (n) => {
   const links = []
   for (let i = 0; i < n; ++i) {
     for (let j = i + 1; j < n; ++j) {
-      links.push({ source: i, target: j })
+      links.push({ source: i, target: j, label: `link\n${i}-${j}` })
     }
   }
-  return { nodes, links }
+  const groups = [
+    {
+      label: `group\n0`,
+      x: cx,
+      y: cy
+    }
+  ]
+  return { nodes, links, groups }
 }
 
 const data = {
@@ -76,7 +83,7 @@ storiesOf('EgRenderer', module)
       onUpdateEnd={action('update end')}
     />
   ))
-  .add('node attributes', () => {
+  .add('visual attributes', () => {
     const width = 600
     const height = 400
     return (
@@ -157,8 +164,8 @@ storiesOf('EgRenderer', module)
           'default-node-label-text-align',
           {
             left: 'left',
-            right: 'right',
-            center: 'center'
+            center: 'center',
+            right: 'right'
           },
           'center'
         )}
@@ -166,16 +173,210 @@ storiesOf('EgRenderer', module)
         default-node-label-dy={number('default-node-label-dy', 0)}
         default-node-label-dx-base={select(
           'default-node-label-dx-base',
-          { left: 'left', right: 'right', center: 'center' },
+          { left: 'left', center: 'center', right: 'right' },
           'center'
         )}
         default-node-label-dy-base={select(
           'default-node-label-dy-base',
+          { top: 'top', middle: 'middle', bottom: 'bottom' },
+          'middle'
+        )}
+        default-link-stroke-color={color('default-link-stroke-color', '#000')}
+        default-link-stroke-opacity={number('default-link-stroke-opacity', 1, {
+          range: true,
+          min: 0,
+          max: 1,
+          step: 0.01
+        })}
+        default-link-stroke-width={number('default-link-stroke-width', 1, {
+          min: 0
+        })}
+        default-link-source-marker-shape={select(
+          'default-link-source-marker-shape',
+          {
+            none: '',
+            circle: 'circle',
+            triangle: 'triangle'
+          },
+          ''
+        )}
+        default-link-target-marker-shape={select(
+          'default-link-target-marker-shape',
+          {
+            none: '',
+            circle: 'circle',
+            triangle: 'triangle'
+          },
+          ''
+        )}
+        default-link-source-marker-size={number(
+          'default-link-source-marker-size',
+          5,
+          {
+            min: 0
+          }
+        )}
+        default-link-target-marker-size={number(
+          'default-link-target-marker-size',
+          5,
+          {
+            min: 0
+          }
+        )}
+        default-link-label-font-size={number(
+          'default-link-label-font-size',
+          16
+        )}
+        default-link-label-fill-color={color(
+          'default-link-label-fill-color',
+          '#000'
+        )}
+        default-link-label-fill-opacity={number(
+          'default-link-label-fill-opacity',
+          1,
+          {
+            range: true,
+            min: 0,
+            max: 1,
+            step: 0.01
+          }
+        )}
+        default-link-label-stroke-color={color(
+          'default-link-label-stroke-color',
+          '#f00'
+        )}
+        default-link-label-stroke-opacity={number(
+          'default-link-label-stroke-opacity',
+          1,
+          {
+            range: true,
+            min: 0,
+            max: 1,
+            step: 0.01
+          }
+        )}
+        default-link-label-stroke-width={number(
+          'default-link-label-stroke-width',
+          0,
+          {
+            min: 0
+          }
+        )}
+        default-link-label-text-align={select(
+          'default-link-label-text-align',
+          {
+            left: 'left',
+            right: 'right',
+            center: 'center'
+          },
+          'center'
+        )}
+        default-link-label-dx={number('default-link-label-dx', 0)}
+        default-link-label-dy={number('default-link-label-dy', 0)}
+        default-link-label-dx-base={select(
+          'default-link-label-dx-base',
+          { left: 'left', right: 'right', center: 'center' },
+          'center'
+        )}
+        default-link-label-dy-base={select(
+          'default-link-label-dy-base',
           { top: 'top', bottom: 'bottom', middle: 'middle' },
           'middle'
         )}
-        default-link-source-marker-shape='circle'
-        default-link-target-marker-shape='circle'
+        default-group-width={number('default-group-width', 380, {
+          min: 0,
+          step: 10
+        })}
+        default-group-height={number('default-group-height', 380, {
+          min: 0,
+          step: 10
+        })}
+        default-group-type={select(
+          'default-group-type',
+          { circle: 'circle', rect: 'rect' },
+          'circle'
+        )}
+        default-group-fill-color={color('default-group-fill-color', '#fff')}
+        default-group-fill-opacity={number('default-group-fill-opacity', 1, {
+          range: true,
+          min: 0,
+          max: 1,
+          step: 0.01
+        })}
+        default-group-stroke-color={color('default-group-stroke-color', '#000')}
+        default-group-stroke-opacity={number(
+          'default-group-stroke-opacity',
+          1,
+          {
+            range: true,
+            min: 0,
+            max: 1,
+            step: 0.01
+          }
+        )}
+        default-group-stroke-width={number('default-group-stroke-width', 1, {
+          min: 0
+        })}
+        default-group-label-font-size={number(
+          'default-group-label-font-size',
+          16
+        )}
+        default-group-label-fill-color={color(
+          'default-group-label-fill-color',
+          '#000'
+        )}
+        default-group-label-fill-opacity={number(
+          'default-group-label-fill-opacity',
+          1,
+          {
+            range: true,
+            min: 0,
+            max: 1,
+            step: 0.01
+          }
+        )}
+        default-group-label-stroke-color={color(
+          'default-group-label-stroke-color',
+          '#f00'
+        )}
+        default-group-label-stroke-opacity={number(
+          'default-group-label-stroke-opacity',
+          1,
+          {
+            range: true,
+            min: 0,
+            max: 1,
+            step: 0.01
+          }
+        )}
+        default-group-label-stroke-width={number(
+          'default-group-label-stroke-width',
+          0,
+          {
+            min: 0
+          }
+        )}
+        default-group-label-text-align={select(
+          'default-group-label-text-align',
+          {
+            left: 'left',
+            center: 'center',
+            right: 'right'
+          },
+          'center'
+        )}
+        default-group-label-dx={number('default-group-label-dx', 0)}
+        default-group-label-dy={number('default-group-label-dy', 0)}
+        default-group-label-dx-base={select(
+          'default-group-label-dx-base',
+          { left: 'left', center: 'center', right: 'right' },
+          'center'
+        )}
+        default-group-label-dy-base={select(
+          'default-group-label-dy-base',
+          { top: 'top', middle: 'middle', bottom: 'bottom' },
+          'middle'
+        )}
         transition-duration={number('transition-duration', 500, {
           min: 0,
           step: 100
