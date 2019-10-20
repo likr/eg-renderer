@@ -67,5 +67,7 @@ export const EgRenderer = forwardRef((props, ref) => {
     })
   }, [data])
 
-  return <eg-renderer ref={rendererRef} {...props} />
+  const childProps = Object.assign({}, props)
+  delete childProps.data
+  return <eg-renderer ref={rendererRef} {...childProps} />
 })

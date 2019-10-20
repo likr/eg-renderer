@@ -5,7 +5,7 @@
   "author": "Yosuke Onoue <onoue@likr-lab.com>",
   "homepage": "https://github.com/likr/eg-renderer#readme",
   "license": "MIT",
-  "main": "src/eg-renderer.js",
+  "main": "lib/eg-renderer.js",
   "directories": [
     "src"
   ],
@@ -14,6 +14,7 @@
     "url": "git+https://github.com/likr/eg-renderer.git"
   },
   "scripts": {
+    "prepublish": "rollup -c",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
   },
@@ -25,6 +26,8 @@
   },
   "devDependencies": {
     "@babel/core": "^7.6.4",
+    "@babel/preset-env": "^7.6.3",
+    "@babel/preset-react": "^7.6.3",
     "@storybook/addon-actions": "^5.2.4",
     "@storybook/addon-knobs": "^5.2.4",
     "@storybook/addon-links": "^5.2.4",
@@ -33,6 +36,11 @@
     "@storybook/react": "^5.2.4",
     "babel-loader": "^8.0.6",
     "react": "^16.10.2",
-    "react-dom": "^16.10.2"
+    "react-dom": "^16.10.2",
+    "rollup": "^1.25.0",
+    "rollup-plugin-babel": "^4.3.3"
+  },
+  "peerDependencies": {
+    "react": ">=16.8.0"
   }
 }
