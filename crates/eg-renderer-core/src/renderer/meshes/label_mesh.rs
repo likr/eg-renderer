@@ -186,6 +186,12 @@ fn create_texture(gl: &GL, canvas: &HtmlCanvasElement) -> Result<WebGlTexture, J
         GL::UNSIGNED_BYTE,
         &canvas,
     )?;
+    gl.tex_parameteri(
+        GL::TEXTURE_2D,
+        GL::TEXTURE_MIN_FILTER,
+        GL::LINEAR_MIPMAP_LINEAR as i32,
+    );
+    gl.tex_parameteri(GL::TEXTURE_2D, GL::TEXTURE_MAG_FILTER, GL::LINEAR as i32);
     gl.tex_parameteri(GL::TEXTURE_2D, GL::TEXTURE_WRAP_S, GL::CLAMP_TO_EDGE as i32);
     gl.tex_parameteri(GL::TEXTURE_2D, GL::TEXTURE_WRAP_T, GL::CLAMP_TO_EDGE as i32);
 

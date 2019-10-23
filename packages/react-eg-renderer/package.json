@@ -35,8 +35,8 @@
     "@storybook/addons": "^5.2.4",
     "@storybook/react": "^5.2.4",
     "babel-loader": "^8.0.6",
-    "react": "^16.10.2",
-    "react-dom": "^16.10.2",
+    "react": "^16.11.0",
+    "react-dom": "^16.11.0",
     "rollup": "^1.25.0",
     "rollup-plugin-babel": "^4.3.3"
   },
