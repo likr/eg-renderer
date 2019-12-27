@@ -373,7 +373,7 @@ export default (Renderer) => {
 
       p.renderer = new Renderer(p.canvas, p.layout, p.transform)
       this.invalidate()
-      p.renderer.resize(p.canvas.width, p.canvas.height)
+      p.renderer.resize(this.width, this.height)
       render()
     }
 
