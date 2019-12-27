@@ -3,5 +3,5 @@
     "crates/eg-renderer-core",
     "packages/*"
   ],
-  "version": "1.5.0-alpha.4"
+  "version": "1.5.0-alpha.5"
 }
