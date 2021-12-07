@@ -68,43 +68,43 @@
       >
     </div>
     <script>
-      customElements.whenDefined('eg-renderer-ogdf').then(() => {
-        const egRenderer = document.getElementById('renderer')
-        const contentWrapper = document.getElementById('wrapper')
-        egRenderer.setAttribute('width', contentWrapper.clientWidth)
-        egRenderer.setAttribute('height', contentWrapper.clientHeight)
+      customElements.whenDefined("eg-renderer-ogdf").then(() => {
+        const egRenderer = document.getElementById("renderer");
+        const contentWrapper = document.getElementById("wrapper");
+        egRenderer.setAttribute("width", contentWrapper.clientWidth);
+        egRenderer.setAttribute("height", contentWrapper.clientHeight);
 
-        window.addEventListener('resize', (event) => {
-          egRenderer.setAttribute('width', contentWrapper.clientWidth)
-          egRenderer.setAttribute('height', contentWrapper.clientHeight)
-        })
+        window.addEventListener("resize", (event) => {
+          egRenderer.setAttribute("width", contentWrapper.clientWidth);
+          egRenderer.setAttribute("height", contentWrapper.clientHeight);
+        });
 
-        document.getElementById('update').addEventListener('click', (event) => {
-          egRenderer.update()
-        })
+        document.getElementById("update").addEventListener("click", (event) => {
+          egRenderer.update();
+        });
 
-        document.getElementById('center').addEventListener('click', (event) => {
-          egRenderer.center()
-        })
-
-        document
-          .getElementById('layout')
-          .addEventListener('change', (event) => {
-            egRenderer.layoutMethod = event.target.value
-          })
+        document.getElementById("center").addEventListener("click", (event) => {
+          egRenderer.center();
+        });
 
         document
-          .getElementById('auto-update')
-          .addEventListener('change', (event) => {
-            egRenderer.autoUpdate = event.target.checked
-          })
+          .getElementById("layout")
+          .addEventListener("change", (event) => {
+            egRenderer.layoutMethod = event.target.value;
+          });
 
         document
-          .getElementById('auto-centering')
-          .addEventListener('change', (event) => {
-            egRenderer.autoCentering = event.target.checked
-          })
-      })
+          .getElementById("auto-update")
+          .addEventListener("change", (event) => {
+            egRenderer.autoUpdate = event.target.checked;
+          });
+
+        document
+          .getElementById("auto-centering")
+          .addEventListener("change", (event) => {
+            egRenderer.autoCentering = event.target.checked;
+          });
+      });
     </script>
   </body>
 </html>

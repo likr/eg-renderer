@@ -15,14 +15,14 @@
       <h2>Result</h2>
       <eg-renderer width="600" height="400"></eg-renderer>
       <script>
-        customElements.whenDefined('eg-renderer').then(() => {
-          fetch('/demos/js-demo/data.json')
+        customElements.whenDefined("eg-renderer").then(() => {
+          fetch("/demos/js-demo/data.json")
             .then((response) => response.json())
             .then((data) => {
-              const renderer = document.querySelector('eg-renderer')
-              renderer.load(data)
-            })
-        })
+              const renderer = document.querySelector("eg-renderer");
+              renderer.load(data);
+            });
+        });
       </script>
     </div>
     <div>

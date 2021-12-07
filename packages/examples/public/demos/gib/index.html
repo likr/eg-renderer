@@ -28,15 +28,15 @@
     </div>
     <script>
       document
-        .querySelector('eg-renderer')
-        .addEventListener('datafetchend', (event) => {
-          const data = event.detail
-          console.log(data)
+        .querySelector("eg-renderer")
+        .addEventListener("datafetchend", (event) => {
+          const data = event.detail;
+          console.log(data);
           for (const group of data.groups) {
-            group.labelDx = -group.width / 2 + 2
-            group.labelDy = -group.height / 2 + 2
+            group.labelDx = -group.width / 2 + 2;
+            group.labelDy = -group.height / 2 + 2;
           }
-        })
+        });
     </script>
   </body>
 </html>

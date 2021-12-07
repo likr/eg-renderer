@@ -16,7 +16,10 @@
       "sourceMarkerShape": "circle",
       "targetMarkerShape": "triangle",
       "type": "line",
-      "bends": [[200, 50], [400, 150]]
+      "bends": [
+        [200, 50],
+        [400, 150]
+      ]
     },
     {
       "source": "2",
