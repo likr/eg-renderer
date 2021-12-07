@@ -1,1 +1,1 @@
-import 'eg-renderer'
+import "eg-renderer";

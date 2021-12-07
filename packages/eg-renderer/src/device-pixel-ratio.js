@@ -1,3 +1,3 @@
 export const devicePixelRatio = () => {
-  return window.devicePixelRatio || 1.0
-}
+  return window.devicePixelRatio || 1.0;
+};

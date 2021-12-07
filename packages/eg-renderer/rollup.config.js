@@ -1,11 +1,11 @@
-import resolve from 'rollup-plugin-node-resolve'
+import resolve from "rollup-plugin-node-resolve";
 
 export default {
-  input: 'src/umd.js',
+  input: "src/umd.js",
   output: {
-    file: 'umd/eg-renderer.js',
-    format: 'umd',
-    name: 'eg-renderer'
+    file: "umd/eg-renderer.js",
+    format: "umd",
+    name: "eg-renderer",
   },
-  plugins: [resolve()]
-}
+  plugins: [resolve()],
+};

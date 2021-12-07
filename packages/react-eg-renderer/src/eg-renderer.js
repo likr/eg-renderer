@@ -1,73 +1,73 @@
 /* global customElements */
-import React, { forwardRef, useEffect, useRef } from 'react'
-import 'eg-renderer'
+import React, { forwardRef, useEffect, useRef } from "react";
+import "eg-renderer";
 
 const useCombinedRefs = (...refs) => {
-  const targetRef = React.useRef()
+  const targetRef = React.useRef();
 
   React.useEffect(() => {
     refs.forEach((ref) => {
-      if (!ref) return
+      if (!ref) return;
 
-      if (typeof ref === 'function') {
-        ref(targetRef.current)
+      if (typeof ref === "function") {
+        ref(targetRef.current);
       } else {
-        ref.current = targetRef.current
+        ref.current = targetRef.current;
       }
-    })
-  }, [refs])
+    });
+  }, [refs]);
 
-  return targetRef
-}
+  return targetRef;
+};
 
 export const EgRenderer = forwardRef((props, ref) => {
-  const innerRef = useRef(null)
-  const rendererRef = useCombinedRefs(ref, innerRef)
+  const innerRef = useRef(null);
+  const rendererRef = useCombinedRefs(ref, innerRef);
 
-  const { data, onDataFetchEnd, onNodeClick, onUpdateEnd } = props
+  const { data, onDataFetchEnd, onNodeClick, onUpdateEnd } = props;
 
   const handlers = [
     [
-      'datafetchend',
+      "datafetchend",
       onDataFetchEnd,
       (event) => {
-        onDataFetchEnd(event.detail)
-      }
+        onDataFetchEnd(event.detail);
+      },
     ],
     [
-      'nodeclick',
+      "nodeclick",
       onNodeClick,
       (event) => {
-        onNodeClick(event.detail)
-      }
+        onNodeClick(event.detail);
+      },
     ],
     [
-      'updateend',
+      "updateend",
       onUpdateEnd,
       () => {
-        onUpdateEnd()
-      }
-    ]
-  ]
+        onUpdateEnd();
+      },
+    ],
+  ];
 
   for (const [name, prop, handler] of handlers) {
     useEffect(() => {
       if (prop) {
-        rendererRef.current.addEventListener(name, handler)
+        rendererRef.current.addEventListener(name, handler);
         return () => {
-          rendererRef.current.removeEventListener(name, handler)
-        }
+          rendererRef.current.removeEventListener(name, handler);
+        };
       }
-    }, [prop])
+    }, [prop]);
   }
 
   useEffect(() => {
-    customElements.whenDefined('eg-renderer').then(() => {
-      rendererRef.current.load(data)
-    })
-  }, [data])
+    customElements.whenDefined("eg-renderer").then(() => {
+      rendererRef.current.load(data);
+    });
+  }, [data]);
 
-  const childProps = Object.assign({}, props)
-  delete childProps.data
-  return <eg-renderer ref={rendererRef} {...childProps} />
-})
+  const childProps = Object.assign({}, props);
+  delete childProps.data;
+  return <eg-renderer ref={rendererRef} {...childProps} />;
+});

@@ -1,1 +1,1 @@
-import 'eg-renderer-ogdf'
+import "eg-renderer-ogdf";
