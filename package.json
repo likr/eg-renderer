@@ -3,10 +3,9 @@
   "author": "Yosuke Onoue <onoue@likr-lab.com>",
   "license": "MIT",
   "scripts": {
-    "bootstrap": "lerna bootstrap",
-    "build:wasm": "npx lerna exec --scope eg-renderer-core -- npm run build",
-    "deploy": "npx lerna exec --scope examples -- npm run deploy",
-    "start": "npx lerna exec --scope examples -- npm start"
+    "build:wasm": "npm run build -w eg-renderer-core",
+    "deploy": "npm run deploy -w examples",
+    "start": "npm start -w examples"
   },
   "devDependencies": {
     "babel-eslint": "^10.0.3",
@@ -21,8 +20,10 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-react": "^7.14.3",
     "eslint-plugin-standard": "^4.0.1",
-    "lerna": "^3.18.1",
     "prettier": "^1.18.2"
   },
-  "private": true
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ]
 }

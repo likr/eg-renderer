@@ -1,4 +1,3 @@
 node_modules
-lerna-debug.log
 packages/examples/public/eg-renderer.js
 packages/examples/public/eg-renderer-ogdf.js
