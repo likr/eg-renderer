@@ -9,7 +9,7 @@
     "umd"
   ],
   "scripts": {
-    "prepublish": "rollup -c && cp node_modules/eg-renderer-core/dist/web/eg_renderer_core_bg.wasm umd/eg_renderer_core_bg.wasm"
+    "prepublish": "rollup -c && cp ../../node_modules/eg-renderer-core/dist/web/eg_renderer_core_bg.wasm umd/eg_renderer_core_bg.wasm"
   },
   "description": "Easy Graph Renderer for the Web",
   "keywords": [
