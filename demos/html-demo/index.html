@@ -1,41 +1,39 @@
 <!DOCTYPE html>
 <html>
-<head>
-<meta charset="utf-8"/>
-<title>HTML API Demo | EgRenderer Example</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/6.23.0/polyfill.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/2.0.3/fetch.min.js"></script>
-<script>
-if (!window.customElements) {
-  window.customElements = {}
-}
-window.customElements.forcePolyfill = true
-</script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/custom-elements/1.0.0/custom-elements.min.js"></script>
-<script async src="../../eg-renderer.js"></script>
-</head>
-<body>
-<div>
-<a href="../../">back</a>
-<h1>HTML API Demo</h1>
-</div>
-<div>
-<h2>Result</h2>
-<eg-renderer width="600" height="400" src="data.json"></eg-renderer>
-</div>
-<div>
-<h2>Code</h2>
+  <head>
+    <meta charset="utf-8" />
+    <title>HTML API Demo | EgRenderer Example</title>
+    <base href="/" />
+    <script async src="/eg-renderer.js"></script>
+  </head>
+  <body>
+    <div>
+      <a href="../../">back</a>
+      <h1>HTML API Demo</h1>
+    </div>
+    <div>
+      <h2>Result</h2>
+      <eg-renderer
+        width="600"
+        height="400"
+        src="/demos/html-demo/data.json"
+      ></eg-renderer>
+    </div>
+    <div>
+      <h2>Code</h2>
+      <pre>
 <code>
-&lt;!DOCTYPE html&gt;<br/>
-&lt;html&gt;<br/>
-&lt;head&gt;<br/>
-&lt;script&ensp;async&ensp;src="https://likr.github.io/eg-renderer/eg-renderer.js"&gt;&lt;/script&gt;<br/>
-&lt;/head&gt;<br/>
-&lt;body&gt;<br/>
-&lt;eg-renderer&ensp;width="600"&ensp;height="400"&ensp;src="data.json"&gt;&lt;/eg-renderer&gt;<br/>
-&lt;/body&gt;<br/>
-&lt;/html&gt;<br/>
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;script async src="/eg-renderer.js"&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;eg-renderer width="600" height="400" src="/demos/html-demo/data.json"&gt;&lt;/eg-renderer&gt;
+&lt;/body&gt;
+&lt;/html&gt;
 </code>
-</div>
-</body>
+</pre>
+    </div>
+  </body>
 </html>
