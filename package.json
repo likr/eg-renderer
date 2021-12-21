@@ -24,6 +24,7 @@
   },
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "crates/*"
   ]
 }

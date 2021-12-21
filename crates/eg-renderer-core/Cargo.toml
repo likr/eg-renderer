@@ -8,19 +8,19 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-js-sys = "0.3.28"
+js-sys = "0.3.55"
 cgmatrix = "0.2.1"
-serde = "^1.0.59"
-serde_derive = "^1.0.59"
+serde = "^1.0.132"
+serde_derive = "^1.0.132"
 
 [dependencies.wasm-bindgen]
-version = "0.2.51"
+version = "0.2.78"
 features = [
   'serde-serialize',
 ]
 
 [dependencies.web-sys]
-version = "0.3.28"
+version = "0.3.55"
 features = [
   'CanvasRenderingContext2d',
   'Document',
