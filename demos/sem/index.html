@@ -3,9 +3,11 @@
   <head>
     <meta charset="utf-8" />
     <title>Path Diagram for SEM | EgRenderer Example</title>
-    <base href="/" />
-    <script src="/eg-renderer.js"></script>
-    <script src="/eg-renderer-ogdf.js"></script>
+    <script type="module">
+      import "../../eg-renderer.js";
+      import "../../eg-renderer-ogdf.js";
+      egRenderer("../../eg-renderer.wasm");
+    </script>
     <style>
       eg-renderer-ogdf {
         display: block;
@@ -36,7 +38,7 @@
         default-node-label-fill-color="#fff"
         default-node-label-stroke-width="2"
         default-link-label-stroke-width="2"
-        src="/demos/sem/sem.json"
+        src="sem.json"
       >
       </eg-renderer-ogdf>
     </div>
@@ -47,8 +49,11 @@
 &lt;!DOCTYPE html&gt;
 &lt;html&gt;
 &lt;head&gt;
-&lt;script src="/eg-renderer.js"&gt;&lt;/script&gt;
-&lt;script src="/eg-renderer-ogdf.js"&gt;&lt;/script&gt;
+&lt;script type="module"&gt;
+import "https://unpkg.com/eg-renderer";
+import "https://unpkg.com/eg-renderer-ogdf";
+egRenderer("https://unpkg.com/eg-renderer/eg-renderer.wasm");
+&lt;/script&gt;
 &lt;/head&gt;
 &lt;body&gt;
 &lt;eg-renderer-ogdf

@@ -7,9 +7,11 @@
       content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"
     />
     <title>EgRenderer Demo</title>
-    <base href="/" />
-    <script async src="/eg-renderer.js"></script>
-    <script async src="/eg-renderer-ogdf.js"></script>
+    <script type="module">
+      import "../../eg-renderer.js";
+      import "../../eg-renderer-ogdf.js";
+      egRenderer("../../eg-renderer.wasm");
+    </script>
     <style>
       body {
         margin: 0;
@@ -35,7 +37,7 @@
     <div id="wrapper">
       <eg-renderer-ogdf
         id="renderer"
-        src="/demos/eg-renderer/data.json"
+        src="data.json"
         transition-duration="1000"
         node-id-property="u"
         link-source-property="u"

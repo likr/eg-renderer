@@ -3,8 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <title>Group-In-a-Box | EgRenderer Example</title>
-    <base href="/" />
-    <script async src="/eg-renderer.js"></script>
+    <script type="module">
+      import "../../eg-renderer.js";
+      egRenderer("../../eg-renderer.wasm");
+    </script>
   </head>
   <body>
     <div>
@@ -16,7 +18,7 @@
       <eg-renderer
         width="820"
         height="620"
-        src="/demos/gib/data.json"
+        src="data.json"
         node-label-property="name"
         group-label-property="name"
         default-link-stroke-color="gray"
@@ -31,7 +33,6 @@
         .querySelector("eg-renderer")
         .addEventListener("datafetchend", (event) => {
           const data = event.detail;
-          console.log(data);
           for (const group of data.groups) {
             group.labelDx = -group.width / 2 + 2;
             group.labelDy = -group.height / 2 + 2;

@@ -3,8 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <title>Links Demo | EgRenderer Example</title>
-    <base href="/" />
-    <script async src="/eg-renderer.js"></script>
+    <script type="module">
+      import "../../eg-renderer.js";
+      egRenderer("../../eg-renderer.wasm");
+    </script>
   </head>
   <body>
     <div>
@@ -19,7 +21,7 @@
         transition-duration="1000"
         width="600"
         height="600"
-        src="/demos/links/data.json"
+        src="data.json"
         no-auto-centering
       >
       </eg-renderer>

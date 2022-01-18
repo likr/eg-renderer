@@ -3,8 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <title>HTML API Demo | EgRenderer Example</title>
-    <base href="/" />
-    <script src="../../eg-renderer.js"></script>
+    <script type="module">
+      import "../../eg-renderer.js";
+      egRenderer("../../eg-renderer.wasm");
+    </script>
   </head>
   <body>
     <div>
@@ -15,7 +17,7 @@
       <eg-renderer
         width="600"
         height="400"
-        src="/demos/event/data.json"
+        src="data.json"
         enable-link-events
         no-auto-centering
       >

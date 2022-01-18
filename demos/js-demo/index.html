@@ -3,8 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <title>JavaScript API Demo | EgRenderer Example</title>
-    <base href="/" />
-    <script src="/eg-renderer.js"></script>
+    <script type="module">
+      import "../../eg-renderer.js";
+      egRenderer("../../eg-renderer.wasm");
+    </script>
   </head>
   <body>
     <div>
@@ -16,7 +18,7 @@
       <eg-renderer width="600" height="400"></eg-renderer>
       <script>
         customElements.whenDefined("eg-renderer").then(() => {
-          fetch("/demos/js-demo/data.json")
+          fetch("data.json")
             .then((response) => response.json())
             .then((data) => {
               const renderer = document.querySelector("eg-renderer");
@@ -32,12 +34,15 @@
 &lt;!DOCTYPE html&gt;
 &lt;html&gt;
 &lt;head&gt;
-&lt;script src="/eg-renderer.js"&gt;&lt;/script&gt;
+&lt;script type="module"&gt;
+import "https://unpkg.com/eg-renderer";
+egRenderer("https://unpkg.com/eg-renderer/eg-renderer.wasm");
+&lt;/script&gt;
 &lt;/head&gt;
 &lt;body&gt;
 &lt;eg-renderer width="600" height="400"&gt;&lt;/eg-renderer&gt;
 &lt;script&gt;
-fetch('/demos/js-demo/data.json')
+fetch('data.json')
   .then((response) =&gt; response.json())
   .then((data) =&gt; {
     const renderer = document.querySelector('eg-renderer')
