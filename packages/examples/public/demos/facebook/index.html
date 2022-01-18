@@ -3,9 +3,11 @@
   <head>
     <meta charset="utf-8" />
     <title>ego-Facebook | EgRenderer Example</title>
-    <base href="/" />
-    <script async src="/eg-renderer.js"></script>
-    <script async src="/eg-renderer-ogdf.js"></script>
+    <script type="module">
+      import "../../eg-renderer.js";
+      import "../../eg-renderer-ogdf.js";
+      egRenderer("../../eg-renderer.wasm");
+    </script>
     <style>
       eg-renderer-ogdf {
         display: block;
@@ -38,7 +40,7 @@
         default-link-stroke-color="#999"
         default-link-stroke-width="0.1"
         default-link-stroke-opacity="0.3"
-        src="/demos/facebook/facebook.json"
+        src="facebook.json"
       >
       </eg-renderer-ogdf>
     </div>
@@ -49,8 +51,11 @@
 &lt;!DOCTYPE html&gt;
 &lt;html&gt;
 &lt;head&gt;
-&lt;script src="/eg-renderer.js"&gt;&lt;/script&gt;
-&lt;script src="/eg-renderer-ogdf.js"&gt;&lt;/script&gt;
+&lt;script type="module"&gt;
+import "https://unpkg.com/eg-renderer";
+import "https://unpkg.com/eg-renderer-ogdf";
+egRenderer("https://unpkg.com/eg-renderer/eg-renderer.wasm");
+&lt;/script&gt;
 &lt;/head&gt;
 &lt;body&gt;
 &lt;eg-renderer-ogdf

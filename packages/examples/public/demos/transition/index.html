@@ -3,17 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <title>Form Demo | EgRenderer Example</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/6.23.0/polyfill.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/fetch/2.0.3/fetch.min.js"></script>
-    <script>
-      if (!window.customElements) {
-        window.customElements = {};
-      }
-      window.customElements.forcePolyfill = true;
+    <script type="module">
+      import "../../eg-renderer.js";
+      egRenderer("../../eg-renderer.wasm");
     </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/custom-elements/1.0.0/custom-elements.min.js"></script>
-    <script async src="/eg-renderer.js"></script>
-    <base href="/" />
   </head>
   <body>
     <div>
@@ -28,7 +21,7 @@
         transition-duration="1000"
         width="600"
         height="400"
-        src="/demos/transition/data.json"
+        src="data.json"
         node-id-property="id"
         node-visibility-property="visibility1"
         link-type-property="type1"

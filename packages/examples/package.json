@@ -3,9 +3,8 @@
   "version": "1.5.0-alpha.5",
   "description": "EgRenderer Examples",
   "scripts": {
-    "start": "webpack-dev-server --mode=development",
-    "build": "webpack --mode=development",
-    "deploy": "npm run build && gh-pages -d public"
+    "start": "http-server -c-1 public",
+    "deploy": "gh-pages -d public"
   },
   "keywords": [],
   "author": "Yosuke Onoue <onoue@likr-lab.com>",
@@ -19,13 +18,8 @@
     "eg-renderer-ogdf": "^1.5.0-alpha.0"
   },
   "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-loader": "^7.1.5",
-    "babel-preset-env": "^1.7.0",
     "gh-pages": "^1.2.0",
-    "webpack": "^4.29.6",
-    "webpack-cli": "^3.3.0",
-    "webpack-dev-server": "^3.3.1"
+    "http-server": "^14.1.0"
   },
   "private": true
 }

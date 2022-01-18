@@ -3,8 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <title>Form Demo | EgRenderer Example</title>
-    <base href="/" />
-    <script async src="/eg-renderer.js"></script>
+    <script type="module">
+      import "../../eg-renderer.js";
+      egRenderer("../../eg-renderer.wasm");
+    </script>
   </head>
   <body>
     <div>
@@ -32,7 +34,7 @@
         transition-duration="1000"
         width="600"
         height="400"
-        src="/demos/form/data.json"
+        src="data.json"
         node-id-property="id"
         node-label-property="id"
         link-label-property="id"

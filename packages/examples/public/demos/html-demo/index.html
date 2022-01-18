@@ -3,8 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <title>HTML API Demo | EgRenderer Example</title>
-    <base href="/" />
-    <script async src="/eg-renderer.js"></script>
+    <script type="module">
+      import "../../eg-renderer.js";
+      egRenderer("../../eg-renderer.wasm");
+    </script>
   </head>
   <body>
     <div>
@@ -13,11 +15,7 @@
     </div>
     <div>
       <h2>Result</h2>
-      <eg-renderer
-        width="600"
-        height="400"
-        src="/demos/html-demo/data.json"
-      ></eg-renderer>
+      <eg-renderer width="600" height="400" src="data.json"></eg-renderer>
     </div>
     <div>
       <h2>Code</h2>
@@ -26,10 +24,13 @@
 &lt;!DOCTYPE html&gt;
 &lt;html&gt;
 &lt;head&gt;
-&lt;script async src="/eg-renderer.js"&gt;&lt;/script&gt;
+&lt;script type="module"&gt;
+import "https://unpkg.com/eg-renderer";
+egRenderer("https://unpkg.com/eg-renderer/eg-renderer.wasm");
+&lt;/script&gt;
 &lt;/head&gt;
 &lt;body&gt;
-&lt;eg-renderer width="600" height="400" src="/demos/html-demo/data.json"&gt;&lt;/eg-renderer&gt;
+&lt;eg-renderer width="600" height="400" src="data.json"&gt;&lt;/eg-renderer&gt;
 &lt;/body&gt;
 &lt;/html&gt;
 </code>
