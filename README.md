@@ -8,8 +8,8 @@ index.html
 
 ```html
 <script type="module">
-  import "../../eg-renderer.js";
-  egRenderer("../../eg-renderer.wasm");
+  import "https://unpkg.com/eg-renderer";
+  egRenderer("https://unpkg.com/eg-renderer/umd/eg-renderer.wasm");
 </script>
 <eg-renderer width="600" height="400" src="data.json"></eg-renderer>
 ```
