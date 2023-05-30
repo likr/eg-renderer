@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>acvis | EgRenderer Example</title>
+    <script type="module" src="./main.js"></script>
+    <meta charset="utf-8" />
+    <style>
+      eg-renderer {
+        display: block;
+        border: solid 1px;
+        width: 960px;
+        height: 600px;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <a href="../../">back</a>
+    </div>
+
+    <div>
+      <h2>Result</h2>
+      <eg-renderer
+        id="renderer"
+        src="/data/acvis.json"
+        width="960"
+        height="600"
+        transition-duration="1000"
+        node-label-property="label"
+        default-node-width="10"
+        default-node-height="10"
+        default-node-stroke-width="0"
+        default-node-label-stroke-color="#fff"
+        default-node-label-stroke-width="1"
+        default-link-stroke-color="gray"
+        default-link-stroke-opacity="0.3"
+      >
+      </eg-renderer>
+    </div>
+  </body>
+</html>

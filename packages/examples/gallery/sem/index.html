@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Path Diagram for SEM | EgRenderer Example</title>
+    <script type="module" src="./main.js"></script>
+    <style>
+      eg-renderer-ogdf {
+        display: block;
+        border: solid 1px;
+        width: 960px;
+        height: 600px;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <a href="../../">back</a>
+      <h1>Path Diagram for SEM</h1>
+    </div>
+    <div>
+      <h2>Result</h2>
+      <eg-renderer-ogdf
+        width="960"
+        height="600"
+        node-id-property="id"
+        node-fill-color-property="color"
+        node-label-stroke-color-property="color"
+        link-stroke-color-property="color"
+        link-label-stroke-color-property="color"
+        link-source-marker-size-property="markerSize"
+        link-target-marker-size-property="markerSize"
+        default-node-stroke-width="0"
+        default-node-label-fill-color="#fff"
+        default-node-label-stroke-width="2"
+        default-link-label-stroke-width="2"
+        src="/data/sem.json"
+      >
+      </eg-renderer-ogdf>
+    </div>
+    <div>
+      <h2>Code</h2>
+      <pre>
+<code>
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;script type="module"&gt;
+import "https://unpkg.com/eg-renderer";
+import "https://unpkg.com/eg-renderer-ogdf";
+egRenderer("https://unpkg.com/eg-renderer/umd/eg-renderer.wasm");
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;eg-renderer-ogdf
+  width="960"
+  height="600"
+  node-id-property="id"
+  node-fill-color-property="color"
+  node-label-stroke-color-property="color"
+  link-stroke-color-property="color"
+  link-label-stroke-color-property="color"
+  default-node-stroke-width="0"
+  default-node-label-fill-color="#fff"
+  default-node-label-stroke-width="2"
+  default-link-label-stroke-width="2"
+  src="/demos/sem/sem.json"&gt;
+&lt;/eg-renderer-ogdf&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code>
+</pre>
+    </div>
+  </body>
+</html>

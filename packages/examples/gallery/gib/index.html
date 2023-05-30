@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Group-In-a-Box | EgRenderer Example</title>
+    <script type="module" src="./main.js"></script>
+  </head>
+  <body>
+    <div>
+      <a href="../../">back</a>
+      <h1>Group-In-a-Box</h1>
+    </div>
+    <div>
+      <h2>Result</h2>
+      <eg-renderer
+        width="820"
+        height="620"
+        src="/data/gib.json"
+        node-label-property="name"
+        group-label-property="name"
+        default-link-stroke-color="gray"
+        default-link-stroke-opacity="0.5"
+        default-group-label-dx-base="left"
+        default-group-label-dy-base="top"
+      >
+      </eg-renderer>
+    </div>
+    <script>
+      document
+        .querySelector("eg-renderer")
+        .addEventListener("datafetchend", (event) => {
+          const data = event.detail;
+          for (const group of data.groups) {
+            group.labelDx = -group.width / 2 + 2;
+            group.labelDy = -group.height / 2 + 2;
+          }
+        });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>HTML API Demo | EgRenderer Example</title>
+    <script type="module" src="./main.js"></script>
+  </head>
+  <body>
+    <div>
+      <a href="../../">back</a>
+      <h1>HTML API Demo</h1>
+    </div>
+    <div>
+      <h2>Result</h2>
+      <eg-renderer width="600" height="400" src="/data/demo.json"></eg-renderer>
+    </div>
+    <div>
+      <h2>Code</h2>
+      <pre>
+<code>
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;script type="module"&gt;
+import "https://unpkg.com/eg-renderer";
+egRenderer("https://unpkg.com/eg-renderer/umd/eg-renderer.wasm");
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;eg-renderer width="600" height="400" src="data.json"&gt;&lt;/eg-renderer&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code>
+</pre>
+    </div>
+  </body>
+</html>

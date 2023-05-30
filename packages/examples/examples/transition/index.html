@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Form Demo | EgRenderer Example</title>
+    <script type="module" src="./main.js"></script>
+  </head>
+  <body>
+    <div>
+      <a href="../../">back</a>
+      <h1>Form Demo</h1>
+    </div>
+    <div>
+      <button id="transition">transition</button>
+    </div>
+    <div>
+      <eg-renderer
+        transition-duration="1000"
+        width="600"
+        height="400"
+        src="/data/transition.json"
+        node-id-property="id"
+        node-visibility-property="visibility1"
+        link-type-property="type1"
+        link-visibility-property="visibility1"
+        default-node-stroke-width="0"
+        default-node-label-fill-color="#fff"
+        default-link-stroke-color="#ccc"
+        default-link-stroke-width="3"
+        no-auto-centering
+      >
+      </eg-renderer>
+    </div>
+  </body>
+</html>

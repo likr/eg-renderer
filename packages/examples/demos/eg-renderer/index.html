@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <title>EgRenderer Demo</title>
+    <script type="module" src="./main.js"></script>
+    <style>
+      body {
+        margin: 0;
+      }
+      #wrapper {
+        position: absolute;
+        top: 0;
+        bottom: 50px;
+        left: 0;
+        right: 0;
+      }
+      .control {
+        position: absolute;
+        height: 50px;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: gray;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="wrapper">
+      <eg-renderer-ogdf
+        id="renderer"
+        src="/data/egrid.json"
+        transition-duration="1000"
+        node-id-property="u"
+        link-source-property="u"
+        link-target-property="v"
+        default-node-width="140"
+        default-node-height="20"
+        default-node-type="rect"
+      >
+      </eg-renderer-ogdf>
+    </div>
+    <div class="control">
+      <button id="center">center</button>
+      <button id="update">update</button>
+      <select id="layout">
+        <option value="balloon">balloon</option>
+        <option value="circular">circular</option>
+        <option value="davidsonHarel">davidsonHarel</option>
+        <option value="fastMultipoleEmbedder">fastMultipoleEmbedder</option>
+        <option value="fmmm" selected>fmmm</option>
+        <option value="planarization">planarization</option>
+        <option value="sugiyama">sugiyama</option>
+        <option value="tree">tree</option>
+        <option value="tutte">tutte</option>
+      </select>
+      <label id="auto-update">
+        <input type="checkbox" checked /> auto update
+      </label>
+      <label id="auto-centering">
+        <input type="checkbox" checked /> auto centering
+      </label>
+    </div>
+  </body>
+</html>
