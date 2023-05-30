@@ -15,5 +15,6 @@
   "workspaces": [
     "packages/*",
     "crates/*"
-  ]
+  ],
+  "version": "0.1.0"
 }
