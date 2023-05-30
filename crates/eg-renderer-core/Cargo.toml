@@ -23,9 +23,11 @@ features = [
 version = "0.3.55"
 features = [
   'CanvasRenderingContext2d',
+  'CustomElementRegistry',
   'Document',
   'Element',
   'HtmlCanvasElement',
+  'HtmlElement',
   'TextMetrics',
   'WebGl2RenderingContext',
   'WebGlBuffer',
