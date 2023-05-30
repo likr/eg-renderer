@@ -9,7 +9,8 @@
     "umd"
   ],
   "scripts": {
-    "prepublish": "rollup -c && cp ../../node_modules/eg-renderer-core/dist/web/eg_renderer_core_bg.wasm umd/eg-renderer.wasm"
+    "build": "rollup -c && cp ../../node_modules/eg-renderer-core/dist/web/eg_renderer_core_bg.wasm umd/eg-renderer.wasm",
+    "prepublish": "npm run build"
   },
   "description": "Easy Graph Renderer for the Web",
   "keywords": [
@@ -22,11 +23,11 @@
   },
   "license": "MIT",
   "dependencies": {
-    "d3-color": "^1.3.0",
-    "d3-ease": "^1.0.5",
-    "d3-selection": "^1.4.0",
-    "d3-zoom": "^1.8.3",
-    "eg-renderer-core": "^1.5.0"
+    "d3-color": "^3.1.0",
+    "d3-ease": "^3.0.1",
+    "d3-selection": "^3.0.0",
+    "d3-zoom": "^3.0.0",
+    "eg-renderer-core": "^1.6.0"
   },
   "gitHead": "2f560e640150ede9617842ac8e55c81ac8b0ffb5",
   "devDependencies": {

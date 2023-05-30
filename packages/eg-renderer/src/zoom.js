@@ -1,4 +1,4 @@
-import { event as d3Event, select as d3Select } from "d3-selection";
+import { select as d3Select } from "d3-selection";
 import { zoom as d3Zoom, zoomIdentity as d3ZoomIdentity } from "d3-zoom";
 import { adjustEdge } from "./marker-point";
 
@@ -40,7 +40,7 @@ export const zoom = (element, attrs) => {
   let restoreTransform = false;
   const zoom = d3Zoom();
   zoom
-    .on("start", () => {
+    .on("start", (d3Event) => {
       if (
         !element.canZoom ||
         (element.canDragNode &&
@@ -59,7 +59,7 @@ export const zoom = (element, attrs) => {
         }
       }
     })
-    .on("zoom", () => {
+    .on("zoom", (d3Event) => {
       const { x, y, k } = d3Event.transform;
       if (element.canDragNode && pos.region) {
         const u = pos.region;
