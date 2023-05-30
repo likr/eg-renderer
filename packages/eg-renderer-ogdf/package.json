@@ -1,6 +1,6 @@
 {
   "name": "eg-renderer-ogdf",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "main": "src/index.js",
   "module": "src/index.js",
   "unpkg": "umd/eg-renderer-ogdf.js",
