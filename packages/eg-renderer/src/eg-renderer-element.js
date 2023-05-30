@@ -430,28 +430,21 @@ export default (Renderer) => {
     }
 
     focus(x, y) {
-      const { canvas, data, margin, zoom } = privates.get(this);
-      const items = [].concat(
-        Array.from(data.vertices.values()),
-        Array.from(data.groups.values())
-      );
-      const { layoutWidth, layoutHeight, left, top } = layoutRect(items);
-      const canvasWidth = canvas.width / devicePixelRatio();
-      const canvasHeight = canvas.height / devicePixelRatio();
-      const { k } = centerTransform(
-        layoutWidth,
-        layoutHeight,
-        left,
-        top,
-        canvasWidth,
-        canvasHeight,
-        margin
-      );
+      const { canvas, margin, zoom, transform } = privates.get(this);
       zoom.transform(
         d3Select(canvas),
-        d3ZoomIdentity.translate(x, y).scale(k).translate(-left, -top)
+        d3ZoomIdentity
+          .translate(this.width / 2 - margin, this.height / 2 - margin)
+          .scale(transform.k)
+          .translate(-x, -y)
       );
       return this;
+    }
+
+    focusNode(u) {
+      const { data } = privates.get(this);
+      const { x, y } = data.vertices.get(u);
+      return this.focus(x, y);
     }
 
     load(data) {
